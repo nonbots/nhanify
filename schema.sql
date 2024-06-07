@@ -107,7 +107,8 @@ VALUES
 
 --insert references to songs and playlists in songs playlists table
 INSERT INTO
-  "playlists-songs" (playlist_id, song_id) VALUES
+  "playlists-songs" (playlist_id, song_id)
+VALUES
   (1, 1),
   (1, 2),
   (1, 3),
