@@ -133,7 +133,7 @@ FROM
 WHERE
   "playlists-songs".playlist_id = 1;
 
---query for playlists that to user1 has access to or shares 
+--query for playlists that user1 has access to or shares 
 SELECT
   playlists.id,
   playlists.title,
