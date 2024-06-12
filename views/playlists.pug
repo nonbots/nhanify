@@ -1,34 +1,28 @@
 extends layout
 
 block title
-    h1(class="pageTitle") Playlist 
+  h1(class="pageTitle") Playlists 
 block navTop 
-    .navTopLeft
-        p userName
-        p #{playlists.length} song(s)  Total Duration
-    .navTopRight
-        a(class="navLinkRoster" href="users-roster") Users
-        form(class="buttonForm" action="/playlist/sign-out" method="post")
-            input(type="submit" value="Sign out")
+  .navTopLeft
+    p #{playlists.length} Playlist(s)  
+  .navTopRight
+    p Signed in as username
+    form(class="buttonForm" action="/playlist/sign-out" method="post")
+      input(type="submit" value="Sign out")
 block content
-    .content
-        .playListWrap
-            each playlist in playlists
-                a(href=`/playlist/${playlist.id}`) 
-                    div(class="songCard")
-                        .songWrap
-                            .songNumber
-                                p #{playlists.indexOf(playlist) + 1}
-                            .songDescription
-                                p= playlist.title   
-                                .songInfo
-                                    p(class="info") Added by: 
-                                    p(class="info") Songs: #{playlist.count}
-                                    p(class="info") Rating:  
-                                    form(class="info" action=`/playlist/edit-song/upVote/${playlist.id}` method="post")
-                                        input(class="likeBtn" type="submit" value="<3")
-                                    form(class="info" action=`/playlist/edit-song/downVote/${playlist.id}` method="post")
-                                        input(class="likeBtn" type="submit" value="</3")
-                        form(class="delete" action=`/playlist/delete/${playlist.id}` method="post")
-                            input(class="deleteBtn" type="submit" value="X")
+  .content
+    .playListWrap
+      each playlist in playlists
+        a(href=`/playlist/${playlist.id}`) 
+          div(class="songCard")
+            .songWrap
+              .songNumber
+                p #{playlists.indexOf(playlist) + 1}
+              .songDescription
+                p= playlist.title   
+                .songInfo
+                  p(class="info") Added by: #{playlist.username} 
+                  p(class="info") Songs: #{playlist.count}
+            form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+              input(class="deleteBtn" type="submit" value="❌")
 

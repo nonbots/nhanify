@@ -1,3 +1,4 @@
+*.swp
 .psql_history
 .env
 node_modules/

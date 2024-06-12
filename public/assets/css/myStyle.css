@@ -11,7 +11,7 @@ body {
 }
 .bWrap {
   display: flex;
-  width: 90%;
+  width: 75%;
   flex-direction: column;
 }
 .navBottom {
@@ -58,12 +58,12 @@ main {
 .playListWrap {
   display: flex;
   flex-direction: column;
-  width: 75%;
-  overflow: scroll;
+  width: 100%;
   height: 100%;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: #0680a8 black;
+  overflow: auto;
 }
 .songWrap {
   display: flex;
@@ -135,8 +135,10 @@ main {
 }
 .navTopWrap {
   display: flex;
-  width: 75%;
+  width: 100%;
   justify-content: space-between;
+  margin-bottom: 1rem;  
+
 }
 .inputForm {
   display: flex;

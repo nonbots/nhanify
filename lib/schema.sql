@@ -14,8 +14,7 @@ CREATE TABLE songs (
   title text NOT NULL,
   url text NOT NULL,
   video_id text NOT NULL,
-  formatted_duration text NOT NULL,
-  ms_duration bigint NOT NULL,
+  duration_sec bigint NOT NULL,
   username text NOT NULL
 );
 
@@ -53,8 +52,7 @@ INSERT INTO
     title,
     url,
     video_id,
-    formatted_duration,
-    ms_duration,
+    duration_sec,
     username
   )
 VALUES
@@ -62,24 +60,21 @@ VALUES
     'title1',
     'ur1',
     'video_id',
-    'formatted_duration1',
-    4324232,
+    43,
     'username1'
   ),
   (
     'title2',
     'ur2',
     'video_id2',
-    'formatted_duration2',
-    234324324,
+    2343,
     'username2'
   ),
   (
     'title3',
     'ur3',
     'video_id3',
-    'formatted_duration3',
-    4332432432,
+    43322,
     'username3'
   );
 

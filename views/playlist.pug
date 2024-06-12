@@ -1,0 +1,28 @@
+extends layout
+
+block title
+  h1(class="pageTitle") #{playlist.title} 
+block navTop 
+  .navTopLeft
+    p #{playlist.songs.length} song(s)  Total Duration: 
+  .navTopRight
+    p Signed in as username
+    form(class="buttonForm" action="/playlist/sign-out" method="post")
+      input(type="submit" value="Sign out")
+block content
+  .content
+    .playListWrap
+      each song in playlist.songs
+        a(href=`/playlist/${song.id}`) 
+          div(class="songCard")
+            .songWrap
+              .songNumber
+                p #{playlist.songs.indexOf(song) + 1}
+              .songDescription
+                p= song.title   
+                .songInfo
+                  p(class="info") Added by: #{song.username} 
+                  p(class="info") Duration: #{song.formattedDuration}
+            form(class="delete" action=`/playlist/delete/${song.id}` method="post")
+              input(class="deleteBtn" type="submit" value="❌")
+
