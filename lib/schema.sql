@@ -48,35 +48,11 @@ CREATE TABLE "playlists-users" (
 
 --insert songs into the songs table
 INSERT INTO
-  songs (
-    title,
-    url,
-    video_id,
-    duration_sec,
-    username
-  )
+  songs (title, url, video_id, duration_sec, username)
 VALUES
-  (
-    'title1',
-    'ur1',
-    'video_id',
-    43,
-    'username1'
-  ),
-  (
-    'title2',
-    'ur2',
-    'video_id2',
-    2343,
-    'username2'
-  ),
-  (
-    'title3',
-    'ur3',
-    'video_id3',
-    43322,
-    'username3'
-  );
+  ('title1', 'ur1', 'video_id', 43, 'username1'),
+  ('title2', 'ur2', 'video_id2', 2343, 'username2'),
+  ('title3', 'ur3', 'video_id3', 43322, 'username3');
 
 --insert users into users table 
 INSERT INTO
