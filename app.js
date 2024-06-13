@@ -33,14 +33,14 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  console.log({username});
+  console.log({ username });
   const user = await persistence.validateUser(username, password);
   if (user) {
     //store in session
-  }else {
+  } else {
     //display an error message to user
   }
 });
 app.listen(port, host, () => {
-console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
+  console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
 });
