@@ -24,6 +24,10 @@ app.get("/playlist/:playlistId", async (req, res) => {
   res.render("playlist", { playlist: updatedPlaylist });
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
 app.listen(port, host, () => {
-  console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
+console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
 });
