@@ -5,10 +5,6 @@ block title
 block navTop 
   .navTopLeft
     p #{playlists.length} Playlist(s)  
-  .navTopRight
-    p Signed in as username
-    form(class="buttonForm" action="/playlist/sign-out" method="post")
-      input(type="submit" value="Sign out")
 block content
   .content
     .playListWrap
