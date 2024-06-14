@@ -55,11 +55,9 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  console.log({ username });
-  const user = await persistence.validateUsername(username);
+  console.log({ password });
+  const user = await persistence.validateUser(username, password);
   if (user) {
-    //authenicate user
-
     //store in session
     req.session.user = user;
     //redired to playlists page

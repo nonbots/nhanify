@@ -58,10 +58,20 @@ VALUES
 INSERT INTO
   users (username, password)
 VALUES
-  ('username1', 'jdfldjlasf'),
-  ('username2', 'dfjdslf'),
-  ('username3', 'dttrkt');
+  (
+    'username1',
+    '$2a$10$GTVfrqaHC.tSyD0s8IDAcept.aGvZCu3iJMlARsyqe7s2rGwp2FNW'
+  ), --p1
+  (
+    'username2',
+    '$2a$10$hmvejnTK.r/AMkHTULeB4epsJ3xK4dYNS4eoZSRsDJTvDFR6z8DnO'
+  ), --p2
+  (
+    'username3',
+    '$2a$10$Fp.fqZx4HPprQHNbF4LyAOSGZsrixMU1JXUq0Inez0IqSmrIFZZmO'
+  );
 
+--p3
 --query songs table
 SELECT
   *
@@ -94,57 +104,3 @@ VALUES
   (1, 2),
   (2, 1),
   (3, 3);
-
--- query for songs that belong to playlist1
-SELECT
-  songs.*
-FROM
-  "playlists-songs"
-  JOIN songs ON "playlists-songs".song_id = songs.id
-WHERE
-  "playlists-songs".playlist_id = 1;
-
---query for playlists that user1 has access to or shares 
-SELECT
-  playlists.*
-FROM
-  playlists
-  JOIN "playlists-users" ON playlists.id = "playlists-users".playlist_id
-WHERE
-  "playlists-users".user_id = 1;
-
---query total songs associated to the playlist and the user
-SELECT
-  count(*)
-FROM
-  "playlists-songs"
-WHERE
-  playlist_id = 1;
-
---query total songs for each playlist 
-SELECT
-  "playlists-songs".playlist_id,
-  count("playlists-songs".playlist_id)
-FROM
-  "playlists-songs"
-  JOIN songs ON "playlists-songs".song_id = songs.id
-  JOIN "playlists-users" ON "playlists-users".playlist_id = "playlists-songs".playlist_id
-WHERE
-  "playlists-users".user_id = 1
-GROUP BY
-  "playlists-songs".playlist_id;
-
---query playlist info 
-SELECT
-  playlists.*,
-  count(playlists.id)
-FROM
-  "playlists-songs"
-  JOIN songs ON "playlists-songs".song_id = songs.id
-  JOIN "playlists-users" ON "playlists-users".playlist_id = "playlists-songs".playlist_id
-  JOIN playlists ON playlists.id = "playlists-users".playlist_id
-  JOIN users ON users.id = "playlists_users".user_id
-WHERE
-  "playlists-users".user_id = 1
-GROUP BY
-  playlists.id;
