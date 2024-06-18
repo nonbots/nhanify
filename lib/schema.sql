@@ -29,7 +29,8 @@ CREATE TABLE users (
 CREATE TABLE playlists (
   id serial PRIMARY KEY,
   title text NOT NULL,
-  creator_id integer NOT NULL REFERENCES users (id)
+  creator_id integer NOT NULL REFERENCES users (id),
+  private boolean NOT NULL DEFAULT true
 );
 
 --create playlists-songs table
@@ -80,11 +81,11 @@ FROM
 
 --insert playlists into the playlists table
 INSERT INTO
-  playlists (title, creator_id)
+  playlists (title, creator_id, private)
 VALUES
-  ('playlist1', 1),
-  ('playlist2', 2),
-  ('playlist3', 3);
+  ('playlist1', 1, true),
+  ('playlist2', 2, false),
+  ('playlist3', 3, true);
 
 --insert references to songs and playlists in songs playlists table
 INSERT INTO

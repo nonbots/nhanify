@@ -5,6 +5,8 @@ block title
 block navTop 
   .navTopLeft
     p #{playlists.length} Playlist(s)  
+    form(action=`/playlists/create` method="post")
+      input( type="submit" value="Create")
 block content
   .content
     .playListWrap

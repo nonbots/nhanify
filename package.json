@@ -9,7 +9,8 @@
   "scripts": {
     "prettier": "npx prettier . --write",
     "test": "jest",
-    "start": "nodemon --env-file=.env app.js "
+    "start": "nodemon --env-file=.env app.js",
+    "remakedb": "psql -d nhanify < lib/schema.sql"
   },
   "author": "",
   "license": "ISC",

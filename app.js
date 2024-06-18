@@ -51,7 +51,6 @@ app.get("/playlist/:playlistId", async (req, res) => {
 app.get("/login", (req, res) => {
   res.render("login");
 });
-
 app.post("/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -64,8 +63,22 @@ app.post("/login", async (req, res) => {
     res.redirect("/playlists");
   } else {
     //display an error message to user
+    res.redirect("/login");
   }
 });
+
+app.get("/signup", (req, res) => {
+  res.render("signup");
+});
+
+app.post("/signup", async (req, res) => {
+  const { username, password } = req.body;
+  console.log({ username }, { password });
+  const user = await persistence.createUser(username, password);
+  req.session.user = user;
+  res.redirect("/playlists");
+});
+
 app.listen(port, host, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
 });
