@@ -54,7 +54,6 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  console.log({ password });
   const user = await persistence.validateUser(username, password);
   if (user) {
     //store in session
@@ -73,12 +72,19 @@ app.get("/signup", (req, res) => {
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
-  console.log({ username }, { password });
   const user = await persistence.createUser(username, password);
   req.session.user = user;
   res.redirect("/playlists");
 });
 
+app.get("/playlists/create", (req, res) => {
+  res.render("create_playlist");
+});
+app.post("/playlists/create", async (req, res) => {
+ const {title, username, visiability} = req.body;
+  const result = await persistence.createPlaylist(title, username, visiability, req.session.user.id);
+  if (result.rowCount === 1) res.redirect("/playlists");
+});
 app.listen(port, host, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
 });
