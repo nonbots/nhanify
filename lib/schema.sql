@@ -105,3 +105,19 @@ VALUES
   (1, 2),
   (2, 1),
   (3, 3);
+
+SELECT
+  users.username,
+  playlists.*,
+  count(playlists.id)
+FROM
+  playlists
+  LEFT JOIN "playlists-songs" ON "playlists-songs".playlist_id = playlists.id
+  LEFT JOIN songs ON songs.id = "playlists-songs".song_id
+  LEFT JOIN "playlists-users" ON "playlists-users".playlist_id = "playlists-songs".playlist_id
+  LEFT JOIN users ON users.id = playlists.creator_id
+WHERE
+  "playlists-users".user_id = 2
+GROUP BY
+  playlists.id,
+  users.username;

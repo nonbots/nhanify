@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getPlaylists(req.session.user.id);
+  console.log("IN PLAYLISTS ROUTE", { playlists });
   res.render("playlists", { playlists });
 });
 
@@ -81,8 +82,13 @@ app.get("/playlists/create", (req, res) => {
   res.render("create_playlist");
 });
 app.post("/playlists/create", async (req, res) => {
- const {title, username, visiability} = req.body;
-  const result = await persistence.createPlaylist(title, username, visiability, req.session.user.id);
+  const { title, username, visiability } = req.body;
+  const result = await persistence.createPlaylist(
+    title,
+    username,
+    visiability,
+    req.session.user.id,
+  );
   if (result.rowCount === 1) res.redirect("/playlists");
 });
 app.listen(port, host, () => {
