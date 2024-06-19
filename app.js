@@ -89,7 +89,7 @@ app.post("/playlists/create", async (req, res) => {
     visiability,
     req.session.user.id,
   );
-  if (result.rowCount === 1) res.redirect("/playlists");
+  if (result.rowCount >= 1) res.redirect("/playlists");
 });
 app.listen(port, host, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);

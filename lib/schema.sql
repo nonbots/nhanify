@@ -85,8 +85,8 @@ INSERT INTO
 VALUES
   ('playlist1', 1, true),
   ('playlist2', 2, false),
-  ('playlist3', 3, true);
-
+  ('playlist3', 3, true),
+  ('playlist4', 1, true);
 --insert references to songs and playlists in songs playlists table
 INSERT INTO
   "playlists-songs" (playlist_id, song_id)
@@ -104,7 +104,8 @@ VALUES
   (1, 1),
   (1, 2),
   (2, 1),
-  (3, 3);
+  (3, 3),
+  (1, 4);
 
 SELECT
   users.username,
