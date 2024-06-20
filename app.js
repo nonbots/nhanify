@@ -34,6 +34,7 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
 });
+
 app.post("/playlist/:playlistId/contributors/add", async (req, res) => {
   const playlistId = Number(req.params.playlistId);
   const rowCount = await persistence.addContributor(
@@ -48,12 +49,12 @@ app.get("/playlist/:playlistId/contributors/add", (req, res) => {
 });
 
 app.get("/playlist/:playlistId/contributors", async (req, res) => {
-  const contributors = await persistence.getContributors(
-    Number(req.params.playlistId),
-  );
+  const playlistId = Number(req.params.playlistId);
+  const contributors = await persistence.getContributors(playlistId);
+  console.log({ contributors });
   res.render("contributors", {
     contributors,
-    playlistId: req.params.playlistId,
+    playlistId,
   });
 });
 
@@ -63,6 +64,18 @@ app.get("/playlist/:playlistId", async (req, res) => {
   const updatedPlaylist = getUpdatedPlaylist(playlist);
   res.render("playlist", { playlist: updatedPlaylist, playlistId });
 });
+
+app.post(
+  "/playlist/:playlistId/contributors/delete/:contributorId",
+  async (req, res) => {
+    const playlistId = req.params.playlistId;
+    const rowCount = await persistence.deleteContributor(
+      playlistId,
+      req.params.contributorId,
+    );
+    if (rowCount >= 1) res.redirect(`/playlist/${playlistId}/contributors`);
+  },
+);
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getPlaylists(req.session.user.id);
