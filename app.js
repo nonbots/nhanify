@@ -34,6 +34,40 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
 });
+app.get("/playlists/create", (req, res) => {
+  res.render("create_playlist");
+});
+app.post("/playlists/create", async (req, res) => {
+  const { title, username, visiability } = req.body;
+  const result = await persistence.createPlaylist(
+    title,
+    username,
+    visiability,
+    req.session.user.id,
+  );
+  if (result.rowCount >= 1) res.redirect("/playlists");
+});
+
+app.get("/playlist/contributors", (req, res) => {
+  console.log("IN CONTRIBUTORS");
+  res.render("contributors");
+});
+
+app.post("/playlist/contributors", async (req, res) => {
+  const contributors = await persistence.getContributors(req.session.playlistId);
+  res.render("contributors", { contributors });
+
+});
+
+app.get("/playlist/:playlistId", async (req, res) => {
+  console.log("IN PLAYLIST ROUTE");
+  const playlistId = Number(req.params.playlistId);
+  req.session.playlistId = playlistId;
+  const playlist = await persistence.getPlaylist(playlistId);
+  const updatedPlaylist = getUpdatedPlaylist(playlist);
+  console.log("UPDATED PLAYLIST", updatedPlaylist);
+  res.render("playlist", { playlist: updatedPlaylist });
+});
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getPlaylists(req.session.user.id);
@@ -41,13 +75,6 @@ app.get("/playlists", async (req, res) => {
   res.render("playlists", { playlists });
 });
 
-app.get("/playlist/:playlistId", async (req, res) => {
-  const playlistId = Number(req.params.playlistId);
-  const playlist = await persistence.getPlaylist(playlistId);
-  const updatedPlaylist = getUpdatedPlaylist(playlist);
-  console.log("UPDATED PLAYLIST", updatedPlaylist);
-  res.render("playlist", { playlist: updatedPlaylist });
-});
 
 app.get("/login", (req, res) => {
   res.render("login");
@@ -78,19 +105,6 @@ app.post("/signup", async (req, res) => {
   res.redirect("/playlists");
 });
 
-app.get("/playlists/create", (req, res) => {
-  res.render("create_playlist");
-});
-app.post("/playlists/create", async (req, res) => {
-  const { title, username, visiability } = req.body;
-  const result = await persistence.createPlaylist(
-    title,
-    username,
-    visiability,
-    req.session.user.id,
-  );
-  if (result.rowCount >= 1) res.redirect("/playlists");
-});
 app.listen(port, host, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);
 });

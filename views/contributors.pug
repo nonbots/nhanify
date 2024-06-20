@@ -1,0 +1,19 @@
+extends layout
+
+block title
+  h1(class="pageTitle") Contributors 
+block navTop 
+  .navTopLeft
+    p #{constributors.length} Constributor(s)  
+    a(href="/contributors/add") Add 
+block content
+  .content
+    .playListWrap
+      each contributor in contributors
+          div(class="songCard")
+            .songWrap
+              .songDescription
+                p= contributor.username   
+            form(class="delete" action=`/contributors/delete/${contributor.id}` method="post")
+              input(class="deleteBtn" type="submit" value="❌")
+
