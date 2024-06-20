@@ -32,31 +32,23 @@ app.use(
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
+  res.locals.contributors = req.session.contributors;
   next();
 });
-app.get("/playlists/create", (req, res) => {
-  res.render("create_playlist");
-});
-app.post("/playlists/create", async (req, res) => {
-  const { title, username, visiability } = req.body;
-  const result = await persistence.createPlaylist(
-    title,
-    username,
-    visiability,
-    req.session.user.id,
-  );
-  if (result.rowCount >= 1) res.redirect("/playlists");
+app.post("/playlist/contributors/add", async (req, res) => {
+  const rowCount  = await persistence.addContributor(req.body.username, req.session.playlistId);
+  if (rowCount >= 1) res.redirect("/playlist/contributors");
 });
 
-app.get("/playlist/contributors", (req, res) => {
-  console.log("IN CONTRIBUTORS");
+app.get("/playlist/contributors/add", (req, res) => {
+  res.render("add_contributors");
+});
+
+app.get("/playlist/contributors", async (req, res) => {
+  console.log("IN GET CONTRIBUTORS PAGE");
+  const contributors = await persistence.getContributors(req.session.playlistId, req.session.user.id);
+  req.session.contributors = contributors;
   res.render("contributors");
-});
-
-app.post("/playlist/contributors", async (req, res) => {
-  const contributors = await persistence.getContributors(req.session.playlistId);
-  res.render("contributors", { contributors });
-
 });
 
 app.get("/playlist/:playlistId", async (req, res) => {
@@ -75,6 +67,20 @@ app.get("/playlists", async (req, res) => {
   res.render("playlists", { playlists });
 });
 
+app.get("/playlists/create", (req, res) => {
+  res.render("create_playlist");
+});
+
+app.post("/playlists/create", async (req, res) => {
+  const { title, username, visiability } = req.body;
+  const result = await persistence.createPlaylist(
+    title,
+    username,
+    visiability,
+    req.session.user.id,
+  );
+  if (result.rowCount >= 1) res.redirect("/playlists");
+});
 
 app.get("/login", (req, res) => {
   res.render("login");

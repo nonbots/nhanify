@@ -1,0 +1,12 @@
+extends layout
+block title
+    h1(class="pageTitle") Add contributor
+block content
+    form(class="inputForm" action="/playlist/contributors/add" method="post")
+      label(for="username") username
+      input(id="username" type="text" name="username") 
+      input(type="submit")
+block navBottom 
+  a(href="home") Cancel
+     
+
