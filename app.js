@@ -32,38 +32,40 @@ app.use(
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
-  res.locals.contributors = req.session.contributors;
   next();
 });
-app.post("/playlist/contributors/add", async (req, res) => {
-  const rowCount  = await persistence.addContributor(req.body.username, req.session.playlistId);
-  if (rowCount >= 1) res.redirect("/playlist/contributors");
+app.post("/playlist/:playlistId/contributors/add", async (req, res) => {
+  const playlistId = Number(req.params.playlistId);
+  const rowCount = await persistence.addContributor(
+    req.body.username,
+    playlistId,
+  );
+  if (rowCount >= 1) res.redirect(`/playlist/${playlistId}/contributors`);
 });
 
-app.get("/playlist/contributors/add", (req, res) => {
-  res.render("add_contributors");
+app.get("/playlist/:playlistId/contributors/add", (req, res) => {
+  res.render("add_contributors", { playlistId: req.params.playlistId });
 });
 
-app.get("/playlist/contributors", async (req, res) => {
-  console.log("IN GET CONTRIBUTORS PAGE");
-  const contributors = await persistence.getContributors(req.session.playlistId, req.session.user.id);
-  req.session.contributors = contributors;
-  res.render("contributors");
+app.get("/playlist/:playlistId/contributors", async (req, res) => {
+  const contributors = await persistence.getContributors(
+    Number(req.params.playlistId),
+  );
+  res.render("contributors", {
+    contributors,
+    playlistId: req.params.playlistId,
+  });
 });
 
 app.get("/playlist/:playlistId", async (req, res) => {
-  console.log("IN PLAYLIST ROUTE");
   const playlistId = Number(req.params.playlistId);
-  req.session.playlistId = playlistId;
   const playlist = await persistence.getPlaylist(playlistId);
   const updatedPlaylist = getUpdatedPlaylist(playlist);
-  console.log("UPDATED PLAYLIST", updatedPlaylist);
-  res.render("playlist", { playlist: updatedPlaylist });
+  res.render("playlist", { playlist: updatedPlaylist, playlistId });
 });
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getPlaylists(req.session.user.id);
-  console.log("IN PLAYLISTS ROUTE", { playlists });
   res.render("playlists", { playlists });
 });
 
