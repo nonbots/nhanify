@@ -79,13 +79,12 @@ app.post(
 
 app.get("/playlists/public", async (req, res) => {
   const playlists = await persistence.getPublicPlaylists();
-  console.log({ playlists });
-  res.render("playlists", { playlists });
+  res.render("playlists", { playlists, pageTitle: "Public Playlists" });
 });
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getPlaylists(req.session.user.id);
-  res.render("playlists", { playlists });
+  res.render("playlists", { playlists, pageTitle: "Your Playlists" });
 });
 
 app.get("/playlists/create", (req, res) => {

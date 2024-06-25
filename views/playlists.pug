@@ -1,11 +1,12 @@
 extends layout
 
 block title
-  h1(class="pageTitle") Playlists 
+  h1(class="pageTitle") #{pageTitle}
 block navTop 
   .navTopLeft
     p #{playlists.length} Playlist(s)  
-    a(href="/playlists/create") Create 
+    if (user !== undefined)
+      a(href="/playlists/create") Create 
 block content
   .content
     .playListWrap
@@ -20,6 +21,7 @@ block content
                 .songInfo
                   p(class="info") Added by: #{playlist.username} 
                   p(class="info") Songs: #{playlist.count}
-            form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-              input(class="deleteBtn" type="submit" value="❌")
+            if (user !== undefined)
+              form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+                input(class="deleteBtn" type="submit" value="❌")
 

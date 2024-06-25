@@ -5,7 +5,8 @@ block title
 block navTop 
   .navTopLeft
     p #{playlist.songs.length} song(s)  Total Duration: 
-    a( href=`/playlist/${playlistId}/contributors`) Contributors
+    if (user !== undefined)
+      a(href=`/playlist/${playlistId}/contributors`) Contributors
 
 block content
   .content
@@ -21,6 +22,7 @@ block content
                 .songInfo
                   p(class="info") Added by: #{song.username} 
                   p(class="info") Duration: #{song.formattedDuration}
-            form(class="delete" action=`/playlist/delete/${song.id}` method="post")
-              input(class="deleteBtn" type="submit" value="❌")
+            if (user !== undefined)
+              form(class="delete" action=`/playlist/delete/${song.id}` method="post")
+                input(class="deleteBtn" type="submit" value="❌")
 
