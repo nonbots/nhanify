@@ -80,7 +80,7 @@ app.post(
 app.get("/playlists/public", async (req, res) => {
   const playlists = await persistence.getPublicPlaylists();
   console.log({ playlists });
-  //res.render("playlists", { playlists });
+  res.render("playlists", { playlists });
 });
 
 app.get("/playlists", async (req, res) => {

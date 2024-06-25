@@ -13,10 +13,10 @@ html(lang="en")
       .navTopWrap 
         .navTopLeft
           if user !== undefined 
-            a(href="/playlists/public") Nhanify 
-          else 
             a(href="/playlists") Nhanify
             p #{user.username}
+          else 
+            a(href="/playlists/public") Nhanify 
         .navTopRight
           if user !== undefined
             form(class="buttonForm" action="/signout" method="post")
