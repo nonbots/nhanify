@@ -11,26 +11,27 @@ html(lang="en")
   body
     .bWrap
       .navTopWrap 
-        .navTopLeft
-          if user !== undefined 
-            a(href="/playlists") Nhanify
-            p #{user.username}
-          else 
-            a(href="/playlists/public") Nhanify 
-        .navTopRight
-          if user !== undefined
-            form(class="buttonForm" action="/signout" method="post")
-              input(type="submit" value="Sign out")
-          else
-            a(href="/signup") Sign up 
-            a(href="/login") Sign in
-      header 
-        block title 
-        nav
-          .navTopWrap 
-            block navTop
+        .stack1
+          .navTopLeft
+            if user !== undefined 
+              .home
+                a(class="logo" href="/playlists") N
+              p(class="username") #{user.username}
+            else 
+              .home
+                a(class="logo" href="/playlists/public") N
+          .navTopRight
+            if (user !== undefined)
+              form(class="buttonForm" action="/signout" method="post")
+                input(type="submit" value="Sign out")
+            else
+              a(href="/signup") Sign up 
+              a(href="/login") Sign in
+        .stack2
+          if (user !== undefined)
+            a(href="/playlists/public") Public Playlists 
       main
-        block content
+          block main
       footer
         nav(class="navBottom")
           block navBottom   

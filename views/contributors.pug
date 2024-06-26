@@ -1,19 +1,24 @@
 extends layout
 
-block title
-  h1(class="pageTitle") Contributors 
-block navTop 
-  .navTopLeft
-    p #{contributors.length} Contributor(s)  
-    a(href=`/playlist/${playlistId}/contributors/add`) Add 
-block content
-  .content
-    .playListWrap
-      each contributor in contributors
-          div(class="songCard")
-            .songWrap
-              .songDescription
+block main
+  block title
+    h1(class="pageTitle") Contributors 
+  block list 
+    .listHeader
+      p(class="username") #{contributors.length} Contributor(s)  
+      a(href=`/playlist/${playlistId}/contributors/add`) Add 
+    .cols
+      .label
+        p(class="username") username
+      .label
+  block values
+    .content
+      .playListWrap
+        each contributor in contributors
+            div(class="songCard")
+              .val
                 p= contributor.username   
-            form(class="delete" action=`/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
-              input(class="deleteBtn" type="submit" value="❌")
+              .val
+                form(class="delete" action=`/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
+                  input(class="deleteBtn" type="submit" value="❌")
 

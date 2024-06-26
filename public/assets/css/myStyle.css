@@ -1,3 +1,14 @@
+:root {
+  --color-bg-dark: #0b2447;
+  --color-bg-light: white;
+  --color-tertiary: #19376d;
+  --color-secondary: #576cbc;
+  --color-primary: #a5d7e8;
+
+  --font-size-large: 3rem;
+  --font-size-medium: 2rem;
+  --font-size-small: 1rem;
+}
 body {
   display: flex;
   width: 100%;
@@ -6,13 +17,19 @@ body {
   font-family: "Roboto", "sans-serif";
   font-size: 1rem;
   text-align: center;
-  background-color: black;
+  background-color: var(--color-bg-dark);
   color: white;
+}
+.cols {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
 }
 .bWrap {
   display: flex;
-  width: 75%;
+  width: 100%;
   flex-direction: column;
+  align-items: center;
 }
 .navBottom {
   display: flex;
@@ -22,21 +39,24 @@ body {
   row-gap: 1rem;
 }
 a {
-  font-size: 3rem;
+  font-size: 1rem;
   font-weight: 500;
   text-decoration: none;
+  color: var(--color-secondary);
 }
-.appTitle {
-  font-weight: 900;
-  font-size: 10rem;
-}
+
 main {
   display: flex;
-  width: 100%;
+  width: 95%;
   flex-direction: column;
   align-items: center;
-  row-gap: 2rem;
-  height: 75%;
+  height: 100%;
+  justify-content: center;
+}
+.mainWrap {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
 }
 .content {
   display: flex;
@@ -65,39 +85,39 @@ main {
   scrollbar-color: #0680a8 black;
   overflow: auto;
 }
-.songWrap {
-  display: flex;
-  column-gap: 1rem;
-}
-.songNumber {
-  display: flex;
-  align-items: center;
-}
 .likeRating {
   display: flex;
   align-items: center;
 }
 .info {
-  color: grey;
+  color: var(--color-secondary);
   font-size: 0.85rem;
 }
 .songCard {
-  border-top: 1px solid #0680a8;
-  padding: 0.5rem;
+  border-top: 1px solid var(--color-tertiary);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   display: flex;
   flex-direction: row;
-  column-gap: 1rem;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 .curCard {
-  border-top: 1px solid #0680a8;
-  background-color: #1434a4;
-  padding: 0.5rem;
+  border-top: 1px solid var(--color-tertiary);
+  background-color: var(--color-primary);
   display: flex;
   flex-direction: row;
-  column-gap: 1rem;
   justify-content: space-between;
 }
+.label {
+  width: 100%;
+  display: flex;
+}
+.val {
+  width: 100%;
+  display: flex;
+  align-self: center;
+}
+
 .likeBtn {
   background-color: transparent;
   color: grey;
@@ -112,20 +132,20 @@ main {
   background-color: transparent;
   border: none;
   color: grey;
+  margin: 0rem;
 }
 .navLinkRoster {
   font-size: 1rem;
 }
 .navTopRight {
   display: flex;
-  flex-direction: column;
-  row-gap: 0.25rem;
-  align-items: flex-start;
+  flex-direction: row;
+  column-gap: 1rem;
 }
 .navTopLeft {
   display: flex;
-  flex-direction: column;
-  row-gap: 0.25rem;
+  flex-direction: row;
+  column-gap: 1rem;
 }
 .songDescription {
   display: flex;
@@ -133,30 +153,84 @@ main {
   justify-content: center;
   row-gap: 0.5rem;
 }
+.username {
+  color: var(--color-secondary);
+}
+.home {
+  background-color: var(--color-secondary);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+.logo {
+  color: white;
+}
 .navTopWrap {
   display: flex;
   width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+.stack1 {
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  height: 4rem;
+  align-items: center;
+  width: 95%;
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-tertiary);
+  border-bottom-width: 1px;
+}
+.stack2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  padding: 1rem;
 }
 .inputForm {
   display: flex;
   flex-direction: column;
   width: fit-content;
-}
-.pageTitle {
-  font-size: 3rem;
-  font-weight: 500;
-  margin-bottom: 2rem;
-}
-input {
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  row-gap: 0.25rem;
+  font-size: 1rem;
 }
 
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 500;
+  align-items: flex-start;
+  display: flex;
+  color: var(--color-secondary);
+}
+input {
+  margin: 0rem;
+  background-color: var(--color-secondary);
+  color: white;
+  border-radius: 1rem;
+  padding: 0.25rem 0.5rem;
+  border: none;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: row;
+  column-gap: 1rem;
+}
+.listHeader {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
 p {
   font-size: 1rem;
   text-align: left;
   color: white;
+  align-self: center;
 }
 .songInfo {
   display: flex;

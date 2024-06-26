@@ -1,13 +1,11 @@
-extends layout
-block title
-    h1(class="pageTitle")  Sign In
+extends signup
+block header
+  h1(class="pageTitle")  Sign In
 block content
-    form(class="inputForm" action="login" method="post")
-        label(for="username") User name
-        input(id="username" type="text" name="username") 
-        label(for="password") Password
-        input(id="password" type="password" name="password")
-        input(type="submit")
-block navBottom 
-    a(href="home") Cancel
- 
+  form(class="inputForm" action="login" method="post")
+    label(for="username") User name
+    input(id="username" type="text" name="username") 
+    label(for="password") Password
+    input(id="password" type="password" name="password")
+    input(type="submit")
+

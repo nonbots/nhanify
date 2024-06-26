@@ -1,27 +1,39 @@
 extends layout
 
-block title
-  h1(class="pageTitle") #{pageTitle}
-block navTop 
-  .navTopLeft
-    p #{playlists.length} Playlist(s)  
-    if (user !== undefined)
-      a(href="/playlists/create") Create 
-block content
-  .content
-    .playListWrap
-      each playlist in playlists
-        a(href=`/playlist/${playlist.id}`) 
-          div(class="songCard")
-            .songWrap
-              .songNumber
-                p #{playlists.indexOf(playlist) + 1}
-              .songDescription
-                p= playlist.title   
-                .songInfo
-                  p(class="info") Added by: #{playlist.username} 
-                  p(class="info") Songs: #{playlist.count}
-            if (user !== undefined)
-              form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-                input(class="deleteBtn" type="submit" value="❌")
+block main
+  block title
+    h1(class="pageTitle") #{pageTitle}
+  block list 
+    .listHeader
+      p(class="username") #{playlists.length} Playlist(s)  
+      if (user !== undefined)
+        a(href="/playlists/create") Create 
+    .cols
+      .label
+        p(class="username") No.
+      .label
+        p(class="username") Title
+      .label
+        p(class="username") Creator
+      .label
+        p(class="username") Song Total
+      .label
+  block values
+    .content
+      .playListWrap
+        each playlist in playlists
+          a(href=`/playlist/${playlist.id}`) 
+            div(class="songCard")
+                .val
+                  p= playlists.indexOf(playlist) + 1
+                .val
+                  p= playlist.title   
+                .val
+                  p= playlist.username 
+                .val
+                  p= playlist.count
+                .val
+                  if (user !== undefined)
+                    form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+                      input(class="deleteBtn" type="submit" value="❌")
 
