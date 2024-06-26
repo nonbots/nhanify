@@ -110,6 +110,7 @@ app.post("/signout", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  if (req.session.user) res.redirect("/playlists/public");
   res.render("login");
 });
 
@@ -137,6 +138,10 @@ app.post("/signup", async (req, res) => {
   const user = await persistence.createUser(username, password);
   req.session.user = user;
   res.redirect("/playlists");
+});
+
+app.get("/", (req, res) => {
+  res.redirect("/playlists/public");
 });
 
 app.listen(port, host, () => {
