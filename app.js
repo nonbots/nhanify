@@ -102,9 +102,17 @@ app.post("/playlists/create", async (req, res) => {
   if (result.rowCount >= 1) res.redirect("/playlists");
 });
 
+app.post("/signout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) console.error(error);
+    res.redirect("/playlists/public");
+  });
+});
+
 app.get("/login", (req, res) => {
   res.render("login");
 });
+
 app.post("/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
