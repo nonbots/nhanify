@@ -14,8 +14,7 @@ CREATE TABLE songs (
   title text NOT NULL,
   url text NOT NULL,
   video_id text NOT NULL,
-  duration_sec bigint NOT NULL,
-  username text NOT NULL
+  duration_sec bigint NOT NULL
 );
 
 --create a users table
@@ -37,7 +36,8 @@ CREATE TABLE playlists (
 CREATE TABLE "playlists-songs" (
   id serial PRIMARY KEY,
   song_id integer NOT NULL REFERENCES songs (id),
-  playlist_id integer NOT NULL REFERENCES playlists (id)
+  playlist_id integer NOT NULL REFERENCES playlists (id),
+  user_id integer NOT NULL REFERENCES users (id)
 );
 
 --create a playlists-users table that references playlists and users
@@ -49,11 +49,11 @@ CREATE TABLE "playlists-users" (
 
 --insert songs into the songs table
 INSERT INTO
-  songs (title, url, video_id, duration_sec, username)
+  songs (title, url, video_id, duration_sec)
 VALUES
-  ('title1', 'ur1', 'video_id', 43, 'username1'),
-  ('title2', 'ur2', 'video_id2', 2343, 'username2'),
-  ('title3', 'ur3', 'video_id3', 43322, 'username3');
+  ('title1', 'ur1', 'video_id', 43),
+  ('title2', 'ur2', 'video_id2', 2343),
+  ('title3', 'ur3', 'video_id3', 43322);
 
 --insert users into users table 
 INSERT INTO
@@ -86,17 +86,18 @@ VALUES
   ('playlist1', 1, true),
   ('playlist2', 2, false),
   ('playlist3', 3, true),
-  ('playlist4', 1, true);
+  ('playlist4', 1, true),
+  ('playlist5', 2, false);
 
 --insert references to songs and playlists in songs playlists table
 INSERT INTO
-  "playlists-songs" (playlist_id, song_id)
+  "playlists-songs" (playlist_id, song_id, user_id)
 VALUES
-  (1, 1),
-  (1, 2),
-  (1, 3),
-  (2, 1),
-  (3, 3);
+  (1, 1, 1),
+  (1, 2, 2),
+  (1, 3, 2),
+  (2, 1, 1),
+  (3, 3, 1);
 
 --insert reference to users and playlist into playlists-users table
 INSERT INTO
