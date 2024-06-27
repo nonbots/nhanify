@@ -40,7 +40,7 @@ jobs:
       - name: Connect to PostgreSQL
         # Runs a script that creates a PostgreSQL table, populates
         # the table with data, and then retrieves the data
-        run: psql --host=localhost --username=postgres < lib/schema.sql
+        run: psql --host=localhost --username=postgres  -v ON_ERROR_STOP=1 < lib/schema.sql
         # Environment variables used by the `client.js` script to create
         # a new PostgreSQL table.
         env:
