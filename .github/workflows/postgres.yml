@@ -15,6 +15,7 @@ jobs:
         image: postgres
         # Provide the password for postgres
         env:
+          POSTGRES_USER=postgres
           POSTGRES_PASSWORD: postgres
         # Set health checks to wait until postgres has started
         options: >-
@@ -39,7 +40,7 @@ jobs:
       - name: Connect to PostgreSQL
         # Runs a script that creates a PostgreSQL table, populates
         # the table with data, and then retrieves the data
-        run: psql --host=localhost --username=runner < lib/schema.sql
+        run: PASSWORD=postgres psql --host=localhost --username=postgres < lib/schema.sql
         # Environment variables used by the `client.js` script to create
         # a new PostgreSQL table.
         env:
