@@ -15,7 +15,6 @@ CREATE TABLE songs (
   url text NOT NULL,
   video_id text NOT NULL,
   duration_sec bigint NOT NULL,
-  username text NOT NULL
 );
 
 --create a users table
@@ -37,7 +36,9 @@ CREATE TABLE playlists (
 CREATE TABLE "playlists-songs" (
   id serial PRIMARY KEY,
   song_id integer NOT NULL REFERENCES songs (id),
-  playlist_id integer NOT NULL REFERENCES playlists (id)
+  playlist_id integer NOT NULL REFERENCES playlists (id), 
+
+  user_id integer NOT NULL REFERENCES users (id)
 );
 
 --create a playlists-users table that references playlists and users
