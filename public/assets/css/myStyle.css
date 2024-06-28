@@ -20,6 +20,9 @@ body {
   background-color: var(--color-bg-dark);
   color: white;
 }
+label {
+  align-self: start;
+}
 .cols {
   display: flex;
   justify-content: space-around;
@@ -56,7 +59,12 @@ main {
 .mainWrap {
   display: flex;
   flex-direction: column;
-  row-gap: 1rem;
+  row-gap: 2rem;
+}
+.submit {
+  width: 100%;
+  font-size: 1rem;
+  font-weight: bold;
 }
 .content {
   display: flex;
@@ -118,6 +126,10 @@ main {
   align-self: center;
 }
 
+.formDiv {
+  display: flex;
+  flex-direction: column;
+}
 .likeBtn {
   background-color: transparent;
   color: grey;
@@ -194,7 +206,7 @@ main {
   flex-direction: column;
   width: fit-content;
   align-items: flex-start;
-  row-gap: 0.25rem;
+  row-gap: 2rem;
   font-size: 1rem;
 }
 

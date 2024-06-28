@@ -3,9 +3,11 @@ block header
   h1(class="pageTitle")  Sign In
 block content
   form(class="inputForm" action="login" method="post")
-    label(for="username") User name
-    input(id="username" type="text" name="username") 
-    label(for="password") Password
-    input(id="password" type="password" name="password")
-    input(type="submit")
+    .formDiv
+      label(for="username") User name
+      input(id="username" type="text" name="username") 
+    .formDiv
+      label(for="password") Password
+      input(id="password" type="password" name="password")
+    input(type="submit" class="submit" value="Sign In")
 
