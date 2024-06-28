@@ -39,10 +39,16 @@ jobs:
       POSTGRES_HOST: localhost
       # The default PostgreSQL port
       POSTGRES_PORT: 5432
+
+      # npm
       PG_PASSWORD: postgres
-      PGPASSWORD: postgres
       PG_USER: postgres
       PG_DATABASE: nhanify
+        
+      # psql
+      PGDATABASE: nhanify
+      PGPASSWORD: postgres
+
     steps:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
