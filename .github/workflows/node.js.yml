@@ -44,7 +44,7 @@ jobs:
       PG_PASSWORD: postgres
       PG_USER: postgres
       PG_DATABASE: nhanify
-        
+
       # psql
       PGDATABASE: nhanify
       PGPASSWORD: postgres
