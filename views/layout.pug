@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head 
-    title Music Sharing Playlist
+    title Nhanify
     meta(charset="UTF-8")
     link(rel="stylesheet" href="/assets/css/reset.css")
     link(rel="stylesheet" href="/assets/css/myStyle.css")
@@ -23,10 +23,10 @@ html(lang="en")
           .navTopRight
             if (user !== undefined)
               form(class="buttonForm" action="/signout" method="post")
-                input(type="submit" value="Sign out")
+                input(type="submit" value="Sign Out")
             else
-              a(href="/signup") Sign up 
-              a(href="/login") Sign in
+              a(href="/signup") Sign Up 
+              a(href="/login") Sign In
         .stack2
           if (user !== undefined)
             a(href="/playlists/public") Public Playlists 

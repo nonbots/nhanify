@@ -9,6 +9,8 @@
   --font-size-medium: 2rem;
   --font-size-small: 1rem;
 }
+
+/* layout */
 body {
   display: flex;
   width: 100%;
@@ -20,161 +22,12 @@ body {
   background-color: var(--color-bg-dark);
   color: white;
 }
-label {
-  align-self: start;
-}
-.cols {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-}
+
 .bWrap {
   display: flex;
   width: 100%;
   flex-direction: column;
   align-items: center;
-}
-.navBottom {
-  display: flex;
-  width: 50%;
-  margin-top: 5rem;
-  flex-direction: column;
-  row-gap: 1rem;
-}
-a {
-  font-size: 1rem;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--color-secondary);
-}
-
-main {
-  display: flex;
-  width: 95%;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  justify-content: center;
-}
-.mainWrap {
-  display: flex;
-  flex-direction: column;
-  row-gap: 2rem;
-}
-.submit {
-  width: 100%;
-  font-size: 1rem;
-  font-weight: bold;
-}
-.content {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  height: 100%;
-}
-#player {
-  width: 200px;
-  height: 200px;
-  background-color: grey;
-}
-.addSongWrap {
-  display: flex;
-  flex-direction: column;
-  row-gap: 2rem;
-  align-items: center;
-}
-.playListWrap {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: #0680a8 black;
-  overflow: auto;
-}
-.likeRating {
-  display: flex;
-  align-items: center;
-}
-.info {
-  color: var(--color-secondary);
-  font-size: 0.85rem;
-}
-.songCard {
-  border-top: 1px solid var(--color-tertiary);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-}
-.curCard {
-  border-top: 1px solid var(--color-tertiary);
-  background-color: var(--color-primary);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.label {
-  width: 100%;
-  display: flex;
-}
-.val {
-  width: 100%;
-  display: flex;
-  align-self: center;
-}
-
-.formDiv {
-  display: flex;
-  flex-direction: column;
-}
-.likeBtn {
-  background-color: transparent;
-  color: grey;
-  border-radius: 50%;
-}
-.delete {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-}
-.deleteBtn {
-  background-color: transparent;
-  border: none;
-  color: grey;
-  margin: 0rem;
-}
-.navLinkRoster {
-  font-size: 1rem;
-}
-.navTopRight {
-  display: flex;
-  flex-direction: row;
-  column-gap: 1rem;
-}
-.navTopLeft {
-  display: flex;
-  flex-direction: row;
-  column-gap: 1rem;
-}
-.songDescription {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  row-gap: 0.5rem;
-}
-.username {
-  color: var(--color-secondary);
-}
-.home {
-  background-color: var(--color-secondary);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-}
-.logo {
-  color: white;
 }
 .navTopWrap {
   display: flex;
@@ -182,6 +35,15 @@ main {
   flex-direction: column;
   align-items: center;
 }
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 500;
+  align-items: flex-start;
+  display: flex;
+  color: var(--color-secondary);
+}
+
 .stack1 {
   display: flex;
   flex-direction: row;
@@ -193,6 +55,40 @@ main {
   border-bottom-color: var(--color-tertiary);
   border-bottom-width: 1px;
 }
+
+.navTopLeft {
+  display: flex;
+  flex-direction: row;
+  column-gap: 1rem;
+}
+
+.username {
+  color: var(--color-secondary);
+}
+
+.home {
+  background-color: var(--color-secondary);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+a {
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--color-secondary);
+}
+
+.logo {
+  color: white;
+}
+
+.navTopRight {
+  display: flex;
+  flex-direction: row;
+  column-gap: 1rem;
+}
+
 .stack2 {
   display: flex;
   flex-direction: row;
@@ -201,22 +97,129 @@ main {
   width: 95%;
   padding: 1rem;
 }
+
+footer {
+  display: flex;
+  justify-content: center;
+}
+
+.navBottom {
+  display: flex;
+  width: 50%;
+  margin-top: 5rem;
+  flex-direction: column;
+  row-gap: 1rem;
+}
+
+/* table for lists */
+main {
+  display: flex;
+  width: 95%;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+}
+
+#player {
+  width: 200px;
+  height: 200px;
+  background-color: grey;
+}
+
+.listHeader {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.cols {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.label {
+  width: 100%;
+  display: flex;
+}
+
+.content {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.playListWrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #0680a8 black;
+  overflow: auto;
+}
+
+.songCard {
+  border-top: 1px solid var(--color-tertiary);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.val {
+  width: 100%;
+  display: flex;
+  align-self: center;
+}
+
+p {
+  font-size: 1rem;
+  text-align: left;
+  color: white;
+  align-self: center;
+}
+
+.delete {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* input forms */
+.mainWrap {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2rem;
+}
+
 .inputForm {
   display: flex;
   flex-direction: column;
-  width: fit-content;
+  width: 100%;
   align-items: flex-start;
   row-gap: 2rem;
   font-size: 1rem;
 }
 
-.pageTitle {
-  font-size: 2rem;
-  font-weight: 500;
-  align-items: flex-start;
+.formDiv {
   display: flex;
-  color: var(--color-secondary);
+  flex-direction: column;
+  row-gap: 0.25rem;
+  width: 100%;
 }
+
+label {
+  align-self: start;
+  font-weight: 300;
+}
+
 input {
   margin: 0rem;
   background-color: var(--color-secondary);
@@ -225,52 +228,24 @@ input {
   padding: 0.25rem 0.5rem;
   border: none;
 }
-
-.headerLeft {
+.formDivParent {
   display: flex;
   flex-direction: row;
-  column-gap: 1rem;
+  column-gap: 2rem;
 }
-.listHeader {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+
+.formDivHz {
   display: flex;
+  column-gap: 0.25rem;
+}
+
+.submit {
   width: 100%;
-  justify-content: space-between;
-}
-p {
   font-size: 1rem;
-  text-align: left;
-  color: white;
-  align-self: center;
+  font-weight: bold;
 }
-.songInfo {
-  display: flex;
-  justify-content: flex-start;
-  column-gap: 1rem;
-  font-weight: 300;
-}
-nav {
-  display: flex;
-  justify-content: flex-start;
-}
-.navLink {
-  font-size: 1.5rem;
-}
-.songActionWrap {
-  display: flex;
-  justify-content: space-between;
-}
-.voteWrap {
-  display: flex;
-  justify-content: center;
-  width: 50%;
-  column-gap: 1rem;
-}
-footer {
-  display: flex;
-  justify-content: center;
-}
+
+/*error*/
 .errorWrap {
   margin-bottom: 1rem;
 }

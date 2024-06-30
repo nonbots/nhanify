@@ -4,8 +4,9 @@ block header
     h1(class="pageTitle") Add contributor
 block content
     form(class="inputForm" action=`/playlist/${playlistId}/contributors/add` method="post")
-      label(for="username") username
-      input(id="username" type="text" name="username") 
-      input(type="submit")
+      .formDiv
+        label(for="username") username
+        input(id="username" type="text" name="username") 
+      input(type="submit" class="submit" value="Add")
      
 

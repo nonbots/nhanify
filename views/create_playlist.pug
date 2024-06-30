@@ -3,13 +3,20 @@ block header
   h1(class="pageTitle") Create playlist
 block content
   form(class="inputForm" action="/playlists/create" method="post")
-    label(for="title") Title
-    input(id="title" type="text" name="title") 
-    label(for="username") Add user
-    input(id="username" type="text" name="username")
-    input(type="radio" id="private" name="visiability" value="private" checked)
-    label(for="private") private
-    input(type="radio" id="public" name="visiability" value="public")
-    label(for="public") public
-    input(type="submit")
+    .formDiv
+      label(for="title") Title
+      input(id="title" type="text" name="title") 
+    .formDiv
+      label(for="username") Add user
+      input(id="username" type="text" name="username")
+    .formDiv
+      label(for="visiability") Visibility
+      .formDivParent
+        .formDivHz
+          input(type="radio" id="private" name="visiability" value="private" checked)
+          label(for="private") private
+        .formDivHz
+          input(type="radio" id="public" name="visiability" value="public")
+          label(for="public") public
+    input(type="submit" class="submit" value="Create")
 
