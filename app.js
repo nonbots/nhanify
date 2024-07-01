@@ -51,7 +51,6 @@ app.get("/playlist/:playlistId/contributors/add", (req, res) => {
 app.get("/playlist/:playlistId/contributors", async (req, res) => {
   const playlistId = Number(req.params.playlistId);
   const contributors = await persistence.getContributors(playlistId);
-  console.log({ contributors });
   res.render("contributors", {
     contributors,
     playlistId,

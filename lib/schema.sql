@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS "playlists-songs";
+DROP TABLE IF EXISTS playlists_songs;
 
-DROP TABLE IF EXISTS "playlists-users";
+DROP TABLE IF EXISTS playlists_users;
 
 DROP TABLE IF EXISTS songs;
 
@@ -32,19 +32,21 @@ CREATE TABLE playlists (
   private boolean NOT NULL DEFAULT true
 );
 
---create playlists-songs table
-CREATE TABLE "playlists-songs" (
+--create playlists_songs table
+CREATE TABLE playlists_songs (
   id serial PRIMARY KEY,
   song_id integer NOT NULL REFERENCES songs (id),
-  playlist_id integer NOT NULL REFERENCES playlists (id),
-  user_id integer NOT NULL REFERENCES users (id)
+  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT unique_playlist_id_song_id UNIQUE (playlist_id, song_id)
 );
 
---create a playlists-users table that references playlists and users
-CREATE TABLE "playlists-users" (
+--create a playlists_users table that references playlists and users
+CREATE TABLE playlists_users (
   id serial PRIMARY KEY,
-  playlist_id integer NOT NULL REFERENCES playlists (id),
-  user_id integer NOT NULL REFERENCES users (id)
+  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT unique_playlist_id_user_id UNIQUE (playlist_id, user_id)
 );
 
 --insert songs into the songs table
@@ -72,13 +74,6 @@ VALUES
     '$2a$10$Fp.fqZx4HPprQHNbF4LyAOSGZsrixMU1JXUq0Inez0IqSmrIFZZmO'
   );
 
---p3
---query songs table
-SELECT
-  *
-FROM
-  songs;
-
 --insert playlists into the playlists table
 INSERT INTO
   playlists (title, creator_id, private)
@@ -91,7 +86,7 @@ VALUES
 
 --insert references to songs and playlists in songs playlists table
 INSERT INTO
-  "playlists-songs" (playlist_id, song_id, user_id)
+  playlists_songs (playlist_id, song_id, user_id)
 VALUES
   (1, 1, 1),
   (1, 2, 2),
@@ -99,9 +94,10 @@ VALUES
   (2, 1, 1),
   (3, 3, 1);
 
+--  (3, 3, 1); --violates unique song/playlist constraint 
 --insert reference to users and playlist into playlists-users table
 INSERT INTO
-  "playlists-users" (user_id, playlist_id)
+  playlists_users (user_id, playlist_id)
 VALUES
   (1, 1),
   (1, 2),
@@ -109,18 +105,4 @@ VALUES
   (3, 3),
   (1, 4);
 
-SELECT
-  users.username,
-  playlists.*,
-  count(playlists.id)
-FROM
-  playlists
-  LEFT JOIN "playlists-songs" ON "playlists-songs".playlist_id = playlists.id
-  LEFT JOIN songs ON songs.id = "playlists-songs".song_id
-  LEFT JOIN "playlists-users" ON "playlists-users".playlist_id = "playlists-songs".playlist_id
-  LEFT JOIN users ON users.id = playlists.creator_id
-WHERE
-  "playlists-users".user_id = 2
-GROUP BY
-  playlists.id,
-  users.username;
+--  (1, 4); -- violates unique playlist/user constriant
