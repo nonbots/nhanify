@@ -91,7 +91,7 @@ app.get("/playlists/create", (req, res) => {
 });
 
 app.post("/playlists/create", async (req, res) => {
-  const { title,visiability } = req.body;
+  const { title, visiability } = req.body;
   const result = await persistence.createPlaylist(
     title,
     visiability,
