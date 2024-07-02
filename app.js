@@ -64,6 +64,15 @@ app.get("/playlist/:playlistId", async (req, res) => {
   res.render("playlist", { playlist: updatedPlaylist, playlistId });
 });
 
+app.post("/playlists/:playlistId/delete", async (req, res) => {
+  const rowCount = await persistence.deletePlaylist(+req.params.playlistId);
+
+  if (rowCount !== 1) {
+    // if not equal to 1 display a error that playlist does not exist;
+  }
+  res.redirect("/playlists");
+});
+
 app.post(
   "/playlist/:playlistId/contributors/delete/:contributorId",
   async (req, res) => {

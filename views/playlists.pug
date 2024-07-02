@@ -34,6 +34,10 @@ block main
                   p= playlist.count
                 .val
                   if (user !== undefined)
-                    form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-                      input(class="deleteBtn" type="submit" value="❌")
+                    if (pageTitle === "Contributing Playlists")
+                      form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+                        input(class="deleteBtn" type="submit" value="❌")
+                    if (pageTitle === "Your Playlists")
+                      form(class="delete" action=`/playlists/${playlist.id}/delete` method="post")
+                        input(class="deleteBtn" type="submit" value="X")
 
