@@ -87,21 +87,33 @@ app.post(
 
 app.get("/playlists/public", async (req, res) => {
   const playlists = await persistence.getPublicPlaylists();
-  res.render("playlists", { playlists, pageTitle: "Public Playlists" });
+  res.render("playlists", {
+    playlists,
+    pageTitle: "Public Playlists",
+    isPublic: true,
+  });
 });
 
 app.get("/playlists", async (req, res) => {
   const playlists = await persistence.getUserCreatedPlaylists(
     req.session.user.id,
   );
-  res.render("playlists", { playlists, pageTitle: "Your Playlists" });
+  res.render("playlists", {
+    playlists,
+    pageTitle: "Your Playlists",
+    isYour: true,
+  });
 });
 
 app.get("/playlists/contributing", async (req, res) => {
   const playlists = await persistence.getContributedPlaylists(
     req.session.user.id,
   );
-  res.render("playlists", { playlists, pageTitle: "Contributing Playlists" });
+  res.render("playlists", {
+    playlists,
+    pageTitle: "Contributing Playlists",
+    isContributing: true,
+  });
 });
 
 app.get("/playlists/create", (req, res) => {
