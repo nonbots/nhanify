@@ -20,5 +20,5 @@ block main
                 p= contributor.username   
               .val
                 form(class="delete" action=`/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
-                  input(class="deleteBtn" type="submit" value="❌")
+                  input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="❌")
 

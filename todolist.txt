@@ -1,7 +1,10 @@
 Phase 1: Complete application without the use of Youtube APIs
 [DONE] 1. Create a hard delete query for users that own their playlist
 [DONE] 1. Use a different variable for delete playlist POST in pug
- 2. Created comfirmation for all deletes
+[DONE] 2. Created comfirmation for all deletes
+[DONE} 2. Check for other deletes for comfirmation
+ 2. remove the creator column from the your playlist and remove the owner of the 
+    playlist from the contributor list
  3. User input invalidation 
   3a. Use flash lib display the errors
  4. Catch errors from database
