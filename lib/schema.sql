@@ -99,10 +99,8 @@ VALUES
 INSERT INTO
   playlists_users (user_id, playlist_id)
 VALUES
-  (1, 1),
   (1, 2),
   (2, 1),
-  (3, 3),
-  (1, 4);
+  (2, 3);
 
 --  (1, 4); -- violates unique playlist/user constriant
