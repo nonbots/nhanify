@@ -33,7 +33,7 @@ block main
               .val
                 p= song.added_by
               .val
-                p= song.duration_sec
+                p= song.formattedDuration
               .val
                 if (user !== undefined)
                   form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")

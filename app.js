@@ -70,7 +70,20 @@ app.post("/playlists/:playlistId/delete", async (req, res) => {
   if (rowCount !== 1) {
     // if not equal to 1 display a error that playlist does not exist;
   }
-  res.redirect("/playlists");
+  res.redirect("/playlists/your");
+});
+
+app.post("/playlists/:playlistId/delete/contribution", async (req, res) => {
+  const playlistId = +req.params.playlistId;
+  const rowCount = await persistence.deleteContributionPlaylist(
+    playlistId,
+    req.session.user.id,
+  );
+
+  if (rowCount !== 1) {
+    // if not equal to 1 display a error that playlist does not exist;
+  }
+  res.redirect("/playlists/contributing");
 });
 
 app.post(
@@ -87,33 +100,30 @@ app.post(
 
 app.get("/playlists/public", async (req, res) => {
   const playlists = await persistence.getPublicPlaylists();
-  res.render("playlists", {
-    playlists,
-    pageTitle: "Public Playlists",
-    isPublic: true,
-  });
+  res.locals.playlists = playlists;
+  res.locals.isPublic = true;
+  res.locals.pageTitle = "Public playlists";
+  res.render("playlists");
 });
 
-app.get("/playlists", async (req, res) => {
+app.get("/playlists/your", async (req, res) => {
   const playlists = await persistence.getUserCreatedPlaylists(
     req.session.user.id,
   );
-  res.render("playlists", {
-    playlists,
-    pageTitle: "Your Playlists",
-    isYour: true,
-  });
+  res.locals.playlists = playlists;
+  res.locals.isYour = true;
+  res.locals.pageTitle = "Your playlists";
+  res.render("playlists");
 });
 
 app.get("/playlists/contributing", async (req, res) => {
   const playlists = await persistence.getContributedPlaylists(
     req.session.user.id,
   );
-  res.render("playlists", {
-    playlists,
-    pageTitle: "Contributing Playlists",
-    isContributing: true,
-  });
+  res.locals.playlists = playlists;
+  res.locals.isContributing = true;
+  res.locals.pageTitle = "Contributing playlists";
+  res.render("playlists");
 });
 
 app.get("/playlists/create", (req, res) => {
@@ -122,12 +132,12 @@ app.get("/playlists/create", (req, res) => {
 
 app.post("/playlists/create", async (req, res) => {
   const { title, visiability } = req.body;
-  const result = await persistence.createPlaylist(
+  const rowCount = await persistence.createPlaylist(
     title,
     visiability,
     req.session.user.id,
   );
-  if (result.rowCount >= 1) res.redirect("/playlists");
+  if (rowCount >= 1) res.redirect("/playlists/your");
 });
 
 app.post("/signout", (req, res) => {
@@ -147,12 +157,9 @@ app.post("/login", async (req, res) => {
   const password = req.body.password;
   const user = await persistence.validateUser(username, password);
   if (user) {
-    //store in session
     req.session.user = user;
-    //redired to playlists page
-    res.redirect("/playlists");
+    res.redirect("/playlists/your");
   } else {
-    //display an error message to user
     res.redirect("/login");
   }
 });
@@ -165,7 +172,7 @@ app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   const user = await persistence.createUser(username, password);
   req.session.user = user;
-  res.redirect("/playlists");
+  res.redirect("/playlists/your");
 });
 
 app.get("/", (req, res) => {
