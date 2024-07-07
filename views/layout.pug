@@ -30,14 +30,14 @@ html(lang="en")
               a(href="/login") Sign In
         .stack2
           if (user !== undefined)
-            if (playlistType === "owned")
-              a(class="hiNavTab" href="/playlists/your") Your Playlists 
-            else 
-              a(class="navTab" href="/playlists/your") Your Playlists 
             if (playlistType === "public")
               a(class="hiNavTab" href="/playlists/public") Public Playlists 
             else
               a(class="navTab" href="/playlists/public") Public Playlists 
+            if (playlistType === "owned")
+              a(class="hiNavTab" href="/playlists/your") Your Playlists 
+            else 
+              a(class="navTab" href="/playlists/your") Your Playlists 
             if (playlistType === "contribution")
               a(class="hiNavTab" href="/playlists/contributing") Contributing Playlists
             else

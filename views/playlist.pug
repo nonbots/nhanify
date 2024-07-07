@@ -1,42 +1,38 @@
-extends layout
+extends playlists
 
-block main
-  .playlistsDiv
-    block title
-      h1(class="pageTitle") #{pageTitle} 
-    block list 
-      .listHeader
-        .headerLeft
-          p(class="username") #{playlist.songs.length} song(s)  
-          p(class="username") Total Duration: 
-        if (user !== undefined)
-          a(href=`/playlist/${playlistId}/contributors`) Contributors
-      .cols
-        .label
-          p(class="username") No.
-        .label
-          p(class="username") Title
-        .label
-          p(class="username") Added By
-        .label
-          p(class="username") Duration
-        .label
-    block values
-      .content
-        .playListWrap
-          each song in playlist.songs
-            a(href=`/playlist/${song.id}`) 
-              div(class="songCard")
-                .val
-                  p= playlist.songs.indexOf(song) + 1
-                .val
-                  p= song.title   
-                .val
-                  p= song.added_by
-                .val
-                  p= song.formattedDuration
-                .val
-                  if (user !== undefined)
-                    form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-                      input(class="deleteBtn" type="submit" value="❌")
+block list 
+  .listHeader
+    .headerLeft
+      p(class="username") #{playlist.songs.length} song(s)  
+      p(class="username") Total Duration: 
+    if (user !== undefined && playlistType === "owned")
+      a(href=`/playlist/${playlistId}/contributors`) Contributors
+  .cols
+    .label
+      p(class="username") No.
+    .label
+      p(class="username") Title
+    .label
+      p(class="username") Added By
+    .label
+      p(class="username") Duration
+    .label
+block values
+  .content
+    .playListWrap
+      each song in playlist.songs
+        a(href=`/playlist/${song.id}`) 
+          div(class="songCard")
+            .val
+              p= playlist.songs.indexOf(song) + 1
+            .val
+              p= song.title   
+            .val
+              p= song.added_by
+            .val
+              p= song.formattedDuration
+            .val
+              if (user !== undefined)
+                form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+                  input(class="deleteBtn" type="submit" value="❌")
 
