@@ -103,4 +103,4 @@ VALUES
   (2, 1),
   (2, 3);
 
---  (1, 4); -- violates unique playlist/user constriant
+--  (1, 2); -- violates unique playlist/user constriant

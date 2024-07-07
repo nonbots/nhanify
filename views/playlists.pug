@@ -1,43 +1,44 @@
 extends layout
 
 block main
-  block title
-    h1(class="pageTitle") #{pageTitle}
-  block list 
-    .listHeader
-      p(class="username") #{playlists.length} Playlist(s)  
-      if (user !== undefined)
-        a(href="/playlists/create") Create 
-    .cols
-      .label
-        p(class="username") No.
-      .label
-        p(class="username") Title
-      .label
-        p(class="username") Creator
-      .label
-        p(class="username") Song Total
-      .label
-  block values
-    .content
-      .playListWrap
-        each playlist in playlists
-          a(href=`/playlist/${playlist.id}`) 
-            div(class="songCard")
-                .val
-                  p= playlists.indexOf(playlist) + 1
-                .val
-                  p= playlist.title   
-                .val
-                  p= playlist.username 
-                .val
-                  p= playlist.count
-                .val
-                  if (user !== undefined)
-                    if (isContributing)
-                          form(class="delete" action=`/playlists/${playlist.id}/delete/contribution` method="post")
-                            input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="deleteBtn" type="submit" value="❌")
-                    if (isYour)
-                        form(class="delete" action=`/playlists/${playlist.id}/delete` method="post")
-                          input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="X")
+  .playlistsDiv
+    block title
+      h1(class="pageTitle") #{pageTitle}
+    block list 
+      .listHeader
+        p(class="username") #{playlists.length} Playlist(s)  
+        if (user !== undefined)
+          a(href="/playlists/create") Create 
+      .cols
+        .label
+          p(class="username") No.
+        .label
+          p(class="username") Title
+        .label
+          p(class="username") Creator
+        .label
+          p(class="username") Song Total
+        .label
+    block values
+      .content
+        .playListWrap
+          each playlist in playlists
+            a(href=`/${playlistType}/playlist/${playlist.id}`) 
+              div(class="songCard")
+                  .val
+                    p= playlists.indexOf(playlist) + 1
+                  .val
+                    p= playlist.title   
+                  .val
+                    p= playlist.username 
+                  .val
+                    p= playlist.count
+                  .val
+                    if (user !== undefined)
+                      if (isContributing)
+                            form(class="delete" action=`/playlists/${playlist.id}/delete/contribution` method="post")
+                              input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="deleteBtn" type="submit" value="❌")
+                      if (isYour)
+                          form(class="delete" action=`/playlists/${playlist.id}/delete` method="post")
+                            input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="X")
 

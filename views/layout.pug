@@ -8,6 +8,7 @@ html(lang="en")
     link(rel="preconnect" href="https://fonts.googleapis.com")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet")
+    script(src="/assets/javascript/main.js")
   body
     .bWrap
       .navTopWrap 
@@ -29,11 +30,17 @@ html(lang="en")
               a(href="/login") Sign In
         .stack2
           if (user !== undefined)
-            a(href="/playlists/public") Public Playlists 
-            a(href="/playlists/contributing") Contributing Playlists
+            if (playlistType === "owned")
+              a(class="hiNavTab" href="/playlists/your") Your Playlists 
+            else 
+              a(class="navTab" href="/playlists/your") Your Playlists 
+            if (playlistType === "public")
+              a(class="hiNavTab" href="/playlists/public") Public Playlists 
+            else
+              a(class="navTab" href="/playlists/public") Public Playlists 
+            if (playlistType === "contribution")
+              a(class="hiNavTab" href="/playlists/contributing") Contributing Playlists
+            else
+              a(class="navTab" href="/playlists/contributing") Contributing Playlists
       main
           block main
-      footer
-        nav(class="navBottom")
-          block navBottom   
-  script(src="/assets/javascript/main.js")

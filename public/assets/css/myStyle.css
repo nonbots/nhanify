@@ -51,9 +51,6 @@ body {
   height: 4rem;
   align-items: center;
   width: 95%;
-  border-bottom-style: solid;
-  border-bottom-color: var(--color-tertiary);
-  border-bottom-width: 1px;
 }
 
 .navTopLeft {
@@ -89,17 +86,33 @@ a {
   column-gap: 1rem;
 }
 
+.hiNavTab {
+  border-width: 1px 1px 0px 1px;
+  background-color: var(--color-tertiary);
+  padding: 1rem;
+  border-radius: 1rem 1rem 0rem 0rem;
+}
+
+.navTab {
+  border-width: 1px 1px 0px 1px;
+  padding: 1rem;
+  border-radius: 1rem 1rem 0rem 0rem;
+}
+
 .stack2 {
   display: flex;
   flex-direction: row;
   align-items: center;
   width: 95%;
-  padding: 1rem;
   column-gap: 1rem;
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-tertiary);
+  border-bottom-width: 1px;
 }
 
 footer {
   display: flex;
+  background-color: var(--color-tertiary);
   justify-content: center;
 }
 
@@ -114,11 +127,19 @@ footer {
 /* table for lists */
 main {
   display: flex;
+  width: 100%;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-tertiary);
+  align-items: center;
+  padding: 2rem 0rem;
+}
+
+.playlistsDiv {
+  display: flex;
   width: 95%;
   flex-direction: column;
   align-items: center;
-  height: 100%;
-  justify-content: center;
 }
 
 #player {
@@ -165,7 +186,7 @@ main {
 }
 
 .songCard {
-  border-top: 1px solid var(--color-tertiary);
+  border-top: 1px solid var(--color-secondary);
   padding-top: 1rem;
   padding-bottom: 1rem;
   display: flex;
@@ -193,6 +214,12 @@ p {
 }
 
 /* input forms */
+.mainWrapWrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
 .mainWrap {
   display: flex;
   flex-direction: column;

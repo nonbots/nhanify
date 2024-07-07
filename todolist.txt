@@ -8,7 +8,7 @@ Phase 1: Complete application without the use of Youtube APIs
     playlist from the contributor list
  2b. Only playlist creators can add contributors to the playlist (remove on the contributors page)
  [DONE] 2c. fix your playlist bug
- [DONE]3. change the redirect for the contributor playlists to be contributor 
+ [DONE] 3. change the redirect for the contributor playlists to be contributor 
  3. User input invalidation 
   3a. Use flash lib display the errors
  4. Catch errors from database

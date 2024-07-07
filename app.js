@@ -57,11 +57,17 @@ app.get("/playlist/:playlistId/contributors", async (req, res) => {
   });
 });
 
-app.get("/playlist/:playlistId", async (req, res) => {
+app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
   const playlistId = Number(req.params.playlistId);
   const playlist = await persistence.getPlaylist(playlistId);
   const updatedPlaylist = getUpdatedPlaylist(playlist);
-  res.render("playlist", { playlist: updatedPlaylist, playlistId });
+  //if (playlistId === req.session.user.id) res.locals:
+  res.locals.playlistType = req.params.playlistType;
+  res.render("playlist", {
+    playlist: updatedPlaylist,
+    playlistId,
+    pageTitle: updatedPlaylist.title,
+  });
 });
 
 app.post("/playlists/:playlistId/delete", async (req, res) => {
@@ -101,7 +107,7 @@ app.post(
 app.get("/playlists/public", async (req, res) => {
   const playlists = await persistence.getPublicPlaylists();
   res.locals.playlists = playlists;
-  res.locals.isPublic = true;
+  res.locals.playlistType = "public";
   res.locals.pageTitle = "Public playlists";
   res.render("playlists");
 });
@@ -111,7 +117,7 @@ app.get("/playlists/your", async (req, res) => {
     req.session.user.id,
   );
   res.locals.playlists = playlists;
-  res.locals.isYour = true;
+  res.locals.playlistType = "owned";
   res.locals.pageTitle = "Your playlists";
   res.render("playlists");
 });
@@ -121,7 +127,7 @@ app.get("/playlists/contributing", async (req, res) => {
     req.session.user.id,
   );
   res.locals.playlists = playlists;
-  res.locals.isContributing = true;
+  res.locals.playlistType = "contribution";
   res.locals.pageTitle = "Contributing playlists";
   res.render("playlists");
 });
@@ -148,7 +154,7 @@ app.post("/signout", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user) res.redirect("/playlists/public");
+  if (req.session.user) res.redirect("/playlists/your");
   res.render("login");
 });
 
@@ -176,7 +182,11 @@ app.post("/signup", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.redirect("/playlists/public");
+  if (req.session.user) {
+    res.redirect("/playlists/your");
+  } else {
+    res.redirect("/playlists/public");
+  }
 });
 
 app.listen(port, host, () => {

@@ -1,17 +1,18 @@
 extends layout
 
 block main 
-  .mainWrap
-    block header 
-      h1(class="pageTitle") Sign Up
-    block content
-      form(class="inputForm" action="/signup" method="post")
-        .formDiv
-          label(for="username") User name 
-          input(id="username" type="text" name="username") 
-        .formDiv
-          label(for="password") Password
-          input(id="password" type="password" name="password")
-        input(type="submit" class="submit"  value="Sign Up")
+  .mainWrapWrap
+    .mainWrap
+      block header 
+        h1(class="pageTitle") Sign Up
+      block content
+        form(class="inputForm" action="/signup" method="post")
+          .formDiv
+            label(for="username") User name 
+            input(id="username" type="text" name="username") 
+          .formDiv
+            label(for="password") Password
+            input(id="password" type="password" name="password")
+          input(type="submit" class="submit"  value="Sign Up")
        
       
