@@ -5,8 +5,8 @@ block list
     .headerLeft
       p(class="username") #{playlist.songs.length} song(s)  
       p(class="username") Total Duration: 
-    if (user !== undefined && playlistType === "owned")
-      a(href=`/playlist/${playlistId}/contributors`) Contributors
+    if (user !== undefined)
+      a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
   .cols
     .label
       p(class="username") No.

@@ -29,11 +29,11 @@ html(lang="en")
               a(href="/signup") Sign Up 
               a(href="/login") Sign In
         .stack2
+          if (playlistType === "public")
+            a(class="hiNavTab" href="/playlists/public") Public Playlists 
+          else
+            a(class="navTab" href="/playlists/public") Public Playlists 
           if (user !== undefined)
-            if (playlistType === "public")
-              a(class="hiNavTab" href="/playlists/public") Public Playlists 
-            else
-              a(class="navTab" href="/playlists/public") Public Playlists 
             if (playlistType === "owned")
               a(class="hiNavTab" href="/playlists/your") Your Playlists 
             else 

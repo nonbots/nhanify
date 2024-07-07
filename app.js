@@ -44,18 +44,29 @@ app.post("/playlist/:playlistId/contributors/add", async (req, res) => {
   if (rowCount >= 1) res.redirect(`/playlist/${playlistId}/contributors`);
 });
 
-app.get("/playlist/:playlistId/contributors/add", (req, res) => {
-  res.render("add_contributors", { playlistId: req.params.playlistId });
-});
+app.get(
+  "/:playlistType/playlist/:playlistId/contributors/add",
+  async (req, res) => {
+    const playlistId = +req.params.playlistId;
+    res.locals.pageTitle = `Add contributor to ${await persistence.getPlaylistTitle(playlistId)}`;
+    res.locals.playlistType = req.params.playlistType;
+    res.render("add_contributors", { playlistId });
+  },
+);
 
-app.get("/playlist/:playlistId/contributors", async (req, res) => {
-  const playlistId = Number(req.params.playlistId);
-  const contributors = await persistence.getContributors(playlistId);
-  res.render("contributors", {
-    contributors,
-    playlistId,
-  });
-});
+app.get(
+  "/:playlistType/playlist/:playlistId/contributors",
+  async (req, res) => {
+    const playlistId = Number(req.params.playlistId);
+    const contributors = await persistence.getContributors(playlistId);
+    res.locals.pageTitle = `${contributors.playlistTitle} Contributors`;
+    res.locals.playlistType = req.params.playlistType;
+    res.render("contributors", {
+      contributors,
+      playlistId,
+    });
+  },
+);
 
 app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
   const playlistId = Number(req.params.playlistId);
@@ -132,7 +143,8 @@ app.get("/playlists/contributing", async (req, res) => {
   res.render("playlists");
 });
 
-app.get("/playlists/create", (req, res) => {
+app.get("/:playlistType/playlists/create", (req, res) => {
+  res.locals.playlistType = req.params.playlistType;
   res.render("create_playlist");
 });
 

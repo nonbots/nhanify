@@ -1,24 +1,23 @@
-extends layout
+extends playlists
 
-block main
-  block title
-    h1(class="pageTitle") Contributors 
-  block list 
-    .listHeader
-      p(class="username") #{contributors.length} Contributor(s)  
-      a(href=`/playlist/${playlistId}/contributors/add`) Add 
-    .cols
-      .label
-        p(class="username") username
-      .label
-  block values
-    .content
-      .playListWrap
-        each contributor in contributors
-            div(class="songCard")
-              .val
-                p= contributor.username   
-              .val
+block list 
+  .listHeader
+    p(class="username") #{contributors.contributors.length} Contributor(s)  
+    if(playlistType === "owned")
+      a(href=`/${playlistType}/playlist/${playlistId}/contributors/add`) Add 
+  .cols
+    .label
+      p(class="username") username
+    .label
+block values
+  .content
+    .playListWrap
+      each contributor in contributors.contributors
+          div(class="songCard")
+            .val
+              p= contributor.username   
+            .val
+              if(playlistType === "owned")
                 form(class="delete" action=`/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
                   input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="❌")
 
