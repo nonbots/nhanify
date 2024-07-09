@@ -3,7 +3,7 @@ extends signup
 block header
     h1(class="pageTitle") #{pageTitle}
 block content
-    form(class="inputForm" action=`/playlist/${playlistId}/contributors/add` method="post")
+    form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/contributors/add` method="post")
       .formDiv
         label(for="username") username
         input(id="username" type="text" name="username") 

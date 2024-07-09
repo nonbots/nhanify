@@ -18,6 +18,6 @@ block values
               p= contributor.username   
             .val
               if(playlistType === "owned")
-                form(class="delete" action=`/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
+                form(class="delete" action=`/${playlistType}/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
                   input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="❌")
 

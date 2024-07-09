@@ -35,22 +35,43 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/playlist/:playlistId/contributors/add", async (req, res) => {
-  const playlistId = Number(req.params.playlistId);
-  const rowCount = await persistence.addContributor(
-    req.body.username,
-    playlistId,
-  );
-  if (rowCount >= 1) res.redirect(`/playlist/${playlistId}/contributors`);
-});
+app.post(
+  "/:playlistType/playlist/:playlistId/contributors/add",
+  async (req, res) => {
+    if (!req.session.user) return res.redirect("playlists/pubilc");
+    const playlistId = +req.params.playlistId;
+    const playlistType = req.params.playlistType;
+    if (
+      (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
+      1
+    )
+      return res.redirect("/playlists/your");
+    const rowCount = await persistence.addContributor(
+      req.body.username,
+      playlistId,
+    );
+    if (rowCount >= 1)
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors`,
+      );
+  },
+);
 
 app.get(
   "/:playlistType/playlist/:playlistId/contributors/add",
   async (req, res) => {
+    // anonymous user
+    if (!req.session.user) return res.redirect("/playlists/public");
+    //signed user that don't own the playlist
     const playlistId = +req.params.playlistId;
+    if (
+      (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
+      1
+    )
+      return res.redirect("/playlists/your");
     res.locals.pageTitle = `Add contributor to ${await persistence.getPlaylistTitle(playlistId)}`;
     res.locals.playlistType = req.params.playlistType;
-    res.render("add_contributors", { playlistId });
+    return res.render("add_contributors", { playlistId });
   },
 );
 
@@ -61,7 +82,7 @@ app.get(
     const contributors = await persistence.getContributors(playlistId);
     res.locals.pageTitle = `${contributors.playlistTitle} Contributors`;
     res.locals.playlistType = req.params.playlistType;
-    res.render("contributors", {
+    return res.render("contributors", {
       contributors,
       playlistId,
     });
@@ -74,7 +95,7 @@ app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
   const updatedPlaylist = getUpdatedPlaylist(playlist);
   //if (playlistId === req.session.user.id) res.locals:
   res.locals.playlistType = req.params.playlistType;
-  res.render("playlist", {
+  return res.render("playlist", {
     playlist: updatedPlaylist,
     playlistId,
     pageTitle: updatedPlaylist.title,
@@ -87,7 +108,7 @@ app.post("/playlists/:playlistId/delete", async (req, res) => {
   if (rowCount !== 1) {
     // if not equal to 1 display a error that playlist does not exist;
   }
-  res.redirect("/playlists/your");
+  return res.redirect("/playlists/your");
 });
 
 app.post("/playlists/:playlistId/delete/contribution", async (req, res) => {
@@ -100,18 +121,22 @@ app.post("/playlists/:playlistId/delete/contribution", async (req, res) => {
   if (rowCount !== 1) {
     // if not equal to 1 display a error that playlist does not exist;
   }
-  res.redirect("/playlists/contributing");
+  return res.redirect("/playlists/contributing");
 });
 
 app.post(
-  "/playlist/:playlistId/contributors/delete/:contributorId",
+  "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId",
   async (req, res) => {
     const playlistId = req.params.playlistId;
+    const playlistType = req.params.playlistType;
     const rowCount = await persistence.deleteContributor(
       playlistId,
       req.params.contributorId,
     );
-    if (rowCount >= 1) res.redirect(`/playlist/${playlistId}/contributors`);
+    if (rowCount >= 1)
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors`,
+      );
   },
 );
 
@@ -120,7 +145,7 @@ app.get("/playlists/public", async (req, res) => {
   res.locals.playlists = playlists;
   res.locals.playlistType = "public";
   res.locals.pageTitle = "Public playlists";
-  res.render("playlists");
+  return res.render("playlists");
 });
 
 app.get("/playlists/your", async (req, res) => {
@@ -130,7 +155,7 @@ app.get("/playlists/your", async (req, res) => {
   res.locals.playlists = playlists;
   res.locals.playlistType = "owned";
   res.locals.pageTitle = "Your playlists";
-  res.render("playlists");
+  return res.render("playlists");
 });
 
 app.get("/playlists/contributing", async (req, res) => {
@@ -140,12 +165,12 @@ app.get("/playlists/contributing", async (req, res) => {
   res.locals.playlists = playlists;
   res.locals.playlistType = "contribution";
   res.locals.pageTitle = "Contributing playlists";
-  res.render("playlists");
+  return res.render("playlists");
 });
 
 app.get("/:playlistType/playlists/create", (req, res) => {
   res.locals.playlistType = req.params.playlistType;
-  res.render("create_playlist");
+  return res.render("create_playlist");
 });
 
 app.post("/playlists/create", async (req, res) => {
@@ -155,19 +180,19 @@ app.post("/playlists/create", async (req, res) => {
     visiability,
     req.session.user.id,
   );
-  if (rowCount >= 1) res.redirect("/playlists/your");
+  if (rowCount >= 1) return res.redirect("/playlists/your");
 });
 
 app.post("/signout", (req, res) => {
   req.session.destroy((error) => {
     if (error) console.error(error);
-    res.redirect("/playlists/public");
+    return res.redirect("/playlists/public");
   });
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user) res.redirect("/playlists/your");
-  res.render("login");
+  if (req.session.user) return res.redirect("/playlists/your");
+  return res.render("login");
 });
 
 app.post("/login", async (req, res) => {
@@ -176,28 +201,28 @@ app.post("/login", async (req, res) => {
   const user = await persistence.validateUser(username, password);
   if (user) {
     req.session.user = user;
-    res.redirect("/playlists/your");
+    return res.redirect("/playlists/your");
   } else {
-    res.redirect("/login");
+    return res.redirect("/login");
   }
 });
 
 app.get("/signup", (req, res) => {
-  res.render("signup");
+  return res.render("signup");
 });
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   const user = await persistence.createUser(username, password);
   req.session.user = user;
-  res.redirect("/playlists/your");
+  return res.redirect("/playlists/your");
 });
 
 app.get("/", (req, res) => {
   if (req.session.user) {
-    res.redirect("/playlists/your");
+    return res.redirect("/playlists/your");
   } else {
-    res.redirect("/playlists/public");
+    return res.redirect("/playlists/public");
   }
 });
 

@@ -13,7 +13,7 @@ Phase 1: Complete application without the use of Youtube APIs
   3a. Use flash lib display the errors
  4. Catch errors from database
  *5. Redirect anonymous users to the public playist to avoid access from URI (Insecure Direct Object Reference)
- *6. Hide UI buttons that anonymous users should not have access to 
+  [DONE] 6. Hide UI buttons that anonymous users should not have access to 
  7. Use flash to confirm to users that items have been added, removed or modified 
 
 Phase 2: Complete application with the use of Youtube API with standard a standard queue (deploy application for use)
