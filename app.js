@@ -124,7 +124,12 @@ app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
 });
 
 app.post("/playlists/:playlistId/delete", requireAuth, async (req, res) => {
-  const rowCount = await persistence.deletePlaylist(+req.params.playlistId);
+  const playlistId = +req.params.playlistId;
+  if (
+    (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !== 1
+  )
+    return res.redirect("/playlists/your");
+  const rowCount = await persistence.deletePlaylist(playlistId);
   if (rowCount !== 1) {
     // if not equal to 1 display a error that playlist does not exist;
   }
@@ -231,9 +236,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/signup", (req, res) => {
-  return res.render("signup");
-});
+app.get("/signup", (req, res) => {});
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
