@@ -101,6 +101,7 @@ INSERT INTO
 VALUES
   (1, 2),
   (2, 1),
+  (3, 5),
   (2, 3);
 
 --  (1, 2); -- violates unique playlist/user constriant

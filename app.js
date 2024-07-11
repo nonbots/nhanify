@@ -156,7 +156,12 @@ app.post(
   "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId",
   requireAuth,
   async (req, res) => {
-    const playlistId = req.params.playlistId;
+    const playlistId = +req.params.playlistId;
+    if (
+      (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
+      1
+    )
+      return res.redirect("/playlists/your");
     const playlistType = req.params.playlistType;
     const rowCount = await persistence.deleteContributor(
       playlistId,
