@@ -9,6 +9,8 @@ const persistence = new Persistence();
 const port = 3002;
 const host = "localhost";
 const { getUpdatedPlaylist } = require("./lib/playlist.js");
+const flash = require("express-flash");
+const { body, validationResult } = require("express-validator");
 app.set("views", "./views");
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -29,7 +31,7 @@ app.use(
     store: new LokiStore({}),
   }),
 );
-
+app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     res.redirect("/playlists/public");
@@ -40,6 +42,8 @@ function requireAuth(req, res, next) {
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
+  res.locals.flash = req.session.flash;
+  delete req.session.flash;
   next();
 });
 
@@ -229,17 +233,36 @@ app.get("/login", (req, res) => {
   return res.render("login");
 });
 
-app.post("/login", async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  const user = await persistence.validateUser(username, password);
-  if (user) {
-    req.session.user = user;
-    return res.redirect("/playlists/your");
-  } else {
-    return res.redirect("/login");
-  }
-});
+app.post(
+  "/login",
+  [
+    body("username")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Username is empty."),
+    /*    body("password")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Password is empty.")
+*/
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+    }
+    console.log("FLASH", req.flash());
+    const username = req.body.username;
+    const password = req.body.password;
+    const user = await persistence.validateUser(username, password);
+    if (user) {
+      req.session.user = user;
+      return res.redirect("/playlists/your");
+    } else {
+      return res.redirect("/login");
+    }
+  },
+);
 
 app.get("/signup", (req, res) => {});
 
