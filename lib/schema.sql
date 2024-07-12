@@ -21,7 +21,8 @@ CREATE TABLE songs (
 CREATE TABLE users (
   id serial PRIMARY KEY,
   username text NOT NULL,
-  password text NOT NULL
+  password text NOT NULL,
+  CONSTRAINT unique_username UNIQUE (username)
 );
 
 --create playlists table schema

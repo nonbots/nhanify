@@ -9,11 +9,6 @@
   --font-size-medium: 2rem;
   --font-size-small: 1rem;
 }
-.error {
-  background: var(--color-error);
-  color: red;
-  padding: 1rem;
-}
 
 /* layout */
 body {
@@ -257,6 +252,7 @@ input {
   border-radius: 1rem;
   padding: 0.25rem 0.5rem;
   border: none;
+  height: 1.5rem;
 }
 .formDivParent {
   display: flex;
@@ -289,4 +285,7 @@ input {
   background-color: #ff000038;
   border: 1px dashed red;
   border-radius: 1rem;
+  padding: 1rem;
+  color: #ffdede;
+  text-align: left;
 }

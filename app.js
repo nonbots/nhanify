@@ -276,23 +276,11 @@ app.post(
       .isLength({ max: 30 })
       .withMessage("Username is over the max of 30 characters"),
     body("password")
-      .isStrongPassword({
-        minLength: 12,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-        minLowerCase: 1,
-      })
-      .withMessage(
-        `Password needs to meet all the follow requirements:
-       min. length: 12 characters
-       min. uppercase: 1 character
-       min. numbers: 1 number
-       min. symbols: 1 symbol
-       min. lowercase: 1 character`,
-      )
-      .isLength({ max: 30 })
-      .withMessage("Password is over the max of 30 characters."),
+      .trim()
+      .isLength({ min: 12 })
+      .withMessage("Password is under the min of 12 characters.")
+      .isLength({ max: 72 })
+      .withMessage("Password is over the max of 72 characters."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -301,7 +289,21 @@ app.post(
       return res.redirect("/signup");
     }
     const { username, password } = req.body;
-    const user = await persistence.createUser(username, password);
+    let user;
+    try {
+      user = await persistence.createUser(username, password);
+    } catch (error) {
+      if (error.constraint === "unique_username") {
+        req.flash("errors", "Username is already taken");
+      } else {
+        console.log({ error });
+        req.flash(
+          "errors",
+          "Sorry something went wrong the your request. No refunds. :(",
+        );
+      }
+      return res.redirect("/signup");
+    }
     req.session.user = user;
     return res.redirect("/playlists/your");
   },
