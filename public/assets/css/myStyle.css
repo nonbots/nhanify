@@ -4,10 +4,15 @@
   --color-tertiary: #19376d;
   --color-secondary: #576cbc;
   --color-primary: #a5d7e8;
-
+  --color-error: #c28c8c;
   --font-size-large: 3rem;
   --font-size-medium: 2rem;
   --font-size-small: 1rem;
+}
+.error {
+  background: var(--color-error);
+  color: red;
+  padding: 1rem;
 }
 
 /* layout */

@@ -6,15 +6,14 @@ block main
       block header 
         h1(class="pageTitle") Sign Up
       - let msgTypes = Object.keys(flash || {})
-      p #{msgTypes}
       if (msgTypes.length > 0) 
         each msgType in msgTypes
           each msg in flash[msgType]
-            p #{msg}
+            pre(class="errors") #{msg}
       block content
         form(class="inputForm" action="/signup" method="post")
           .formDiv
-            label(for="username") User name 
+            label(for="username") Username 
             input(id="username" type="text" name="username") 
           .formDiv
             label(for="password") Password

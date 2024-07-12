@@ -240,18 +240,16 @@ app.post(
       .trim()
       .isLength({ min: 1 })
       .withMessage("Username is empty."),
-    /*    body("password")
+    body("password")
       .trim()
       .isLength({ min: 1 })
-      .withMessage("Password is empty.")
-*/
+      .withMessage("Password is empty."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
     }
-    console.log("FLASH", req.flash());
     const username = req.body.username;
     const password = req.body.password;
     const user = await persistence.validateUser(username, password);
@@ -264,14 +262,50 @@ app.post(
   },
 );
 
-app.get("/signup", (req, res) => {});
-
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await persistence.createUser(username, password);
-  req.session.user = user;
-  return res.redirect("/playlists/your");
+app.get("/signup", (req, res) => {
+  return res.render("signup");
 });
+
+app.post(
+  "/signup",
+  [
+    body("username")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Username is empty.")
+      .isLength({ max: 30 })
+      .withMessage("Username is over the max of 30 characters"),
+    body("password")
+      .isStrongPassword({
+        minLength: 12,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        minLowerCase: 1,
+      })
+      .withMessage(
+        `Password needs to meet all the follow requirements:
+       min. length: 12 characters
+       min. uppercase: 1 character
+       min. numbers: 1 number
+       min. symbols: 1 symbol
+       min. lowercase: 1 character`,
+      )
+      .isLength({ max: 30 })
+      .withMessage("Password is over the max of 30 characters."),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect("/signup");
+    }
+    const { username, password } = req.body;
+    const user = await persistence.createUser(username, password);
+    req.session.user = user;
+    return res.redirect("/playlists/your");
+  },
+);
 
 app.get("/", (req, res) => {
   if (req.session.user) {
