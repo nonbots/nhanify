@@ -50,9 +50,24 @@ app.use((req, res, next) => {
 app.post(
   "/:playlistType/playlist/:playlistId/contributors/add",
   requireAuth,
+  [
+    body("username")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Username is empty.")
+      .isLength({ max: 30 })
+      .withMessage("Username is over the min limit of 30 characters."),
+  ],
   async (req, res) => {
+    const errors = validationResult(req);
     const playlistId = +req.params.playlistId;
     const playlistType = req.params.playlistType;
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors/add`,
+      );
+    }
     if (
       (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
       1
@@ -211,15 +226,33 @@ app.get("/:playlistType/playlists/create", requireAuth, (req, res) => {
   return res.render("create_playlist");
 });
 
-app.post("/playlists/create", requireAuth, async (req, res) => {
-  const { title, visiability } = req.body;
-  const rowCount = await persistence.createPlaylist(
-    title,
-    visiability,
-    req.session.user.id,
-  );
-  if (rowCount >= 1) return res.redirect("/playlists/your");
-});
+app.post(
+  "/:playlistType/playlists/create",
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Title is empty.")
+      .isLength({ max: 72 })
+      .withMessage("Title is over the min limit of 72 characters."),
+  ],
+  requireAuth,
+  async (req, res) => {
+    const playlistType = req.params.playlistType;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(`/${playlistType}/playlists/create`);
+    }
+    const { title, visiability } = req.body;
+    const rowCount = await persistence.createPlaylist(
+      title,
+      visiability,
+      req.session.user.id,
+    );
+    if (rowCount >= 1) return res.redirect("/playlists/your");
+  },
+);
 
 app.post("/signout", requireAuth, (req, res) => {
   req.session.destroy((error) => {

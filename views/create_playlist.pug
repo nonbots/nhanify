@@ -2,10 +2,10 @@ extends signup
 block header
   h1(class="pageTitle") Create playlist
 block content
-  form(class="inputForm" action="/playlists/create" method="post")
+  form(class="inputForm" action=`/${playlistType}/playlists/create` method="post")
     .formDiv
       label(for="title") Title
-      input(id="title" type="text" name="title") 
+      input(required id="title" type="text" name="title") 
     .formDiv
       label(for="visiability") Visibility
       .formDivParent
