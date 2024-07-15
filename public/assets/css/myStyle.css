@@ -281,11 +281,19 @@ input {
   justify-content: center;
   align-items: center;
 }
-.error {
+.errors {
   background-color: #ff000038;
   border: 1px dashed red;
   border-radius: 1rem;
   padding: 1rem;
   color: #ffdede;
+  text-align: left;
+}
+.successes {
+  background-color: #4c8a5c;
+  border: 1px dashed red;
+  border-radius: 1rem;
+  padding: 1rem;
+  color: #c7fcd6;
   text-align: left;
 }

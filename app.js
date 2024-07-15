@@ -68,19 +68,55 @@ app.post(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
     }
-    if (
-      (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
-      1
-    )
-      return res.redirect("/playlists/your");
-    const rowCount = await persistence.addContributor(
-      req.body.username,
+    console.log("IN IS OWNPLAYLIST");
+    const userId = req.session.user.id;
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
       playlistId,
+      userId,
     );
-    if (rowCount >= 1)
-      return res.redirect(
-        `/${playlistType}/playlist/${playlistId}/contributors`,
+    console.log({ ownedPlaylist });
+    if (ownedPlaylist !== 1) {
+      req.flash(
+        "errors",
+        "You are not authorized to access the information requested.",
       );
+      return res.redirect("/playlists/your");
+    }
+    const user = await persistence.getContributor(req.body.username);
+    if (!user) {
+      req.flash("errors", "Username does not exist.");
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors/add`,
+      );
+    }
+    try {
+      console.log("IN TRY CATCH");
+      const rowCount = await persistence.addContributor(user.id, playlistId);
+    } catch (error) {
+      console.log("THE ERROR IN CATCH", error);
+      if (error.constraint === "unique_playlist_id_user_id") {
+        console.log("IN CONTRIBUTOR ALREADY EXISTS");
+        req.flash(
+          "errors",
+          "Username is already a contributor on the playlist.",
+        );
+      } else {
+        req.flash(
+          "errors",
+          "Sorry something went wrong with your request. Please try again.",
+        );
+      }
+      console.log("IN REDIRECT");
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors/add`,
+      );
+    }
+    console.log("IN SUCCESSES");
+    req.flash(
+      "successes",
+      "Contributor was successfully added to the playlist.",
+    );
+    return res.redirect(`/${playlistType}/playlist/${playlistId}/contributors`);
   },
 );
 
@@ -122,14 +158,12 @@ app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
     if ((await persistence.getPublicPlaylist(playlistId)) !== 1)
       return res.redirect("/playlists/public");
   } else {
-    //if you are logged in, is the playlist that you are requesting is yours, public or contributing playlist
-    if (
-      (await persistence.getUserAuthorizedPlaylist(
-        playlistId,
-        req.session.user.id,
-      )) !== 1
-    )
-      return res.redirect("/playlists/your");
+    const authPlaylist = await persistence.getUserAuthorizedPlaylist(
+      playlistId,
+      req.session.user.id,
+    );
+    console.log({ authPlaylist });
+    if (authPlaylist !== 1) return res.redirect("/playlists/your");
   }
   const playlist = await persistence.getPlaylist(playlistId);
   const updatedPlaylist = getUpdatedPlaylist(playlist);
