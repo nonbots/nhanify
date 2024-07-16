@@ -68,13 +68,18 @@ app.post(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
     }
-    console.log("IN IS OWNPLAYLIST");
+    const username = req.body.username;
+    if (username === req.session.user.username) {
+      req.flash("errors", "Creator of the playlist can not be a contributor.");
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/contributors/add`,
+      );
+    }
     const userId = req.session.user.id;
     const ownedPlaylist = await persistence.getOwnedPlaylist(
       playlistId,
       userId,
     );
-    console.log({ ownedPlaylist });
     if (ownedPlaylist !== 1) {
       req.flash(
         "errors",
@@ -82,7 +87,7 @@ app.post(
       );
       return res.redirect("/playlists/your");
     }
-    const user = await persistence.getContributor(req.body.username);
+    const user = await persistence.getContributor(username);
     if (!user) {
       req.flash("errors", "Username does not exist.");
       return res.redirect(
@@ -91,7 +96,7 @@ app.post(
     }
     try {
       console.log("IN TRY CATCH");
-      const rowCount = await persistence.addContributor(user.id, playlistId);
+      await persistence.addContributor(user.id, playlistId);
     } catch (error) {
       console.log("THE ERROR IN CATCH", error);
       if (error.constraint === "unique_playlist_id_user_id") {

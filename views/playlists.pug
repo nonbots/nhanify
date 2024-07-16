@@ -3,6 +3,11 @@ extends layout
 block main
   .playlistsDiv
     h1(class="pageTitle") #{pageTitle}
+    - let msgTypes = Object.keys(flash || {})
+    if (msgTypes.length > 0) 
+      each msgType in msgTypes
+        each msg in flash[msgType]
+          pre(class=`${msgType}`) #{msg}
     block list 
       .listHeader
         p(class="username") #{playlists.length} Playlist(s)  

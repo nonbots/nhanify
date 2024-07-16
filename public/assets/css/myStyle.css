@@ -43,6 +43,7 @@ body {
   align-items: flex-start;
   display: flex;
   color: var(--color-secondary);
+  padding-bottom: 1rem;
 }
 
 .stack1 {
@@ -291,7 +292,7 @@ input {
 }
 .successes {
   background-color: #4c8a5c;
-  border: 1px dashed red;
+  border: 1px dashed green;
   border-radius: 1rem;
   padding: 1rem;
   color: #c7fcd6;
