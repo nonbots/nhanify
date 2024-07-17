@@ -1,5 +1,4 @@
 const MSG = require("./lib/msg.json");
-console.log("MSG", MSG);
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -36,8 +35,7 @@ app.use(
 app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
-    console.log("WE ARE IN THE REQUIREAUTH MIDDLEWARE");
-    res.redirect("/playlists/public?a");
+    res.redirect("/playlists/public");
   } else {
     next();
   }
@@ -73,7 +71,7 @@ app.post(
     }
     const username = req.body.username;
     if (username === req.session.user.username) {
-      req.flash("errors", "Creator of the playlist can not be a contributor.");
+      req.flash("errors", MSG.creatorContributor);
       return res.redirect(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
@@ -85,12 +83,11 @@ app.post(
     );
     if (ownedPlaylist !== 1) {
       req.flash("errors", MSG.unauthorizedUser);
-      console.log("IN THE OWNEDPLAYLIST");
-      return res.redirect("/playlists/your?b");
+      return res.redirect("/playlists/your");
     }
     const user = await persistence.getContributor(username);
     if (!user) {
-      req.flash("errors", "Username does not exist.");
+      req.flash("errors", MSG.notExistUsername);
       return res.redirect(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
@@ -99,24 +96,15 @@ app.post(
       await persistence.addContributor(user.id, playlistId);
     } catch (error) {
       if (error.constraint === "unique_playlist_id_user_id") {
-        req.flash(
-          "errors",
-          "Username is already a contributor on the playlist.",
-        );
+        req.flash("errors", MSG.alreadyContributor);
       } else {
-        req.flash(
-          "errors",
-          "Sorry something went wrong with your request. Please try again.",
-        );
+        req.flash("errors", MSG.unknownDbError);
       }
       return res.redirect(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
     }
-    req.flash(
-      "successes",
-      "Contributor was successfully added to the playlist.",
-    );
+    req.flash("successes", MSG.addContributor);
     return res.redirect(`/${playlistType}/playlist/${playlistId}/contributors`);
   },
 );
@@ -143,7 +131,7 @@ app.get(
     }
     let playlistTitle;
     try {
-      await persistence.getPlaylistTitle(playlistId);
+      playlistTitle = await persistence.getPlaylistTitle(playlistId);
     } catch (error) {
       req.flash("errors", MSG.unknownDbError);
       return res.redirect("/playlists/your");
@@ -184,7 +172,6 @@ app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
   }
   const playlist = await persistence.getPlaylist(playlistId);
   const updatedPlaylist = getUpdatedPlaylist(playlist);
-  //if (playlistId === req.session.user.id) res.locals:
   res.locals.playlistType = req.params.playlistType;
   return res.render("playlist", {
     playlist: updatedPlaylist,
@@ -204,7 +191,7 @@ app.post("/playlists/:playlistId/delete", requireAuth, async (req, res) => {
   } catch (error) {
     req.flash("errors", MSG.unknownDbError);
   }
-  req.flash("successes", "Playlist was successfully deleted");
+  req.flash("successes", MSG.deletePlaylist);
   return res.redirect("/playlists/your");
 });
 
@@ -213,12 +200,19 @@ app.post(
   requireAuth,
   async (req, res) => {
     const playlistId = +req.params.playlistId;
-    const rowCount = await persistence.deleteContributionPlaylist(
-      playlistId,
-      req.session.user.id,
-    );
+    let rowCount;
+    try {
+      rowCount = await persistence.deleteContributionPlaylist(
+        playlistId,
+        req.session.user.id,
+      );
+    } catch (error) {
+      req.flash("error", MSG.unknownDbError);
+    }
     if (rowCount !== 1) {
-      // if not equal to 1 display a error that playlist does not exist;
+      req.flash("errors", MSG.unauthorizedUser);
+    } else {
+      req.flash("successes", MSG.deletePlaylist);
     }
     return res.redirect("/playlists/contributing");
   },
@@ -229,20 +223,31 @@ app.post(
   requireAuth,
   async (req, res) => {
     const playlistId = +req.params.playlistId;
-    if (
-      (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !==
-      1
-    )
-      return res.redirect("/playlists/your");
-    const playlistType = req.params.playlistType;
-    const rowCount = await persistence.deleteContributor(
-      playlistId,
-      req.params.contributorId,
-    );
-    if (rowCount >= 1)
-      return res.redirect(
-        `/${playlistType}/playlist/${playlistId}/contributors`,
+    let ownedPlaylist;
+    try {
+      ownedPlaylist = await persistence.getOwnedPlaylist(
+        playlistId,
+        req.session.user.id,
       );
+    } catch (error) {
+      req.flash("errors", MSG.unknownDbError);
+    }
+    if (ownedPlaylist !== 1) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");
+    }
+    const playlistType = req.params.playlistType;
+    let rowCount;
+    try {
+      rowCount = await persistence.deleteContributor(
+        playlistId,
+        req.params.contributorId,
+      );
+    } catch (error) {
+      req.flash("errors", MSG.unknownDbError);
+    }
+    req.flash("successes", MSG.deleteContributor);
+    return res.redirect(`/${playlistType}/playlist/${playlistId}/contributors`);
   },
 );
 
@@ -301,13 +306,10 @@ app.post(
     try {
       await persistence.createPlaylist(title, visiability, req.session.user.id);
     } catch (error) {
-      req.flash(
-        "errors",
-        "Sorry something went wrong with your request. Please try again.",
-      );
+      req.flash("errors", MSG.unknownDbError);
       return res.redirect(`/${playlistType}/playlists/create`);
     }
-    req.flash("successes", "Playlist was successfully created.");
+    req.flash("successes", MSG.playlistCreated);
     return res.redirect("/playlists/your");
   },
 );
@@ -327,29 +329,24 @@ app.get("/login", (req, res) => {
 app.post(
   "/login",
   [
-    body("username")
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage("Username is empty."),
-    body("password")
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage("Password is empty."),
+    body("username").trim().isLength({ min: 1 }).withMessage(MSG.emptyUsername),
+    body("password").trim().isLength({ min: 1 }).withMessage(MSG.emptyPassword),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect("/login");
     }
     const username = req.body.username;
     const password = req.body.password;
     const user = await persistence.validateUser(username, password);
     if (user) {
       req.session.user = user;
-      req.flash("successes", "You have successfully logged in.");
+      req.flash("successes", MSG.loggedIn);
       return res.redirect("/playlists/your");
     } else {
-      req.flash("errors", "Credentials are invalid.");
+      req.flash("errors", MSG.invalidCred);
       return res.redirect("/login");
     }
   },
@@ -365,15 +362,15 @@ app.post(
     body("username")
       .trim()
       .isLength({ min: 1 })
-      .withMessage("Username is empty.")
+      .withMessage(MSG.emptyUsername)
       .isLength({ max: 30 })
-      .withMessage("Username is over the maxium of 30 characters"),
+      .withMessage(MSG.maxUsername),
     body("password")
       .trim()
       .isLength({ min: 12 })
-      .withMessage("Password is under the minium of 12 characters.")
+      .withMessage(MSG.minPassword)
       .isLength({ max: 72 })
-      .withMessage("Password is over the maxium of 72 characters."),
+      .withMessage(MSG.maxPassword),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -387,15 +384,15 @@ app.post(
       user = await persistence.createUser(username, password);
     } catch (error) {
       if (error.constraint === "unique_username") {
-        req.flash("errors", "Username is already taken");
+        req.flash("errors", MSG.uniqueUsername);
       } else {
         console.log({ error });
-        req.flash("errors", "Sorry something went wrong the your request.");
+        req.flash("errors", MSG.unknownDbError);
       }
       return res.redirect("/signup");
     }
     req.session.user = user;
-    req.flash("successes", "User account was successfully created.");
+    req.flash("successes", MSG.createUser);
     return res.redirect("/playlists/your");
   },
 );
