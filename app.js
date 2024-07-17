@@ -35,6 +35,7 @@ app.use(
 app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
+    req.flash("errors", MSG.unauthorizedUser);
     res.redirect("/playlists/public");
   } else {
     next();
@@ -81,7 +82,7 @@ app.post(
       playlistId,
       userId,
     );
-    if (ownedPlaylist !== 1) {
+    if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
@@ -92,8 +93,11 @@ app.post(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
     }
+
     try {
-      await persistence.addContributor(user.id, playlistId);
+      console.log("IN TRY CONTRIBUTOR");
+      const contributor = await persistence.addContributor(user.id, playlistId);
+      console.log({ contributor });
     } catch (error) {
       if (error.constraint === "unique_playlist_id_user_id") {
         req.flash("errors", MSG.alreadyContributor);
@@ -125,7 +129,7 @@ app.get(
       req.flash("errors", MSG.unknownDbError);
       return res.redirect("/playlists/your");
     }
-    if (ownedPlaylist !== 1) {
+    if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
@@ -157,35 +161,40 @@ app.get(
   },
 );
 
-app.get("/:playlistType/playlist/:playlistId", async (req, res) => {
-  const playlistId = Number(req.params.playlistId);
-  if (!req.session.user) {
-    if ((await persistence.getPublicPlaylist(playlistId)) !== 1)
-      return res.redirect("/playlists/public");
-  } else {
+app.get(
+  "/:playlistType/playlist/:playlistId",
+  requireAuth,
+  async (req, res) => {
+    const playlistId = Number(req.params.playlistId);
     const authPlaylist = await persistence.getUserAuthorizedPlaylist(
       playlistId,
       req.session.user.id,
     );
-    console.log({ authPlaylist });
-    if (authPlaylist !== 1) return res.redirect("/playlists/your");
-  }
-  const playlist = await persistence.getPlaylist(playlistId);
-  const updatedPlaylist = getUpdatedPlaylist(playlist);
-  res.locals.playlistType = req.params.playlistType;
-  return res.render("playlist", {
-    playlist: updatedPlaylist,
-    playlistId,
-    pageTitle: updatedPlaylist.title,
-  });
-});
+    if (!authPlaylist) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");
+    }
+    const playlist = await persistence.getPlaylist(playlistId);
+    const updatedPlaylist = getUpdatedPlaylist(playlist);
+    res.locals.playlistType = req.params.playlistType;
+    return res.render("playlist", {
+      playlist: updatedPlaylist,
+      playlistId,
+      pageTitle: updatedPlaylist.title,
+    });
+  },
+);
 
 app.post("/playlists/:playlistId/delete", requireAuth, async (req, res) => {
   const playlistId = +req.params.playlistId;
-  if (
-    (await persistence.getOwnedPlaylist(playlistId, req.session.user.id)) !== 1
-  )
+  const ownedPlaylist = await persistence.getOwnedPlaylist(
+    playlistId,
+    req.session.user.id,
+  );
+  if (!ownedPlaylist) {
+    req.flash("errors", MSG.unauthorizedUser);
     return res.redirect("/playlists/your");
+  }
   try {
     await persistence.deletePlaylist(playlistId);
   } catch (error) {
@@ -200,16 +209,16 @@ app.post(
   requireAuth,
   async (req, res) => {
     const playlistId = +req.params.playlistId;
-    let rowCount;
+    let contributionPlaylist;
     try {
-      rowCount = await persistence.deleteContributionPlaylist(
+      contributionPlaylist = await persistence.deleteContributionPlaylist(
         playlistId,
         req.session.user.id,
       );
     } catch (error) {
       req.flash("error", MSG.unknownDbError);
     }
-    if (rowCount !== 1) {
+    if (!contributionPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
     } else {
       req.flash("successes", MSG.deletePlaylist);
@@ -232,17 +241,13 @@ app.post(
     } catch (error) {
       req.flash("errors", MSG.unknownDbError);
     }
-    if (ownedPlaylist !== 1) {
+    if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
     const playlistType = req.params.playlistType;
-    let rowCount;
     try {
-      rowCount = await persistence.deleteContributor(
-        playlistId,
-        req.params.contributorId,
-      );
+      await persistence.deleteContributor(playlistId, req.params.contributorId);
     } catch (error) {
       req.flash("errors", MSG.unknownDbError);
     }
@@ -309,7 +314,7 @@ app.post(
       req.flash("errors", MSG.unknownDbError);
       return res.redirect(`/${playlistType}/playlists/create`);
     }
-    req.flash("successes", MSG.playlistCreated);
+    req.flash("successes", MSG.createPlaylist);
     return res.redirect("/playlists/your");
   },
 );
