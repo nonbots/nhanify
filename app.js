@@ -148,16 +148,21 @@ app.get(
 
 app.get(
   "/:playlistType/playlist/:playlistId",
-  requireAuth,
   catchError(async (req, res) => {
     const playlistId = Number(req.params.playlistId);
-    const authPlaylist = await persistence.getUserAuthorizedPlaylist(
-      playlistId,
-      req.session.user.id,
-    );
-    if (!authPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your");
+    if (!req.session.user) {
+      if (!(await persistence.getPublicPlaylist(playlistId))) {
+        return res.redirect("/playlists/public");
+      }
+    } else {
+      const authPlaylist = await persistence.getUserAuthorizedPlaylist(
+        playlistId,
+        req.session.user.id,
+      );
+      if (!authPlaylist) {
+        req.flash("errors", MSG.unauthorizedUser);
+        return res.redirect("/playlists/your");
+      }
     }
     const playlist = await persistence.getPlaylist(playlistId);
     const updatedPlaylist = getUpdatedPlaylist(playlist);
@@ -183,7 +188,7 @@ app.post(
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
-    const deleted = await persistence.deletePlaylist(playlistIdx);
+    const deleted = await persistence.deletePlaylist(playlistId);
     if (!deleted) {
       req.flash("errors", MSG.notExistPlaylist);
     } else {
@@ -214,64 +219,77 @@ app.post(
 app.post(
   "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId",
   requireAuth,
-  async (req, res) => {
+  catchError(async (req, res) => {
     const playlistId = +req.params.playlistId;
-    let ownedPlaylist;
-    try {
-      ownedPlaylist = await persistence.getOwnedPlaylist(
-        playlistId,
-        req.session.user.id,
-      );
-    } catch (error) {
-      req.flash("errors", MSG.unknownDbError);
-    }
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
+      playlistId,
+      req.session.user.id,
+    );
     if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
     const playlistType = req.params.playlistType;
-    try {
-      await persistence.deleteContributor(playlistId, req.params.contributorId);
-    } catch (error) {
-      req.flash("errors", MSG.unknownDbError);
+    const deleted = await persistence.deleteContributor(
+      playlistId,
+      req.params.contributorId,
+    );
+    if (!deleted) {
+      req.flash("errors", MSG.notExistPlaylist);
+    } else {
+      req.flash("successes", MSG.deleteContributor);
     }
-    req.flash("successes", MSG.deleteContributor);
     return res.redirect(`/${playlistType}/playlist/${playlistId}/contributors`);
-  },
+  }),
 );
 
-app.get("/playlists/public", async (req, res) => {
-  const playlists = await persistence.getPublicPlaylists();
-  res.locals.playlists = playlists;
-  res.locals.playlistType = "public";
-  res.locals.pageTitle = "Public playlists";
-  return res.render("playlists");
-});
+app.get(
+  "/playlists/public",
+  catchError(async (req, res) => {
+    const playlists = await persistence.getPublicPlaylists();
+    res.locals.playlists = playlists;
+    res.locals.playlistType = "public";
+    res.locals.pageTitle = "Public playlists";
+    return res.render("playlists");
+  }),
+);
 
-app.get("/playlists/your", requireAuth, async (req, res) => {
-  const playlists = await persistence.getUserCreatedPlaylists(
-    req.session.user.id,
-  );
-  res.locals.playlists = playlists;
-  res.locals.playlistType = "owned";
-  res.locals.pageTitle = "Your playlists";
-  return res.render("playlists");
-});
+app.get(
+  "/playlists/your",
+  requireAuth,
+  catchError(async (req, res) => {
+    const playlists = await persistence.getUserCreatedPlaylists(
+      req.session.user.id,
+    );
+    res.locals.playlists = playlists;
+    res.locals.playlistType = "owned";
+    res.locals.pageTitle = "Your playlists";
+    return res.render("playlists");
+  }),
+);
 
-app.get("/playlists/contributing", requireAuth, async (req, res) => {
-  const playlists = await persistence.getContributedPlaylists(
-    req.session.user.id,
-  );
-  res.locals.playlists = playlists;
-  res.locals.playlistType = "contribution";
-  res.locals.pageTitle = "Contributing playlists";
-  return res.render("playlists");
-});
+app.get(
+  "/playlists/contributing",
+  requireAuth,
+  catchError(async (req, res) => {
+    const playlists = await persistence.getContributedPlaylists(
+      req.session.user.id,
+    );
+    res.locals.playlists = playlists;
+    res.locals.playlistType = "contribution";
+    res.locals.pageTitle = "Contributing playlists";
+    return res.render("playlists");
+  }),
+);
 
-app.get("/:playlistType/playlists/create", requireAuth, (req, res) => {
-  res.locals.playlistType = req.params.playlistType;
-  return res.render("create_playlist");
-});
+app.get(
+  "/:playlistType/playlists/create",
+  requireAuth,
+  catchError((req, res) => {
+    res.locals.playlistType = req.params.playlistType;
+    return res.render("create_playlist");
+  }),
+);
 
 app.post(
   "/:playlistType/playlists/create",
@@ -284,7 +302,7 @@ app.post(
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   requireAuth,
-  async (req, res) => {
+  catchError(async (req, res) => {
     const playlistType = req.params.playlistType;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -292,28 +310,38 @@ app.post(
       return res.redirect(`/${playlistType}/playlists/create`);
     }
     const { title, visiability } = req.body;
-    try {
-      await persistence.createPlaylist(title, visiability, req.session.user.id);
-    } catch (error) {
-      req.flash("errors", MSG.unknownDbError);
+    const created = await persistence.createPlaylist(
+      title,
+      visiability,
+      req.session.user.id,
+    );
+    if (!created) {
+      req.flash("errors", MSG.createPlaylistError);
       return res.redirect(`/${playlistType}/playlists/create`);
     }
     req.flash("successes", MSG.createPlaylist);
     return res.redirect("/playlists/your");
-  },
+  }),
 );
 
-app.post("/signout", requireAuth, (req, res) => {
-  req.session.destroy((error) => {
-    if (error) console.error(error);
-    return res.redirect("/playlists/public");
-  });
-});
+app.post(
+  "/signout",
+  requireAuth,
+  catchError((req, res) => {
+    req.session.destroy((error) => {
+      if (error) console.error(error);
+      return res.redirect("/playlists/public");
+    });
+  }),
+);
 
-app.get("/login", (req, res) => {
-  if (req.session.user) return res.redirect("/playlists/your");
-  return res.render("login");
-});
+app.get(
+  "/login",
+  catchError((req, res) => {
+    if (req.session.user) return res.redirect("/playlists/your");
+    return res.render("login");
+  }),
+);
 
 app.post(
   "/login",
@@ -321,7 +349,7 @@ app.post(
     body("username").trim().isLength({ min: 1 }).withMessage(MSG.emptyUsername),
     body("password").trim().isLength({ min: 1 }).withMessage(MSG.emptyPassword),
   ],
-  async (req, res) => {
+  catchError(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
@@ -338,12 +366,15 @@ app.post(
       req.flash("errors", MSG.invalidCred);
       return res.redirect("/login");
     }
-  },
+  }),
 );
 
-app.get("/signup", (req, res) => {
-  return res.render("signup");
-});
+app.get(
+  "/signup",
+  catchError((req, res) => {
+    return res.render("signup");
+  }),
+);
 
 app.post(
   "/signup",
@@ -361,38 +392,34 @@ app.post(
       .isLength({ max: 72 })
       .withMessage(MSG.maxPassword),
   ],
-  async (req, res) => {
+  catchError(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
       return res.redirect("/signup");
     }
     const { username, password } = req.body;
-    let user;
-    try {
-      user = await persistence.createUser(username, password);
-    } catch (error) {
-      if (error.constraint === "unique_username") {
-        req.flash("errors", MSG.uniqueUsername);
-      } else {
-        console.log({ error });
-        req.flash("errors", MSG.unknownDbError);
-      }
+    const user = await persistence.createUser(username, password);
+    if (!user) {
+      req.flash("errors", MSG.uniqueUsername);
       return res.redirect("/signup");
     }
     req.session.user = user;
     req.flash("successes", MSG.createUser);
     return res.redirect("/playlists/your");
-  },
+  }),
 );
 
-app.get("/", (req, res) => {
-  if (req.session.user) {
-    return res.redirect("/playlists/your");
-  } else {
-    return res.redirect("/playlists/public");
-  }
-});
+app.get(
+  "/",
+  catchError((req, res) => {
+    if (req.session.user) {
+      return res.redirect("/playlists/your");
+    } else {
+      return res.redirect("/playlists/public");
+    }
+  }),
+);
 
 app.use((err, req, res, next) => {
   console.log(err);

@@ -10,6 +10,7 @@
   "unauthorizedUser": "You are not authorized to access the information requested.",
   "deletePlaylist": "Playlist was deleted.",
   "createPlaylist": "Playlist was created.",
+  "createPlaylistError": "Sorry, Something went wrong while creating your playlist. Try again another time.",
   "deleteContributor": "Contributor was deleted.",
   "loggedIn": "You are logged in.",
   "invalidCred": "Credentials are invalid.",
