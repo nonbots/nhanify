@@ -124,8 +124,8 @@ app.get(
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
-    const playlistTitle = await persistence.getPlaylistTitle(playlistId);
-    res.locals.pageTitle = `Add contributor to ${playlistTitle}`;
+    const playlist = await persistence.getPlaylist(playlistId);
+    res.locals.pageTitle = `Add contributor to ${playlist.title}`;
     res.locals.playlistType = req.params.playlistType;
     return res.render("add_contributors", { playlistId });
   }),
@@ -147,6 +147,58 @@ app.get(
 );
 
 app.get(
+  "/:playlistType/playlist/:playlistId/edit",
+  requireAuth,
+  catchError(async (req, res) => {
+    const playlistId = +req.params.playlistId;
+    const playlist = await persistence.getPlaylist(playlistId);
+    if (!playlist) {
+      req.flash("errors", MSG.notExistPlaylist);
+      //return to get page
+    }
+    res.locals.playlistId = playlistId;
+    res.locals.playlistType = req.params.playlistType;
+    res.render("edit_playlist", {
+      playlist,
+      pageTitle: `Edit ${playlist.title}`,
+    });
+  }),
+);
+
+app.post(
+  "/:playlistType/playlist/:playlistId/edit",
+  requireAuth,
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Title is empty.")
+      .isLength({ max: 72 })
+      .withMessage("Title is over the min limit of 72 characters."),
+  ],
+  catchError(async (req, res) => {
+    const { playlistType, playlistId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
+    }
+    const visibility = req.body.visiability === "private" ? true : false;
+    const edited = await persistence.editPlaylist(
+      +req.params.playlistId,
+      req.body.title,
+      visibility,
+    );
+    if (!edited) {
+      req.flash("errors", MSG.notExistPlaylist);
+    } else {
+      req.flash("successes", MSG.playlistEdited);
+    }
+    return res.redirect(`/playlists/your`);
+  }),
+);
+
+app.get(
   "/:playlistType/playlist/:playlistId",
   catchError(async (req, res) => {
     const playlistId = Number(req.params.playlistId);
@@ -164,7 +216,7 @@ app.get(
         return res.redirect("/playlists/your");
       }
     }
-    const playlist = await persistence.getPlaylist(playlistId);
+    const playlist = await persistence.getPlaylistInfoSongs(playlistId);
     const updatedPlaylist = getUpdatedPlaylist(playlist);
     res.locals.playlistType = req.params.playlistType;
     return res.render("playlist", {
@@ -287,7 +339,7 @@ app.get(
   requireAuth,
   catchError((req, res) => {
     res.locals.playlistType = req.params.playlistType;
-    return res.render("create_playlist");
+    return res.render("create_playlist", { pageTitle: "Create Playlist" });
   }),
 );
 

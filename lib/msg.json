@@ -18,5 +18,6 @@
   "maxPassword": "Password is over the maxium of 72 characters.",
   "uniqueUsername": "Username is already taken.",
   "createUser": "User account was created.",
-  "creatorContributor": "Creator of the playlist can not be a contributor."
+  "creatorContributor": "Creator of the playlist can not be a contributor.",
+  "playlistEdited": "Playlist was edited."
 }

@@ -1,6 +1,6 @@
 extends signup
 block header
-  h1(class="pageTitle") Create playlist
+  h1(class="pageTitle") #{pageTitle}
 block content
   form(class="inputForm" action=`/${playlistType}/playlists/create` method="post")
     .formDiv

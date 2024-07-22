@@ -255,6 +255,7 @@ input {
   border: none;
   height: 1.5rem;
 }
+
 .formDivParent {
   display: flex;
   flex-direction: row;

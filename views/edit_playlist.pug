@@ -1,0 +1,22 @@
+extends signup
+block header
+  h1(class="pageTitle") #{pageTitle}
+block content
+  form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/edit` method="post")
+    .formDiv
+      label(for="title") Title
+      input(id="title" type="text" name="title" value=title || playlist.title) 
+    .formDiv
+      label(for="visiability") Visibility
+      .formDivParent
+        .formDivHz
+          - let vis = playlist.private ? "private" : "public";
+          - console.log("VIS", vis);
+          input(type="radio" id="private" name="visiability" value="private" checked=visiability || vis === "private")
+          label(for="private") private
+        .formDivHz
+          input(type="radio" id="public" name="visiability" value="public" checked=visiability || vis === "public")
+          label(for="public") public
+    input(type="submit" class="submit" value="Save")
+
+
