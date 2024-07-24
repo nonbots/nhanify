@@ -8,18 +8,6 @@ DROP TABLE IF EXISTS playlists;
 
 DROP TABLE IF EXISTS users;
 
---create songs table schema
-CREATE TABLE songs (
-  id serial PRIMARY KEY,
-  title text NOT NULL,
-  url text NOT NULL,
-  video_id text NOT NULL,
-  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
-  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT unique_video_id_playlist_id UNIQUE (playlist_id, video_id)
-  --  duration_sec bigint NOT NULL
-);
-
 --create a users table
 CREATE TABLE users (
   id serial PRIMARY KEY,
@@ -36,30 +24,24 @@ CREATE TABLE playlists (
   private boolean NOT NULL DEFAULT true
 );
 
---create playlists_songs table
---CREATE TABLE playlists_songs (
---  id serial PRIMARY KEY,
---  song_id integer NOT NULL REFERENCES songs (id),
---  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
---  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
---  CONSTRAINT unique_playlist_id_song_id UNIQUE (playlist_id, song_id)
---);
+--create songs table schema
+CREATE TABLE songs (
+  id serial PRIMARY KEY,
+  title text NOT NULL,
+  url text NOT NULL,
+  video_id text NOT NULL,
+  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
+  creator_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT unique_video_id_playlist_id UNIQUE (playlist_id, video_id)
+);
 
 --create a playlists_users table that references playlists and users
 CREATE TABLE playlists_users (
   id serial PRIMARY KEY,
   playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
-  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT unique_playlist_id_user_id UNIQUE (playlist_id, user_id)
+  contributor_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT unique_playlist_id_user_id UNIQUE (playlist_id, contributor_id)
 );
-
---insert songs into the songs table
-INSERT INTO
-  songs (title, url, video_id, duration_sec)
-VALUES
-  ('title1', 'ur1', 'video_id', 43),
-  ('title2', 'ur2', 'video_id2', 2343),
-  ('title3', 'ur3', 'video_id3', 43322);
 
 --insert users into users table 
 INSERT INTO
@@ -88,24 +70,21 @@ VALUES
   ('playlist4', 1, true),
   ('playlist5', 2, false);
 
---insert references to songs and playlists in songs playlists table
+--insert songs into the songs table
 INSERT INTO
-  playlists_songs (playlist_id, song_id, user_id)
+  songs (title, url, video_id, playlist_id, creator_id)
 VALUES
-  (1, 1, 1),
-  (1, 2, 2),
-  (1, 3, 2),
-  (2, 1, 1),
-  (3, 3, 1);
+  ('title1', 'ur1', 'video_id1', 1, 1),
+  ('title2', 'ur2', 'video_id2', 1, 2),
+  ('title3', 'ur3', 'video_id3', 1, 2),
+  ('title1', 'ur1', 'video_id1', 2, 1),
+  ('title3', 'ur3', 'video_id3', 3, 1);
 
---  (3, 3, 1); --violates unique song/playlist constraint 
 --insert reference to users and playlist into playlists-users table
 INSERT INTO
-  playlists_users (user_id, playlist_id)
+  playlists_users (contributor_id, playlist_id)
 VALUES
   (1, 2),
   (2, 1),
   (3, 5),
   (2, 3);
-
---  (1, 2); -- violates unique playlist/user constriant

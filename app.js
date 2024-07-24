@@ -93,9 +93,7 @@ app.post(
         `/${playlistType}/playlist/${playlistId}/contributors/add`,
       );
     }
-    console.log({ user });
     const created = await persistence.addContributor(user.id, playlistId);
-    console.log({ created });
     if (!created) {
       req.flash("errors", MSG.uniqueContributor);
       return res.redirect(
@@ -210,7 +208,7 @@ app.post(
     body("url").trim().isLength({ min: 1 }).withMessage("Url is empty."),
   ],
   catchError(async (req, res) => {
-    const {playlistType, playlistId} = req.params;
+    const { playlistType, playlistId } = req.params;
     let videoId;
     try {
       videoId = parseURL(req.body.url);
@@ -222,12 +220,12 @@ app.post(
       req.body.title,
       req.body.url,
       videoId,
-      +playlistId, 
-      req.session.user.id
+      +playlistId,
+      req.session.user.id,
     );
     if (!add) {
       req.flash("errors", MSG.uniqueSong);
-    }else {
+    } else {
       req.flash("successes", MSG.addedSong);
     }
     return res.redirect(`/${playlistType}/playlist/${playlistId}`);
