@@ -7,6 +7,14 @@ block list
       p(class="username") Total Duration: 
     if (user !== undefined)
       a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
+  .iframe
+  .addDiv
+    form(class="addForm" action=`${playlistType}/playlist/${playlist.id}/addSong` method="post")
+      label(for="url") Youtube Url
+      input(id="url" type="text" name="url") 
+      label(for="title") Title
+      input(id="title" type="text" name="title") 
+      input(class="deleteBtn" type="submit" value="Add")
   .cols
     .label
       p(class="username") No.

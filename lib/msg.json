@@ -1,4 +1,5 @@
 {
+  "invalidURL": "Invalid URL.",
   "emptyUsername": "Username is empty.",
   "emptyPassword": "Password is empty.",
   "maxUsername": "Username is over the maxium of 30 characters.",

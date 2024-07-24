@@ -14,7 +14,7 @@ CREATE TABLE songs (
   title text NOT NULL,
   url text NOT NULL,
   video_id text NOT NULL,
-  duration_sec bigint NOT NULL
+  --  duration_sec bigint NOT NULL
 );
 
 --create a users table

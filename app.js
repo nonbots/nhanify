@@ -9,7 +9,7 @@ const Persistence = require("./lib/pg-persistence.js");
 const persistence = new Persistence();
 const port = 3002;
 const host = "localhost";
-const { getUpdatedPlaylist } = require("./lib/playlist.js");
+const { getUpdatedPlaylist, parseURL } = require("./lib/playlist.js");
 const flash = require("express-flash");
 const { body, validationResult } = require("express-validator");
 const catchError = require("./lib/catch-error");
@@ -195,6 +195,34 @@ app.post(
       req.flash("successes", MSG.playlistEdited);
     }
     return res.redirect(`/playlists/your`);
+  }),
+);
+app.post(
+  ":playlistType/playlist/:playlistId/addSong",
+  requireAuth,
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Title is empty.")
+      .isLength({ max: 72 })
+      .withMessage("Title is over the min limit of 72 characters."),
+    body("url").trim().isLength({ min: 1 }).withMessage("Url is empty."),
+  ],
+  catchError(async (req, res) => {
+    let videoId;
+    try {
+      videoId = parseURL(req.body.url);
+    } catch (error) {
+      req.flash("errors", MSG.invalidURL);
+      return res.redirect(`/${req.params.playlistType}/playlist/${playlistId}`);
+    }
+    const added = await persistence.addSong(
+      req.body.title,
+      req.body.url,
+      videoId,
+    );
+    req.flash("successes", MSG.addedSong);
   }),
 );
 
