@@ -14,6 +14,9 @@ CREATE TABLE songs (
   title text NOT NULL,
   url text NOT NULL,
   video_id text NOT NULL,
+  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  CONSTRAINT unique_video_id_playlist_id UNIQUE (playlist_id, video_id)
   --  duration_sec bigint NOT NULL
 );
 
@@ -34,13 +37,13 @@ CREATE TABLE playlists (
 );
 
 --create playlists_songs table
-CREATE TABLE playlists_songs (
-  id serial PRIMARY KEY,
-  song_id integer NOT NULL REFERENCES songs (id),
-  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
-  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT unique_playlist_id_song_id UNIQUE (playlist_id, song_id)
-);
+--CREATE TABLE playlists_songs (
+--  id serial PRIMARY KEY,
+--  song_id integer NOT NULL REFERENCES songs (id),
+--  playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
+--  user_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+--  CONSTRAINT unique_playlist_id_song_id UNIQUE (playlist_id, song_id)
+--);
 
 --create a playlists_users table that references playlists and users
 CREATE TABLE playlists_users (

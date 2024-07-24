@@ -198,7 +198,7 @@ app.post(
   }),
 );
 app.post(
-  ":playlistType/playlist/:playlistId/addSong",
+  "/:playlistType/playlist/:playlistId/addSong",
   requireAuth,
   [
     body("title")
@@ -210,19 +210,27 @@ app.post(
     body("url").trim().isLength({ min: 1 }).withMessage("Url is empty."),
   ],
   catchError(async (req, res) => {
+    const {playlistType, playlistId} = req.params;
     let videoId;
     try {
       videoId = parseURL(req.body.url);
     } catch (error) {
       req.flash("errors", MSG.invalidURL);
-      return res.redirect(`/${req.params.playlistType}/playlist/${playlistId}`);
+      return res.redirect(`/${playlistType}/playlist/${playlistId}`);
     }
     const added = await persistence.addSong(
       req.body.title,
       req.body.url,
       videoId,
+      +playlistId, 
+      req.session.user.id
     );
-    req.flash("successes", MSG.addedSong);
+    if (!add) {
+      req.flash("errors", MSG.uniqueSong);
+    }else {
+      req.flash("successes", MSG.addedSong);
+    }
+    return res.redirect(`/${playlistType}/playlist/${playlistId}`);
   }),
 );
 
