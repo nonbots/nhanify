@@ -227,24 +227,40 @@ app.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+    }
     let videoId;
     try {
       videoId = parseURL(req.body.url);
     } catch (error) {
-      req.flash("errors", MSG.invalidURL);
-      return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+      console.log("ERROR", error.message);
+      if (error.message === "invalidURL") {
+        req.flash("errors", MSG.invalidURL);
+        return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+      }
+      throw error;
     }
-    const added = await persistence.addSong(
-      req.body.title,
-      req.body.url,
-      videoId,
-      +playlistId,
-      req.session.user.id,
-    );
-    if (!add) {
-      req.flash("errors", MSG.uniqueSong);
-    } else {
+    try {
+      await persistence.addSong(
+        req.body.title,
+        req.body.url,
+        videoId,
+        +playlistId,
+        req.session.user.id,
+      );
       req.flash("successes", MSG.addedSong);
+    } catch (error) {
+      console.log("CONSTRAINT", error.constraint);
+      if (error.constraint === "unique_video_id_playlist_id") {
+        console.log("IN CATCH ERROR CONSTRAINT");
+        req.flash("errors", MSG.uniqueSong);
+        return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+      }
+
+      throw error;
     }
     return res.redirect(`/${playlistType}/playlist/${playlistId}`);
   }),

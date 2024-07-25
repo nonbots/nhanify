@@ -9,7 +9,7 @@ block list
       a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
   .iframe
   .addDiv
-    form(class="addForm" action=`${playlistType}/playlist/${playlist.id}/addSong` method="post")
+    form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong` method="post")
       label(for="url") Youtube Url
       input(id="url" type="text" name="url") 
       label(for="title") Title
@@ -23,8 +23,6 @@ block list
     .label
       p(class="username") Added By
     .label
-      p(class="username") Duration
-    .label
 block values
   .content
     .playListWrap
@@ -37,8 +35,6 @@ block values
               p= song.title   
             .val
               p= song.added_by
-            .val
-              p= song.formattedDuration
             .val
               if (user !== undefined)
                 form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
