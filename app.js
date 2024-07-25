@@ -181,20 +181,38 @@ app.post(
       errors.array().forEach((message) => req.flash("errors", message.msg));
       return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
     }
-    const visibility = req.body.visiability === "private" ? true : false;
-    const edited = await persistence.editPlaylist(
-      +req.params.playlistId,
-      req.body.title,
-      visibility,
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
+      playlistId,
+      req.session.user.id,
     );
-    if (!edited) {
-      req.flash("errors", MSG.notExistPlaylist);
-    } else {
-      req.flash("successes", MSG.playlistEdited);
+    if (!ownedPlaylist) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");
+    }
+    const visibility = req.body.visiability === "private" ? true : false;
+    try {
+      const edited = await persistence.editPlaylist(
+        playlistId,
+        req.body.title,
+        visibility,
+      );
+      if (!edited) {
+        req.flash("errors", MSG.notExistPlaylist);
+      } else {
+        req.flash("successes", MSG.playlistEdited);
+      }
+    } catch (error) {
+      if (error.constraint === "unique_creator_id_title") {
+        req.flash("errors", MSG.uniquePlaylist);
+        return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
+      }
+      console.log("ERROR", error);
+      throw error;
     }
     return res.redirect(`/playlists/your`);
   }),
 );
+
 app.post(
   "/:playlistType/playlist/:playlistId/addSong",
   requireAuth,
@@ -396,14 +414,14 @@ app.post(
       return res.redirect(`/${playlistType}/playlists/create`);
     }
     const { title, visiability } = req.body;
-    const created = await persistence.createPlaylist(
-      title,
-      visiability,
-      req.session.user.id,
-    );
-    if (!created) {
-      req.flash("errors", MSG.createPlaylistError);
-      return res.redirect(`/${playlistType}/playlists/create`);
+    try {
+      await persistence.createPlaylist(title, visiability, req.session.user.id);
+    } catch (error) {
+      if (error.constraint === "unique_creator_id_title") {
+        req.flash("errors", MSG.uniquePlaylist);
+        return res.redirect(`/${playlistType}/playlists/create`);
+      }
+      throw error;
     }
     req.flash("successes", MSG.createPlaylist);
     return res.redirect("/playlists/your");

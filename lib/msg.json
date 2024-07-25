@@ -1,6 +1,7 @@
 {
   "addedSong": "Song was added to the playlist.",
   "uniqueSong": "Song already exists on the playlist.",
+  "uniquePlaylist": "Playlist title already exists.",
   "invalidURL": "Invalid URL.",
   "emptyUsername": "Username is empty.",
   "emptyPassword": "Password is empty.",

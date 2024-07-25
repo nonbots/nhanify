@@ -21,7 +21,8 @@ CREATE TABLE playlists (
   id serial PRIMARY KEY,
   title text NOT NULL,
   creator_id integer NOT NULL REFERENCES users (id),
-  private boolean NOT NULL DEFAULT true
+  private boolean NOT NULL DEFAULT true,
+  CONSTRAINT unique_creator_id_title UNIQUE (creator_id, title)
 );
 
 --create songs table schema
