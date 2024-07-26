@@ -213,6 +213,9 @@ app.post(
   }),
 );
 
+app.get("/:playlistType/playlist/:playlistId/:songId/:videoId/play", async(req, res) => {
+
+});
 app.post(
   "/:playlistType/playlist/:playlistId/addSong",
   requireAuth,
@@ -270,6 +273,7 @@ app.get(
   "/:playlistType/playlist/:playlistId",
   catchError(async (req, res) => {
     const playlistId = Number(req.params.playlistId);
+
     if (!req.session.user) {
       if (!(await persistence.getPublicPlaylist(playlistId))) {
         return res.redirect("/playlists/public");
@@ -285,12 +289,14 @@ app.get(
       }
     }
     const playlist = await persistence.getPlaylistInfoSongs(playlistId);
+    const videoIds = playlist.songs.map(song => song.video_id);
     const updatedPlaylist = getUpdatedPlaylist(playlist);
     res.locals.playlistType = req.params.playlistType;
+    res.locals.playlistId = req.params.playlistId;
     return res.render("playlist", {
       playlist: updatedPlaylist,
-      playlistId,
       pageTitle: updatedPlaylist.title,
+      videoIds,
     });
   }),
 );

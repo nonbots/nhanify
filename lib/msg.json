@@ -23,5 +23,6 @@
   "uniqueUsername": "Username is already taken.",
   "createUser": "User account was created.",
   "creatorContributor": "Creator of the playlist can not be a contributor.",
-  "playlistEdited": "Playlist was edited."
+  "playlistEdited": "Playlist was edited.",
+  "notExistSong": "Song does not exist on playlist."
 }

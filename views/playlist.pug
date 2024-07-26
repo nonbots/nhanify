@@ -1,6 +1,8 @@
 extends playlists
 
 block list 
+  input(type="hidden" id="videoIds" value=`${videoIds}`)
+  input(type="hidden" id="vidoeId" value=`${videoId}}`)
   .listHeader
     .headerLeft
       p(class="username") #{playlist.songs.length} song(s)  
@@ -8,6 +10,7 @@ block list
     if (user !== undefined)
       a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
   .iframe
+    #player
   .addDiv
     form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong` method="post")
       label(for="url") Youtube Url
@@ -27,16 +30,15 @@ block values
   .content
     .playListWrap
       each song in playlist.songs
-        a(href=`/playlist/${song.id}`) 
-          div(class="songCard")
-            .val
-              p= playlist.songs.indexOf(song) + 1
-            .val
-              p= song.title   
-            .val
-              p= song.added_by
-            .val
-              if (user !== undefined)
-                form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-                  input(class="deleteBtn" type="submit" value="❌")
+        div(class="songCard" data-video-id=`${song.video_id}`)
+          .val
+            p= playlist.songs.indexOf(song) + 1
+          .val
+            p= song.title   
+          .val
+            p= song.added_by
+          .val
+            if (user !== undefined)
+              form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
+                input(class="deleteBtn" type="submit" value="❌")
 
