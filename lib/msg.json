@@ -1,5 +1,8 @@
 {
   "addedSong": "Song was added to the playlist.",
+  "editedSong": "Song was edited.",
+  "deleteSong": "Song was deleted from the playlist.",
+  "notExistSong": "Song does not exist.",
   "uniqueSong": "Song already exists on the playlist.",
   "uniquePlaylist": "Playlist title already exists.",
   "invalidURL": "Invalid URL.",

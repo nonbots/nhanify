@@ -6,39 +6,52 @@ block list
   .listHeader
     .headerLeft
       p(class="username") #{playlist.songs.length} song(s)  
-      p(class="username") Total Duration: 
     if (user !== undefined)
       a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
-  .iframe
+  
+  .iframeDiv
     #player
   .addDiv
     form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong` method="post")
-      label(for="url") Youtube Url
-      input(id="url" type="text" name="url") 
-      label(for="title") Title
-      input(id="title" type="text" name="title") 
-      input(class="deleteBtn" type="submit" value="Add")
+      .verticalDiv
+        .songInputDiv
+          input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL") 
+          input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
+      input(class="addBtn" type="submit" value="Add")
   .cols
-    .label
-      p(class="username") No.
-    .label
+    .labelNo
+      p(class="username" style) No.
+    .labelTitle
       p(class="username") Title
-    .label
+    .labelAddedBy
       p(class="username") Added By
-    .label
+    .labelDelete
 block values
   .content
     .playListWrap
+      div(class="currentSong")
+        .valNo
+          p(id="curSongNo") No.
+        .valTitle
+          p(id="curSongTitle") title   
+        .valAddedBy
+          p(id="curAddedBy") userName
+        .valDelete
+        .valEdit
       each song in playlist.songs
         div(class="songCard" data-video-id=`${song.video_id}`)
-          .val
+          .valNo
             p= playlist.songs.indexOf(song) + 1
-          .val
+          .valTitle
             p= song.title   
-          .val
+          .valAddedBy
             p= song.added_by
-          .val
+          .valEdit
             if (user !== undefined)
-              form(class="delete" action=`/playlists/delete/${playlist.id}` method="post")
-                input(class="deleteBtn" type="submit" value="❌")
+              form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/editSong` method="get")
+                input(class="editBtn" type="submit" value="")
+          .valDelete
+            if (user !== undefined)
+              form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/deleteSong` method="post")
+                input(class="deleteBtn" type="submit" value="")
 

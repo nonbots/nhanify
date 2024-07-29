@@ -163,6 +163,73 @@ app.get(
   }),
 );
 
+app.get(
+  "/:playlistType/playlist/:playlistId/:songId/editSong",
+  requireAuth,
+  catchError(async (req, res) => {
+    const { playlistType, playlistId, songId } = req.params;
+    const song = await persistence.getSong(songId);
+    if (!song) {
+      res.flash("errors", MSG.notExistSong);
+    }
+    res.render("edit_song", {
+      title: song.title,
+      playlistType,
+      playlistId,
+      songId,
+      pageTitle: `Edit ${song.title}`,
+    });
+  }),
+);
+
+app.post(
+  "/:playlistType/playlist/:playlistId/:songId/editSong",
+  requireAuth,
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Title is empty.")
+      .isLength({ max: 72 })
+      .withMessage("Title is over the min limit of 72 characters."),
+  ],
+  catchError(async (req, res) => {
+    const { playlistType, playlistId, songId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(
+        `/${playlistType}/playlist/${playlistId}/${songId}/editSong`,
+      );
+    }
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
+      playlistId,
+      req.session.user.id,
+    );
+    if (!ownedPlaylist) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");
+    }
+    try {
+      const edited = await persistence.editSong(songId, req.body.title);
+      if (!edited) {
+        req.flash("errors", MSG.notExistSong);
+      } else {
+        req.flash("successes", MSG.editedSong);
+      }
+    } catch (error) {
+      if (error.constraint === "unique_title_playlist_id") {
+        req.flash("errors", MSG.uniqueSong);
+        return res.redirect(
+          `/${playlistType}/playlist/${playlistId}/${songId}/editSong`,
+        );
+      }
+      throw error;
+    }
+    return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+  }),
+);
+
 app.post(
   "/:playlistType/playlist/:playlistId/edit",
   requireAuth,
@@ -206,16 +273,38 @@ app.post(
         req.flash("errors", MSG.uniquePlaylist);
         return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
       }
-      console.log("ERROR", error);
       throw error;
     }
     return res.redirect(`/playlists/your`);
   }),
 );
 
-app.get("/:playlistType/playlist/:playlistId/:songId/:videoId/play", async(req, res) => {
-
-});
+app.get(
+  "/:playlistType/playlist/:playlistId/:songId/:videoId/play",
+  async (req, res) => {},
+);
+app.post(
+  "/:playlistType/playlist/:playlistId/:songId/deleteSong",
+  requireAuth,
+  catchError(async (req, res) => {
+    const { playlistType, playlistId, songId } = req.params;
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
+      playlistId,
+      req.session.user.id,
+    );
+    if (!ownedPlaylist) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");
+    }
+    const deleted = await persistence.deleteSong(+songId);
+    if (!deleted) {
+      req.flash("errors", MSG.notExistSong);
+    } else {
+      req.flash("successes", MSG.deleteSong);
+    }
+    return res.redirect(`/${playlistType}/playlist/${playlistId}`);
+  }),
+);
 app.post(
   "/:playlistType/playlist/:playlistId/addSong",
   requireAuth,
@@ -289,7 +378,7 @@ app.get(
       }
     }
     const playlist = await persistence.getPlaylistInfoSongs(playlistId);
-    const videoIds = playlist.songs.map(song => song.video_id);
+    const videoIds = playlist.songs.map((song) => song.video_id);
     const updatedPlaylist = getUpdatedPlaylist(playlist);
     res.locals.playlistType = req.params.playlistType;
     res.locals.playlistId = req.params.playlistId;

@@ -33,7 +33,8 @@ CREATE TABLE songs (
   video_id text NOT NULL,
   playlist_id integer NOT NULL REFERENCES playlists (id) ON DELETE CASCADE,
   creator_id integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT unique_video_id_playlist_id UNIQUE (playlist_id, video_id)
+  CONSTRAINT unique_video_id_playlist_id UNIQUE (playlist_id, video_id),
+  CONSTRAINT unique_title_playlist_id UNIQUE (playlist_id, title)
 );
 
 --create a playlists_users table that references playlists and users
@@ -75,11 +76,35 @@ VALUES
 INSERT INTO
   songs (title, url, video_id, playlist_id, creator_id)
 VALUES
-  ('title1', 'ur1', 'video_id1', 1, 1),
-  ('title2', 'ur2', 'video_id2', 1, 2),
-  ('title3', 'ur3', 'video_id3', 1, 2),
-  ('title1', 'ur1', 'video_id1', 2, 1),
-  ('title3', 'ur3', 'video_id3', 3, 1);
+  ('Blue Heart', 'ur1', 'Dui7KB8y-Ro', 1, 1),
+  (
+    'Chúng Ta Không Thuộc Về Nhau',
+    'ur2',
+    'qGRU3sRbaYw',
+    1,
+    2
+  ),
+  (
+    'Jacob Collier - Little Blue',
+    'ur3',
+    'IQvzX0Z3HE4',
+    1,
+    2
+  ),
+  (
+    'Stick Figure - Paradise',
+    'ur1',
+    'qvzFphdCYHo',
+    2,
+    1
+  ),
+  (
+    'Queen - Under Pressure',
+    'ur3',
+    'a01QQZyl-_I',
+    3,
+    1
+  );
 
 --insert reference to users and playlist into playlists-users table
 INSERT INTO

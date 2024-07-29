@@ -1,0 +1,11 @@
+extends signup
+block header
+  h1(class="pageTitle") #{pageTitle}
+block content
+  form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/${songId}/editSong` method="post")
+    .formDiv
+      label(for="title") Title
+      input(id="title" type="text" name="title" value=title || song.title) 
+    input(type="submit" class="submit" value="Save")
+
+

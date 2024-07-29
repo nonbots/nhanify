@@ -1,3 +1,7 @@
+html {
+  font-size: 100%;
+  text-overflow: ellipsis;
+}
 :root {
   --color-bg-dark: #0b2447;
   --color-bg-light: white;
@@ -131,20 +135,18 @@ main {
   height: 100%;
   background-color: var(--color-tertiary);
   align-items: center;
-  padding: 2rem 0rem;
 }
 
 .playlistsDiv {
   display: flex;
-  width: 65%;
+  max-width: 1024px;
+  min-width: 320px;
   flex-direction: column;
   align-items: center;
   height: 100%;
 }
 
 #player {
-  width: 200px;
-  height: 200px;
   background-color: grey;
 }
 
@@ -155,38 +157,107 @@ main {
   width: 100%;
   justify-content: space-between;
 }
-.iframe {
+.iframeDiv {
+  aspect-ratio: 16 / 9;
   width: 100%;
-  height: 60%;
+  height: auto;
   background-color: var(--color-bg-dark);
   display: flex;
-  margin-bottom: 1rem;
   border-radius: 1rem;
 }
 
+.verticalDiv {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: start;
+  row-gap: 0.5rem;
+}
+
+.songInputDiv {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputURL {
+  background: none;
+  width: 90%;
+  border-radius: 0rem;
+  border-bottom: thin solid var(--color-secondary);
+}
 .addDiv {
   display: flex;
   width: 100%;
-  padding-bottom: 1rem;
   flex-direction: row;
   column-gap: 1rem;
-  justify-content: end;
+  justify-content: space-between;
+  border-bottom: thin solid var(--color-secondary);
+}
+.labelSong {
+  font-weight: 300;
+  width: 40%;
+  padding: 0rem 1rem;
+  align-content: center;
+  text-align: left;
+}
+.stopContributionBtn {
+  background: none;
+  border: thin solid var(--color-secondary);
+}
+
+.editBtn {
+  background: transparent url("../icons/edit.png") 50% 50% no-repeat;
+  background-size: 20px 20px;
+  border: 0px;
+}
+.deleteBtn {
+  background: transparent url("../icons/delete.png") 50% 50% no-repeat;
+  border: 0px;
+}
+.addBtn {
+  margin: 0rem;
+  background-color: var(--color-secondary);
+  color: white;
+  border-radius: 1rem;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  height: 1.5rem;
+  width: 15%;
 }
 .addForm {
   display: flex;
-  gap: 1rem;
   align-items: center;
+  width: 100%;
+  padding: 0.5rem 0rem 1.5rem 0rem;
 }
 
 .cols {
   display: flex;
   justify-content: space-around;
   width: 100%;
+  padding: 0.5rem 0rem;
 }
 
-.label {
-  width: 100%;
+.labelNo {
+  width: 5%;
   display: flex;
+  padding: 0rem 1rem;
+}
+.labelTitle {
+  width: 60%;
+  display: flex;
+  padding: 0rem 1rem;
+}
+.labelAddedBy {
+  width: 30%;
+  display: flex;
+  padding: 0rem 1rem;
+}
+.labelDelete {
+  width: 5%;
+  display: flex;
+  padding: 0rem 1rem;
 }
 
 .content {
@@ -214,11 +285,48 @@ main {
   flex-direction: row;
   justify-content: space-around;
 }
+.currentSong {
+  border-top: 1px solid var(--color-secondary);
+  background: var(--color-secondary);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
 
-.val {
-  width: 100%;
+.valNo {
   display: flex;
   align-self: center;
+  padding: 0rem 1rem;
+  width: 5%;
+}
+
+.valTitle {
+  display: flex;
+  align-self: center;
+  padding: 0rem 1rem;
+  width: 60%;
+}
+.valAddedBy {
+  display: flex;
+  align-self: center;
+  padding: 0rem 1rem;
+  width: 25%;
+}
+
+.valDelete {
+  display: flex;
+  align-self: center;
+  padding: 0rem 1rem;
+  width: 5%;
+}
+
+.valEdit {
+  display: flex;
+  align-self: center;
+  padding: 0rem 1rem;
+  width: 5%;
 }
 
 p {
