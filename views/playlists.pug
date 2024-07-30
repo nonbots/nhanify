@@ -37,13 +37,13 @@ block main
                 .val
                   if (playlistType === "owned")
                     form(action=`/${playlistType}/playlist/${playlist.id}/edit` method="get")
-                      input(class="deleteBtn" type="submit" value="Edit")
+                      input(class="editBtn" type="submit" value="")
                 .val
                   if (user !== undefined)
                     if (playlistType === "contribution")
                       form(class="delete" action=`/playlists/${playlist.id}/delete/contribution` method="post")
-                        input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="deleteBtn" type="submit" value="Stop Contributing")
+                        input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
                     if (playlistType === "owned")
                       form(class="delete" action=`/playlists/${playlist.id}/delete` method="post")
-                        input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="Delete")
+                        input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
                        

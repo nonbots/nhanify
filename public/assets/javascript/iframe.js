@@ -7,10 +7,11 @@ var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 const videoIds = [];
-const songs = [];
+const songs = [];//[{title, addedBy, songIdx},...]
 const currentVideoId = 0; //get the current video from server/db
 const currentTime = 0; // get from server
 const songCards = document.querySelectorAll(".songCard");
+console.log({songCards});
 
 songCards.forEach((songCard, index) => {
   videoIds.push(songCard.dataset.videoId);
@@ -47,9 +48,15 @@ function onPlayerReady(event) {
 //    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING) {
-    const curSongIdx = player.getPlaylistIndex();
-    console.log({ curSongIdx });
-    console.log("IN IF CLAUSE PLAY");
+    const curSongIdx = player.getPlaylistIndex() + 2;
+    const songCard = document.querySelector(`.songCard:nth-child(${curSongIdx})`); 
+    const songIdx = songCard.querySelector('div.valNo > p').innerText;
+    const songTitle = songCard.querySelector('div.valTitle > p').innerText;
+    const songAddedBy = songCard.querySelector('div.valAddedBy > p').innerText;
+
+    document.getElementById('curSongNo').innerText = songIdx;
+    document.getElementById('curSongTitle').innerText = songTitle;
+    document.getElementById('curAddedBy').innerText = songAddedBy;
   }
   if (event.data == YT.PlayerState.ENDED) {
     console.log("IN IF CLAUSE ENDED");
