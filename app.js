@@ -13,6 +13,7 @@ const { getUpdatedPlaylist, parseURL } = require("./lib/playlist.js");
 const flash = require("express-flash");
 const { body, validationResult } = require("express-validator");
 const catchError = require("./lib/catch-error");
+const SONGS_PER_PAGE = 2;
 
 app.set("views", "./views");
 app.set("view engine", "pug");
@@ -362,8 +363,8 @@ app.get(
   "/:playlistType/playlist/:playlistId/:pageNum",
   catchError(async (req, res, next) => {
     const pageNum = req.params.pageNum;
-    const offset = pageNum * 5; //start page number at 0
-    const limit = pageNum + 5;
+    const offset = pageNum * SONGS_PER_PAGE; //start page number at 0
+    const limit = SONGS_PER_PAGE;
     const playlistId = Number(req.params.playlistId);
 
     if (!req.session.user) {
@@ -388,13 +389,14 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     res.locals.playlistType = req.params.playlistType;
     res.locals.playlistId = req.params.playlistId;
-    const pages = Math.ceil(playlist.songTotal / 5);
-    if (req.params.pageNum > pages) return next();
+    const pages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
+    if (req.params.pageNum >= pages) return next();
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
       videoIds,
       pages,
+      curPageNum: +req.params.pageNum,
     });
   }),
 );

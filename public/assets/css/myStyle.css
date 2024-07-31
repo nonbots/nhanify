@@ -200,6 +200,16 @@ main {
   justify-content: right;
   width: 100%;
 }
+.pageNav {
+  display: flex;
+  column-gap: 2rem;
+  justify-content: right;
+  width: 100%;
+}
+.curPage {
+  font-size: 4rem;
+  color: var(--color-tertiary);
+}
 .labelSong {
   font-weight: 300;
   width: 40%;

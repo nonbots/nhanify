@@ -54,6 +54,11 @@ block values
             if (user !== undefined)
               form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/deleteSong` method="post")
                 input(class="deleteBtn" type="submit" value="")
-  .pages
-    - for (let pageNum  = 0; pageNum < pages; pageNum++)
-      a(href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
+  .pageNav 
+    if (curPageNum !== 0) 
+      a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) <
+    .pages
+      - for (let pageNum  = 0; pageNum < pages; pageNum++)
+        a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
+    if (curPageNum < pages - 1) 
+      a(href=`/${playlistType}/playlist/${playlistId}/${+curPageNum + 1}`) >
