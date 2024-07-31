@@ -105,13 +105,7 @@ VALUES
     1,
     1
   ),
-  (
-    'Watermelon Man',
-    'ur4',
-    '_QkGAaYtXA0',
-    1,
-    1
-  ),
+  ('Watermelon Man', 'ur4', '_QkGAaYtXA0', 1, 1),
   (
     'Stick Figure - Paradise',
     'ur1',
@@ -119,13 +113,7 @@ VALUES
     2,
     1
   ),
-  (
-    'xx-intro',
-    'ur1',
-    'QbwdJl8TGeY',
-    1,
-    1
-  ),
+  ('xx-intro', 'ur1', 'QbwdJl8TGeY', 1, 1),
   (
     'Should I Stay or Should I Go',
     'ur1',

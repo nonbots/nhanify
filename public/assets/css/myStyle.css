@@ -195,10 +195,10 @@ main {
   border-bottom: thin solid var(--color-secondary);
 }
 .pages {
-    display: flex;
-    column-gap: 2rem;
-    justify-content: right;
-    width: 100%;
+  display: flex;
+  column-gap: 2rem;
+  justify-content: right;
+  width: 100%;
 }
 .labelSong {
   font-weight: 300;
