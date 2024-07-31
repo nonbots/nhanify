@@ -95,7 +95,42 @@ VALUES
     'Stick Figure - Paradise',
     'ur1',
     'qvzFphdCYHo',
+    1,
+    1
+  ),
+  (
+    'Queen - Under Pressure',
+    'ur3',
+    'a01QQZyl-_I',
+    1,
+    1
+  ),
+  (
+    'Watermelon Man',
+    'ur4',
+    '_QkGAaYtXA0',
+    1,
+    1
+  ),
+  (
+    'Stick Figure - Paradise',
+    'ur1',
+    'qvzFphdCYHo',
     2,
+    1
+  ),
+  (
+    'xx-intro',
+    'ur1',
+    'QbwdJl8TGeY',
+    1,
+    1
+  ),
+  (
+    'Should I Stay or Should I Go',
+    'ur1',
+    'BN1WwnEDWAM',
+    1,
     1
   ),
   (

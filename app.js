@@ -359,8 +359,11 @@ app.post(
 );
 
 app.get(
-  "/:playlistType/playlist/:playlistId",
-  catchError(async (req, res) => {
+  "/:playlistType/playlist/:playlistId/:pageNum",
+  catchError(async (req, res, next) => {
+    const pageNum = req.params.pageNum;
+    const offset = pageNum * 5; //start page number at 0 
+    const limit = pageNum + 5;
     const playlistId = Number(req.params.playlistId);
 
     if (!req.session.user) {
@@ -377,15 +380,17 @@ app.get(
         return res.redirect("/playlists/your");
       }
     }
-    const playlist = await persistence.getPlaylistInfoSongs(playlistId);
+    const playlist = await persistence.getPlaylistInfoSongs(playlistId, offset, limit);
     const videoIds = playlist.songs.map((song) => song.video_id);
-    const updatedPlaylist = getUpdatedPlaylist(playlist);
     res.locals.playlistType = req.params.playlistType;
     res.locals.playlistId = req.params.playlistId;
+    const pages = Math.ceil(playlist.songTotal / 5);
+    if (req.params.pageNum > pages) return next();
     return res.render("playlist", {
-      playlist: updatedPlaylist,
-      pageTitle: updatedPlaylist.title,
+      playlist,
+      pageTitle: playlist.info.title,
       videoIds,
+      pages
     });
   }),
 );
@@ -636,10 +641,17 @@ app.get(
   }),
 );
 
+app.get("*", (req, res, next) => {
+  res.status(404);
+  res.render("error", {statusCode: 404, msg: MSG.error404});  
+});
+
 app.use((err, req, res, next) => {
   console.log(err);
-  res.render("error", { statusCode: 500 });
+  res.status(500);
+  res.render("error", { statusCode: 500, msg: MSG.error500 });
 });
+
 
 app.listen(port, host, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${host}:${port} 🎵`);

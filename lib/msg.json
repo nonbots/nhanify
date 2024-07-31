@@ -1,4 +1,7 @@
 {
+
+  "error500": "This page is currently not available. We are currently addressing the issue.",
+  "error404": "This page does not exist.",
   "addedSong": "Song was added to the playlist.",
   "editedSong": "Song was edited.",
   "deleteSong": "Song was deleted from the playlist.",

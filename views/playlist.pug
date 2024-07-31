@@ -31,7 +31,7 @@ block values
     .playListWrap
       div(class="currentSong")
         .valNo
-          p(id="curSongNo") No.
+          p(id="curSongNo") No
         .valTitle
           p(id="curSongTitle") title   
         .valAddedBy
@@ -54,4 +54,6 @@ block values
             if (user !== undefined)
               form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/deleteSong` method="post")
                 input(class="deleteBtn" type="submit" value="")
-
+  .pages
+    - for (let pageNum  = 0; pageNum < pages; pageNum++)
+      a(href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
