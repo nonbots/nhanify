@@ -48,7 +48,7 @@ function onPlayerReady(event) {
 //    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING) {
-    const curSongIdx = player.getPlaylistIndex() + 2;
+    const curSongIdx = player.getPlaylistIndex() + 1;
     const songCard = document.querySelector(
       `.songCard:nth-child(${curSongIdx})`,
     );

@@ -204,10 +204,9 @@ main {
   display: flex;
   column-gap: 2rem;
   justify-content: right;
-  width: 100%;
 }
 .curPage {
-  font-size: 4rem;
+  font-size: 1.1rem;
   color: var(--color-tertiary);
 }
 .labelSong {
@@ -254,7 +253,18 @@ main {
   width: 100%;
   padding: 0.5rem 0rem;
 }
+.playIcon {
+  display: flex;
+  width: 7%;
+}
 
+.currentSongcols {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 0.5rem 0rem 0rem 0rem;
+  background-color: var(--color-secondary);
+}
 .labelNo {
   width: 5%;
   display: flex;
@@ -304,11 +314,12 @@ main {
 .currentSong {
   border-top: 1px solid var(--color-secondary);
   background: var(--color-secondary);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  width: 100%;
 }
 
 .valNo {
