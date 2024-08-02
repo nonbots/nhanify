@@ -58,7 +58,7 @@ block values
     if (curPageNum !== 0) 
       a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) <
     .pages
-      - for (let pageNum  = 0; pageNum < pages; pageNum++)
+      - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
         a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
     if (curPageNum < pages - 1) 
-      a(href=`/${playlistType}/playlist/${playlistId}/${+curPageNum + 1}`) >
+      a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum}`) >

@@ -9,12 +9,12 @@ const Persistence = require("./lib/pg-persistence.js");
 const persistence = new Persistence();
 const port = 3002;
 const host = "localhost";
-const { getUpdatedPlaylist, parseURL } = require("./lib/playlist.js");
+const { parseURL } = require("./lib/playlist.js");
 const flash = require("express-flash");
 const { body, validationResult } = require("express-validator");
 const catchError = require("./lib/catch-error");
 const SONGS_PER_PAGE = 2;
-
+const VISIBLE_OFFSET = 2;
 app.set("views", "./views");
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -362,8 +362,8 @@ app.post(
 app.get(
   "/:playlistType/playlist/:playlistId/:pageNum",
   catchError(async (req, res, next) => {
-    const pageNum = req.params.pageNum;
-    const offset = pageNum * SONGS_PER_PAGE; //start page number at 0
+    const curPageNum = +req.params.pageNum;
+    const offset = curPageNum * SONGS_PER_PAGE; //start page number at 0
     const limit = SONGS_PER_PAGE;
     const playlistId = Number(req.params.playlistId);
 
@@ -389,14 +389,20 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     res.locals.playlistType = req.params.playlistType;
     res.locals.playlistId = req.params.playlistId;
-    const pages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
-    if (req.params.pageNum >= pages) return next();
+    const totalPages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
+    console.log({ totalPages });
+    if (req.params.pageNum >= totalPages) return next();
+    const startPage = Math.max(curPageNum - VISIBLE_OFFSET, 0);
+    let endPage = Math.min(curPageNum + VISIBLE_OFFSET, totalPages - 1);
+    console.log({ startPage }, { curPageNum }, { endPage });
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
       videoIds,
-      pages,
-      curPageNum: +req.params.pageNum,
+      totalPages,
+      curPageNum,
+      endPage,
+      startPage,
     });
   }),
 );
