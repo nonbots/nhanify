@@ -47,7 +47,7 @@ body {
   align-items: flex-start;
   display: flex;
   color: var(--color-secondary);
-  padding: 1rem 0rem;
+  padding-top: 1rem;
 }
 
 .stack1 {
@@ -139,8 +139,7 @@ main {
 
 .playlistsDiv {
   display: flex;
-  max-width: 1024px;
-  min-width: 320px;
+  width: 320px;
   flex-direction: column;
   align-items: center;
   height: 100%;
@@ -192,27 +191,26 @@ main {
   flex-direction: row;
   column-gap: 1rem;
   justify-content: space-between;
-  border-bottom: thin solid var(--color-secondary);
 }
 .pages {
   display: flex;
-  column-gap: 2rem;
-  justify-content: right;
-  width: 100%;
+  column-gap: 1.5rem;
 }
 .pageNav {
   display: flex;
-  column-gap: 2rem;
+  column-gap: 1.5rem;
   justify-content: right;
+  width: 100%;
 }
 .curPage {
   font-size: 1.1rem;
-  color: var(--color-tertiary);
+  color: var(--color-primary);
 }
 .labelSong {
   font-weight: 300;
   width: 40%;
   padding: 0rem 1rem;
+  color: var(--color-tertiary);
   align-content: center;
   text-align: left;
 }
@@ -249,41 +247,38 @@ main {
 
 .cols {
   display: flex;
-  justify-content: space-around;
   width: 100%;
   padding: 0.5rem 0rem;
+  column-gap: 1rem;
 }
 .playIcon {
+  display: flex;
+  width: 4%;
+  padding-left: 0.5rem;
+}
+
+.labelPlayIcon {
   display: flex;
   width: 7%;
 }
 
 .currentSongcols {
   display: flex;
-  justify-content: space-around;
   width: 100%;
   padding: 0.5rem 0rem 0rem 0rem;
-  background-color: var(--color-secondary);
+  column-gap: 1rem;
 }
 .labelNo {
-  width: 5%;
+  width: 8%;
   display: flex;
-  padding: 0rem 1rem;
 }
 .labelTitle {
-  width: 60%;
+  width: 40%;
   display: flex;
-  padding: 0rem 1rem;
 }
 .labelAddedBy {
   width: 30%;
   display: flex;
-  padding: 0rem 1rem;
-}
-.labelDelete {
-  width: 5%;
-  display: flex;
-  padding: 0rem 1rem;
 }
 
 .content {
@@ -305,54 +300,44 @@ main {
 
 .songCard {
   border-top: 1px solid var(--color-secondary);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding: 1rem 0rem;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
 }
+
 .currentSong {
   border-top: 1px solid var(--color-secondary);
   background: var(--color-secondary);
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 0rem;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
   width: 100%;
+  column-gap: 1rem;
 }
 
 .valNo {
   display: flex;
-  align-self: center;
-  padding: 0rem 1rem;
-  width: 5%;
+  width: 8%;
 }
 
 .valTitle {
   display: flex;
-  align-self: center;
-  padding: 0rem 1rem;
-  width: 60%;
+  width: 40%;
 }
+
 .valAddedBy {
   display: flex;
-  align-self: center;
-  padding: 0rem 1rem;
   width: 25%;
 }
 
 .valDelete {
   display: flex;
-  align-self: center;
-  padding: 0rem 1rem;
   width: 5%;
 }
 
 .valEdit {
   display: flex;
-  align-self: center;
-  padding: 0rem 1rem;
   width: 5%;
 }
 
@@ -361,6 +346,9 @@ p {
   text-align: left;
   color: white;
   align-self: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .delete {

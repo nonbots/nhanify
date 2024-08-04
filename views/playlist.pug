@@ -1,9 +1,11 @@
 extends playlists
 
-block list 
+block listWrap
   if(isEmpty) 
-    p There are no songs on the playlist. Add one here. 
+    p There are currently no songs on the playlist.
     .addDiv
+    if(isEmpty && playlistType === "owned") 
+      p Add a song below.
       form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
         .verticalDiv
           .songInputDiv
@@ -11,72 +13,71 @@ block list
             input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
         input(class="addBtn" type="submit" value="Add")
   else 
-    input(type="hidden" id="videoIds" value=`${videoIds}`)
-    input(type="hidden" id="vidoeId" value=`${videoId}}`)
-    .listHeader
-      .headerLeft
-        p(class="username") #{playlist.songTotal} song(s)  
-      if (user !== undefined)
-        a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
-    
-    .iframeDiv
-      #player
-    .currentSongcols
-      .playIcon
-      .labelNo
-        p(class="username" style) No.
-      .labelTitle
-        p(class="username") Title
-      .labelAddedBy
-        p(class="username") Added By
-    div(class="currentSong")
-      .playIcon
-        img(src="/assets/icons/play.png" alt="Playing")
-      .valNo
-        p(id="curSongNo") 
-      .valTitle
-        p(id="curSongTitle")
-      .valAddedBy
-        p(id="curAddedBy") 
-    .addDiv
-      form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
-        .verticalDiv
-          .songInputDiv
-            input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL") 
-            input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
-        input(class="addBtn" type="submit" value="Add")
-    .cols
-      .labelNo
-        p(class="username" style) No.
-      .labelTitle
-        p(class="username") Title
-      .labelAddedBy
-        p(class="username") Added By
-      .labelDelete
-  block values
-    .content
-      .playListWrap
-        each song in playlist.songs
-          div(class="songCard" data-video-id=`${song.video_id}`)
-            .valNo
-              p= playlist.songs.indexOf(song) + 1
-            .valTitle
-              p= song.title   
-            .valAddedBy
-              p= song.added_by
-            .valEdit
-              if (user !== undefined)
-                form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/editSong/${curPageNum}` method="get")
-                  input(class="editBtn" type="submit" value="")
-            .valDelete
-              if (user !== undefined)
-                form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/deleteSong/${curPageNum}` method="post")
-                  input(class="deleteBtn" type="submit" value="")
-    .pageNav 
-      if (curPageNum !== 0) 
-        a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
-      .pages
-        - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-          a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
-      if (curPageNum < totalPages - 1) 
-        a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
+    block list 
+      input(type="hidden" id="videoIds" value=`${videoIds}`)
+      input(type="hidden" id="vidoeId" value=`${videoId}}`)
+      .listHeader
+        .headerLeft
+          p(class="username") #{playlist.songTotal} song(s)  
+        if (user !== undefined)
+          a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
+      .iframeDiv
+        #player
+      .currentSongcols
+        .labelPlayIcon
+        .labelNo
+          p(class="username") No.
+        .labelTitle
+          p(class="username") Title
+        .labelAddedBy
+          p(class="username") Added By
+      .currentSong
+        .playIcon
+          p ♫
+        .valNo
+          p(id="curSongNo") ...
+        .valTitle
+          p(id="curSongTitle") ...
+        .valAddedBy
+          p(id="curAddedBy") ...
+      .addDiv
+        form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
+          .verticalDiv
+            .songInputDiv
+              input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL") 
+              input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
+          input(class="addBtn" type="submit" value="Add")
+      .pageNav 
+        if (curPageNum !== 0) 
+          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
+        .pages
+          - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
+            a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
+        if (curPageNum < totalPages - 1) 
+          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
+      .cols
+        .labelNo
+          p(class="username" style) No.
+        .labelTitle
+          p(class="username") Title
+        .labelAddedBy
+          p(class="username") Added By
+    block values
+      .content
+        .playListWrap
+          each song in playlist.songs
+            div(class="songCard" data-video-id=`${song.video_id}`)
+              .valNo
+                p= playlist.songs.indexOf(song) + 1
+              .valTitle
+                p= song.title   
+              .valAddedBy
+                p= song.added_by
+              .valEdit
+                if (user !== undefined)
+                  form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/editSong/${curPageNum}` method="get")
+                    input(class="editBtn" type="submit" value="")
+              .valDelete
+                if (user !== undefined)
+                  form(class="delete" action=`/${playlistType}/playlist/${playlistId}/${song.id}/deleteSong/${curPageNum}` method="post")
+                    input(class="deleteBtn" type="submit" value="")

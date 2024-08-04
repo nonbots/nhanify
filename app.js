@@ -354,7 +354,7 @@ app.post(
   catchError(async (req, res) => {
     const { playlistType, playlistId, songId, curPageNum } = req.params;
     const ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
+      +playlistId,
       req.session.user.id,
     );
     if (!ownedPlaylist) {
@@ -383,12 +383,11 @@ app.post(
 );
 
 app.get(
-  "/:playlistType/playlist/:playlistId/:pageNum",
+  "/:playlistType/playlist/:playlistId/:curPageNum",
   catchError(async (req, res, next) => {
-    const curPageNum = +req.params.pageNum;
-    const offset = curPageNum * SONGS_PER_PAGE; //start page number at 0
+    const { curPageNum, playlistType, playlistId } = req.params;
+    const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
-    const playlistId = Number(req.params.playlistId);
 
     if (!req.session.user) {
       if (!(await persistence.getPublicPlaylist(playlistId))) {
@@ -405,31 +404,31 @@ app.get(
       }
     }
     const playlist = await persistence.getPlaylistInfoSongs(
-      playlistId,
+      +playlistId,
       offset,
       limit,
     );
     const videoIds = playlist.songs.map((song) => song.video_id);
-    res.locals.playlistType = req.params.playlistType;
-    res.locals.playlistId = req.params.playlistId;
     const totalPages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
     let startPage;
     let endPage;
     if (!isEmpty) {
-      if (req.params.pageNum >= totalPages) return next();
-      startPage = Math.max(curPageNum - VISIBLE_OFFSET, 0);
-      endPage = Math.min(curPageNum + VISIBLE_OFFSET, totalPages - 1);
+      if (+curPageNum >= totalPages) return next();
+      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
+      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
     }
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
       videoIds,
       totalPages,
-      curPageNum,
+      curPageNum: +curPageNum,
       endPage,
       startPage,
       isEmpty,
+      playlistType,
+      playlistId: +playlistId,
     });
   }),
 );
