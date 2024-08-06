@@ -45,7 +45,7 @@ block main
                     p= playlist.count
                   .val
                     if (playlistType === "owned")
-                      form(action=`/${playlistType}/playlist/${playlist.id}/edit` method="get")
+                      form(action=`/${playlistType}/playlist/${playlist.id}/edit/${curPageNum}` method="get")
                         input(class="editBtn" type="submit" value="")
                   .val
                     if (user !== undefined)

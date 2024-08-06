@@ -17,11 +17,11 @@ html(lang="en")
           .navTopLeft
             if user !== undefined 
               .home
-                a(class="logo" href="/playlists/your") N
+                a(class="logo" href="/playlists/your/0") N
               p(class="username") #{user.username}
             else 
               .home
-                a(class="logo" href="/playlists/public") N
+                a(class="logo" href="/playlists/public/0") N
           .navTopRight
             if (user !== undefined)
               form(class="buttonForm" action="/signout" method="post")
@@ -31,17 +31,17 @@ html(lang="en")
               a(href="/login") Sign In
         .stack2
           if (playlistType === "public")
-            a(class="hiNavTab" href="/playlists/public") Public Playlists 
+            a(class="hiNavTab" href="/playlists/public/0") Public Playlists 
           else
-            a(class="navTab" href="/playlists/public") Public Playlists 
+            a(class="navTab" href="/playlists/public/0") Public Playlists 
           if (user !== undefined)
             if (playlistType === "owned")
               a(class="hiNavTab" href="/playlists/your/0") Your Playlists 
             else 
               a(class="navTab" href="/playlists/your/0") Your Playlists 
             if (playlistType === "contribution")
-              a(class="hiNavTab" href="/playlists/contributing") Contributing Playlists
+              a(class="hiNavTab" href="/playlists/contributing/0") Contributing Playlists
             else
-              a(class="navTab" href="/playlists/contributing") Contributing Playlists
+              a(class="navTab" href="/playlists/contributing/0") Contributing Playlists
       main
           block main
