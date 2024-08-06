@@ -14,6 +14,14 @@ block main
           p(class="username") #{playlists.length} Playlist(s)  
           if (user !== undefined && playlistType === "owned")
             a(href=`/${playlistType}/playlists/create`) Create 
+        .pageNav 
+          if (curPageNum !== 0) 
+            a(href=`/playlists/your/${curPageNum - 1}`) ⮜
+          .pages
+            - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
+              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/your/${pageNum}`) #{pageNum + 1}
+          if (curPageNum < totalPages - 1) 
+            a(href=`/playlists/your/${curPageNum + 1}`) ⮞
         .cols
           .label
             p(class="username") Title

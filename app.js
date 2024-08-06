@@ -110,23 +110,24 @@ app.post(
 );
 
 app.get(
-  "/:playlistType/playlist/:playlistId/contributors/add",
+  "/:playlistType/playlist/:playlistId/contributors/add/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const playlistId = +req.params.playlistId;
+    const {playlistId, playlistType, curPageNum} = req.params;
+
     let ownedPlaylist;
     ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
+      +playlistId,
       req.session.user.id,
+      offset,
+      limit,
     );
     if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
-    const playlist = await persistence.getPlaylist(playlistId);
-    res.locals.pageTitle = `Add contributor to ${playlist.title}`;
-    res.locals.playlistType = req.params.playlistType;
-    return res.render("add_contributors", { playlistId });
+    const playlist = await persistence.getPlaylist(+playlistId);
+    return res.render("add_contributors", { playlistId: +playlistId, pageTitle:  `Add contributor to ${playlist.title}`, playlistType});
   }),
 );
 
@@ -146,24 +147,73 @@ app.get(
 );
 
 app.get(
-  "/:playlistType/playlist/:playlistId/edit",
+  "/:playlistType/playlist/:playlistId/edit/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const playlistId = +req.params.playlistId;
-    const playlist = await persistence.getPlaylist(playlistId);
+    const {playlistId, playlistType, curPageNum} = req.params;
+    const playlist = await persistence.getPlaylist(+playlistId);
     if (!playlist) {
       req.flash("errors", MSG.notExistPlaylist);
-      //return to get page
+      req.redirect(`${playlistType}/playlist/${playlistId}/edit/${curPageNum}`);
     }
-    res.locals.playlistId = playlistId;
-    res.locals.playlistType = req.params.playlistType;
     res.render("edit_playlist", {
       playlist,
       pageTitle: `Edit ${playlist.title}`,
+      playlistId: +playlistId,
+      playlistType,
+      curPageNum: +curPageNum,
     });
   }),
 );
 
+app.post(
+  "/:playlistType/playlist/:playlistId/edit/:curPageNum",
+  requireAuth,
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Title is empty.")
+      .isLength({ max: 72 })
+      .withMessage("Title is over the min limit of 72 characters."),
+  ],
+  catchError(async (req, res) => {
+    const { playlistType, playlistId, curPageNum } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errors.array().forEach((message) => req.flash("errors", message.msg));
+      return res.redirect(`/${playlistType}/playlist/${playlistId}/edit/${curPageNum`);
+    }
+    const ownedPlaylist = await persistence.getOwnedPlaylist(
+      +playlistId,
+      req.session.user.id,
+    );
+    if (!ownedPlaylist) {
+      req.flash("errors", MSG.unauthorizedUser);
+      return res.redirect("/playlists/your");//change to an error page
+    }
+    const visibility = req.body.visiability === "private" ? true : false;
+    try {
+      const edited = await persistence.editPlaylist(
+        playlistId,
+        req.body.title,
+        visibility,
+      );
+      if (!edited) {
+        req.flash("errors", MSG.notExistPlaylist);
+      } else {
+        req.flash("successes", MSG.playlistEdited);
+      }
+    } catch (error) {
+      if (error.constraint === "unique_creator_id_title") {
+        req.flash("errors", MSG.uniquePlaylist);
+        return res.redirect(`/${playlistType}/playlist/${playlistId}/edit/${curPageNum}`);
+      }
+      throw error;
+    }
+    return res.redirect(`/playlists/your/${curPageNum}`);
+  }),
+);
 app.get(
   "/:playlistType/playlist/:playlistId/:songId/editSong/:curPageNum",
   requireAuth,
@@ -234,54 +284,6 @@ app.post(
   }),
 );
 
-app.post(
-  "/:playlistType/playlist/:playlistId/edit",
-  requireAuth,
-  [
-    body("title")
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage("Title is empty.")
-      .isLength({ max: 72 })
-      .withMessage("Title is over the min limit of 72 characters."),
-  ],
-  catchError(async (req, res) => {
-    const { playlistType, playlistId } = req.params;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
-    }
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
-      req.session.user.id,
-    );
-    if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your");
-    }
-    const visibility = req.body.visiability === "private" ? true : false;
-    try {
-      const edited = await persistence.editPlaylist(
-        playlistId,
-        req.body.title,
-        visibility,
-      );
-      if (!edited) {
-        req.flash("errors", MSG.notExistPlaylist);
-      } else {
-        req.flash("successes", MSG.playlistEdited);
-      }
-    } catch (error) {
-      if (error.constraint === "unique_creator_id_title") {
-        req.flash("errors", MSG.uniquePlaylist);
-        return res.redirect(`/${playlistType}/playlist/${playlistId}/edit`);
-      }
-      throw error;
-    }
-    return res.redirect(`/playlists/your`);
-  }),
-);
 
 app.post(
   "/:playlistType/playlist/:playlistId/addSong/:curPageNum",
@@ -513,16 +515,29 @@ app.get(
 );
 
 app.get(
-  "/playlists/your",
+  "/playlists/your/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
+    const curPageNum = +req.params.curPageNum;  
+    const userId = +req.session.user.id;
+    const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
+    const limit = SONGS_PER_PAGE;
     const playlists = await persistence.getUserCreatedPlaylists(
-      req.session.user.id,
+      userId,
+      offset,
+      limit,
     );
-    res.locals.playlists = playlists;
-    res.locals.playlistType = "owned";
-    res.locals.pageTitle = "Your playlists";
-    return res.render("playlists");
+    const countRow = await persistence.getUserCreatedPlaylistTotal(userId);
+    const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
+    const isEmpty = totalPages === 0;
+    let startPage;
+    let endPage;
+    if (!isEmpty) {
+      if (+curPageNum >= totalPages) return next();
+      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
+      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
+    }
+    return res.render("playlists", { startPage, endPage, totalPages, playlistType: "owned", pageTitle: "Your Playlists", playlists, curPageNum: +curPageNum});
   }),
 );
 
@@ -596,7 +611,7 @@ app.post(
 app.get(
   "/login",
   catchError((req, res) => {
-    if (req.session.user) return res.redirect("/playlists/your");
+    if (req.session.user) return res.redirect("/playlists/your/0");
     return res.render("login");
   }),
 );
@@ -619,7 +634,7 @@ app.post(
     if (user) {
       req.session.user = user;
       req.flash("successes", MSG.loggedIn);
-      return res.redirect("/playlists/your");
+      return res.redirect("/playlists/your/0");
     } else {
       req.flash("errors", MSG.invalidCred);
       return res.redirect("/login");
