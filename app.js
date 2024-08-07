@@ -378,10 +378,7 @@ app.post(
       req.flash("successes", MSG.deleteSong);
     }
     const rowCount = await persistence.getSongCount(playlistId);
-    console.log({ rowCount });
     const totalPages = Math.ceil(rowCount.count / SONGS_PER_PAGE);
-    console.log({ totalPages });
-    console.log({ curPageNum });
     if (curPageNum > totalPages - 1)
       return res.redirect(
         `/${playlistType}/playlist/${playlistId}/${totalPages - 1}`,
@@ -444,25 +441,32 @@ app.get(
 );
 
 app.post(
-  "/playlists/:playlistId/delete",
+  "/playlists/:playlistId/delete/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const playlistId = +req.params.playlistId;
+    const {playlistId, curPageNum} = req.params;
+    const userId = +req.session.user.id;
     const ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
-      req.session.user.id,
+      +playlistId,
+      userId,
     );
     if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
-    const deleted = await persistence.deletePlaylist(playlistId);
+    const deleted = await persistence.deletePlaylist(+playlistId);
     if (!deleted) {
       req.flash("errors", MSG.notExistPlaylist);
     } else {
       req.flash("successes", MSG.deletePlaylist);
     }
-    return res.redirect("/playlists/your");
+    const rowCount = await persistence.getUserCreatedPlaylistTotal(userId);
+    const totalPages = Math.ceil(rowCount.count / SONGS_PER_PAGE);
+    if (+curPageNum > totalPages - 1)
+      return res.redirect(
+        `/playlists/your/${totalPages - 1}`,
+      );
+    return res.redirect(`/playlists/your/${curPageNum}`);
   }),
 );
 
@@ -518,10 +522,17 @@ app.get(
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
     const playlists = await persistence.getPublicPlaylists(offset, limit);
-    res.locals.playlists = playlists;
-    res.locals.playlistType = "public";
-    res.locals.pageTitle = "Public playlists";
-    return res.render("playlists");
+    const countRow = await persistence.getPublicPlaylistTotal();
+    const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
+    const isEmpty = totalPages === 0;
+    let startPage;
+    let endPage;
+    if (!isEmpty) {
+      if (+curPageNum >= totalPages) return next();
+      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
+      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
+    }
+    return res.render("playlists", {startPage, endPage, curPageNum: +curPageNum,totalPages, playlists, playlistType: "public", pageTitle: "Public Playlists"});
   }),
 );
 
@@ -575,16 +586,16 @@ app.get(
 );
 
 app.get(
-  "/:playlistType/playlists/create",
+  "/:playlistType/playlists/create/:curPageNum",
   requireAuth,
   catchError((req, res) => {
-    res.locals.playlistType = req.params.playlistType;
-    return res.render("create_playlist", { pageTitle: "Create Playlist" });
+    const {playlistType, curPageNum} = req.params;
+    return res.render("create_playlist", { curPageNum: +curPageNum, playlistType, pageTitle: "Create Playlist" });
   }),
 );
 
 app.post(
-  "/:playlistType/playlists/create",
+  "/:playlistType/playlists/create/:curPageNum",
   [
     body("title")
       .trim()
@@ -595,7 +606,7 @@ app.post(
   ],
   requireAuth,
   catchError(async (req, res) => {
-    const playlistType = req.params.playlistType;
+    const {playlistType, curPageNum } = req.params;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
@@ -612,7 +623,7 @@ app.post(
       throw error;
     }
     req.flash("successes", MSG.createPlaylist);
-    return res.redirect("/playlists/your");
+    return res.redirect(`/playlists/your/${curPageNum}`);
   }),
 );
 
@@ -706,9 +717,9 @@ app.get(
   "/",
   catchError((req, res) => {
     if (req.session.user) {
-      return res.redirect("/playlists/your");
+      return res.redirect("/playlists/your/0");
     } else {
-      return res.redirect("/playlists/public");
+      return res.redirect("/playlists/public/0");
     }
   }),
 );
