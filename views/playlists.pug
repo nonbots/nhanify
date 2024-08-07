@@ -24,7 +24,12 @@ block main
               a(href=`/playlists/contributing/${curPageNum - 1}`) ⮜
           .pages
             - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/your/${pageNum}`) #{pageNum + 1}
+              if(playlistType === "owned")
+                a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/your/${pageNum}`) #{pageNum + 1}
+              if(playlistType === "public")
+                a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/public/${pageNum}`) #{pageNum + 1}
+              if(playlistType === "contribution")
+                a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/contributing/${pageNum}`) #{pageNum + 1}
           if (curPageNum < totalPages - 1) 
             if (playlistType === "owned")
               a(href=`/playlists/your/${curPageNum + 1}`) ⮞

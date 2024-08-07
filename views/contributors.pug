@@ -3,8 +3,6 @@ extends playlists
 block list 
   .listHeader
     p(class="username") #{contributors.contributors.length} Contributor(s)  
-    if(playlistType === "owned")
-      a(href=`/${playlistType}/playlist/${playlistId}/contributors/add`) Add 
   .cols
     .label
       p(class="username") username

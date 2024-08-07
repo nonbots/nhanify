@@ -21,6 +21,8 @@ block listWrap
           p(class="username") #{playlist.songTotal} song(s)  
         if (user !== undefined)
           a(href=`/${playlistType}/playlist/${playlistId}/contributors`) Contributors
+        if(playlistType === "owned")
+          a(href=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}`) Add 
       .iframeDiv
         #player
       .currentSongcols
