@@ -1,29 +1,33 @@
 extends playlists
 
-block list 
-  .listHeader
-    p(class="username") #{totalContributors} Contributor(s)  
-  .pageNav 
-    if (curPageNum !== 0) 
-      a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum - 1}`) ⮜
-    .pages
-      - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-        a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/contributors/${pageNum}`) #{pageNum + 1}
-    if (curPageNum < totalPages - 1) 
-      a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum + 1}`) ⮞
-  .cols
-    .label
-      p(class="username") username
-    .label
-block values
-  .content
-    .playListWrap
-      each contributor in contributors.contributors
-          div(class="songCard")
-            .val
-              p= contributor.username   
-            .val
-              if(playlistType === "owned")
-                form(class="delete" action=`/${playlistType}/playlist/${playlistId}/contributors/delete/${contributor.id}` method="post")
-                  input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="")
+block listWrap
+  if (totalContributors === 0 ) 
+    p There are no contributors on this playlist.
+  else 
+    block list 
+        .listHeader
+          p(class="username") #{totalContributors} Contributor(s)  
+        .pageNav 
+          if (curPageNum !== 0) 
+            a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum - 1}`) ⮜
+          .pages
+            - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
+              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/contributors/${pageNum}`) #{pageNum + 1}
+          if (curPageNum < totalPages - 1) 
+            a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum + 1}`) ⮞
+        .cols
+          .label
+            p(class="username") username
+          .label
+    block values
+      .content
+        .playListWrap
+          each contributor in contributors.contributors
+              div(class="songCard")
+                .val
+                  p= contributor.username   
+                .val
+                  if(playlistType === "owned")
+                    form(class="delete" action=`/${playlistType}/playlist/${playlistId}/contributors/delete/${contributor.id}/${curPageNum}` method="post")
+                      input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="")
 

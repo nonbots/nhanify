@@ -11,7 +11,6 @@ block content
       .formDivParent
         .formDivHz
           - let vis = playlist.private ? "private" : "public";
-          - console.log("VIS", vis);
           input(type="radio" id="private" name="visiability" value="private" checked=visiability || vis === "private")
           label(for="private") private
         .formDivHz

@@ -1,6 +1,8 @@
 extends layout
 
 block main 
+  - console.log({username}, {password})
+  - console.log({flash})
   .mainWrapWrap
     .mainWrap
       block header 
@@ -14,10 +16,10 @@ block main
         form(class="inputForm" action="/signup" method="post")
           .formDiv
             label(for="username") Username 
-            input( id="username" type="text" name="username") 
+            input( id="username" type="text" name="username" value=username) 
           .formDiv
             label(for="password") Password
-            input(id="password" type="password" name="password")
+            input(id="password" type="password" name="password" value=password)
           input(type="submit" class="submit"  value="Sign Up")
        
       

@@ -70,13 +70,20 @@ app.post(
   ],
   catchError(async (req, res) => {
     const errors = validationResult(req);
-    const playlistId = +req.params.playlistId;
-    const playlistType = req.params.playlistType;
+    const { playlistId, playlistType } = req.params;
     if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.redirect(
-        `/${playlistType}/playlist/${playlistId}/contributors/add/0`,
-      );
+      errors.array().forEach((message) => {
+        req.flash("errors", message.msg);
+        if (message.path === "username") username = "";
+      });
+      res.render("add_contributors", {
+        pageTitle: `Add contributor to ${req.session.title}`,
+        flash: req.flash(),
+        username,
+        playlistType,
+        playlistId: +playlistId,
+      });
+      return;
     }
     const userId = req.session.user.id;
     const ownedPlaylist = await persistence.getOwnedPlaylist(
@@ -125,10 +132,11 @@ app.get(
       req.flash("errors", MSG.unauthorizedUser);
       return res.redirect("/playlists/your");
     }
-    const playlist = await persistence.getPlaylist(+playlistId);
+    const titleRow = await persistence.getPlaylistTitle(+playlistId);
+    req.session.title = titleRow.title;
     return res.render("add_contributors", {
       playlistId: +playlistId,
-      pageTitle: `Add contributor to ${playlist.title}`,
+      pageTitle: `Add contributor to ${titleRow.title}`,
       playlistType,
       curPageNum: +curPageNum,
     });
@@ -166,7 +174,7 @@ app.get(
       curPageNum: +curPageNum,
       endPage,
       totalPages,
-      totalContributors: countRow.count,
+      totalContributors: +countRow.count,
     });
   }),
 );
@@ -344,8 +352,9 @@ app.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
+    let { title, url } = req.body;
     const writePlaylist = await persistence.getUserAuthorizedWrite(
-      playlistId,
+      +playlistId,
       req.session.user.id,
     );
     if (!writePlaylist) {
@@ -354,18 +363,24 @@ app.post(
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
+      errors.array().forEach((message) => {
+        req.flash("errors", message.msg);
+        if (message.path === "title") title = "";
+        if (message.path === "url") url = "";
+      });
+      req.session.url = url;
+      req.session.title = title;
       return res.redirect(
         `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
       );
     }
     let videoId;
     try {
-      videoId = parseURL(req.body.url);
+      videoId = parseURL(url);
     } catch (error) {
-      console.log("ERROR", error.message);
       if (error.message === "invalidURL") {
         req.flash("errors", MSG.invalidURL);
+        req.session.title = title;
         return res.redirect(
           `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
         );
@@ -374,8 +389,8 @@ app.post(
     }
     try {
       await persistence.addSong(
-        req.body.title,
-        req.body.url,
+        title,
+        url,
         videoId,
         +playlistId,
         req.session.user.id,
@@ -385,12 +400,14 @@ app.post(
       console.log("CONSTRAINT", error.constraint);
       if (error.constraint === "unique_video_id_playlist_id") {
         req.flash("errors", MSG.uniqueSong);
+        req.session.title = title;
         return res.redirect(
           `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
         );
       }
       if (error.constraint === "unique_title_playlist_id") {
         req.flash("errors", MSG.uniqueSongTitle);
+        req.session.title = title;
         return res.redirect(
           `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
         );
@@ -440,6 +457,7 @@ app.get(
     const { curPageNum, playlistType, playlistId } = req.params;
     const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
+    console.log(req.session.url, req.session.title, "IN GET PLAYLIST");
 
     if (!req.session.user) {
       if (!(await persistence.getPublicPlaylist(playlistId))) {
@@ -481,28 +499,34 @@ app.get(
       isEmpty,
       playlistType,
       playlistId: +playlistId,
+      url: req.session.url,
+      title: req.session.title,
     });
   }),
 );
 
 app.post(
-  "/playlists/:playlistId/delete/contribution",
-  //requireAuth,
+  "/playlists/:playlistId/delete/contribution/:curPageNum",
+  requireAuth,
   catchError(async (req, res) => {
-    const playlistId = +req.params.playlistId;
-    console.log({ playlistId }, req.session.user.id);
+    const { playlistId, curPageNum } = req.params;
+    const userId = req.session.user.id;
     const contributionPlaylist = await persistence.deleteContributionPlaylist(
-      playlistId,
-      req.session.user.id,
+      +playlistId,
+      userId,
     );
-    console.log({ contributionPlaylist });
     if (!contributionPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
+      req.flash("errors", MSG.unauthorizedUser); // should be no playlist not found
     } else {
       req.flash("successes", MSG.deletePlaylist);
     }
+
     res.locals.playlistType = "contribution";
-    return res.redirect("/playlists/contributing/0");
+    const rowCount = await persistence.getContributionPlaylistTotal(userId);
+    const totalPages = Math.ceil(rowCount.count / SONGS_PER_PAGE);
+    if (+curPageNum > totalPages - 1)
+      return res.redirect(`/playlists/contributing/${totalPages - 1}`);
+    return res.redirect(`/playlists/contributing/${curPageNum}`);
   }),
 );
 
@@ -536,29 +560,30 @@ app.post(
 );
 
 app.post(
-  "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId",
+  "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const playlistId = +req.params.playlistId;
+    const { contributorId, playlistId, curPageNum, playlistType } = req.params;
     const ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
+      +playlistId,
       req.session.user.id,
     );
     if (!ownedPlaylist) {
       req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your");
+      return res.redirect("/playlists/your/0");
     }
-    const playlistType = req.params.playlistType;
     const deleted = await persistence.deleteContributor(
-      playlistId,
-      req.params.contributorId,
+      +playlistId,
+      +contributorId,
     );
     if (!deleted) {
       req.flash("errors", MSG.notExistPlaylist);
     } else {
       req.flash("successes", MSG.deleteContributor);
     }
-    return res.redirect(`/${playlistType}/playlist/${playlistId}/contributors`);
+    return res.redirect(
+      `/${playlistType}/playlist/${+playlistId}/contributors/${+curPageNum}`,
+    );
   }),
 );
 
@@ -587,6 +612,7 @@ app.get(
       playlists,
       playlistType: "public",
       pageTitle: "Public Playlists",
+      playlistTotal: +countRow.count,
     });
   }),
 );
@@ -622,6 +648,7 @@ app.get(
       pageTitle: "Your Playlists",
       playlists,
       curPageNum: +curPageNum,
+      playlistTotal: +countRow.count,
     });
   }),
 );
@@ -629,7 +656,7 @@ app.get(
 app.get(
   "/playlists/contributing/:curPageNum",
   requireAuth,
-  catchError(async (req, res) => {
+  catchError(async (req, res, next) => {
     const curPageNum = +req.params.curPageNum;
     const userId = req.session.user.id;
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
@@ -658,6 +685,7 @@ app.get(
       playlists,
       playlistType: "contribution",
       pageTitle: "Contributing Playlists",
+      playlistTotal: +countRow.count,
     });
   }),
 );
@@ -671,6 +699,7 @@ app.get(
       curPageNum: +curPageNum,
       playlistType,
       pageTitle: "Create Playlist",
+      isPrivate: req.session.isPrivate,
     });
   }),
 );
@@ -687,13 +716,24 @@ app.post(
   ],
   requireAuth,
   catchError(async (req, res) => {
+    let { title, visiability } = req.body;
+    const isPrivate = visiability === "private";
     const { playlistType, curPageNum } = req.params;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.redirect(`/${playlistType}/playlists/create/${curPageNum}`);
+      errors.array().forEach((message) => {
+        req.flash("errors", message.msg);
+        if (message.path === "title") title = "";
+      });
+      res.render("create_playlist", {
+        playlistType,
+        curPageNum: +curPageNum,
+        title,
+        isPrivate,
+        flash: req.flash(),
+      });
+      return;
     }
-    const { title, visiability } = req.body;
     try {
       await persistence.createPlaylist(title, visiability, req.session.user.id);
     } catch (error) {
@@ -704,6 +744,7 @@ app.post(
       throw error;
     }
     req.flash("successes", MSG.createPlaylist);
+    req.session.isPrivate = isPrivate;
     return res.redirect(`/playlists/your/${curPageNum}`);
   }),
 );
@@ -777,12 +818,17 @@ app.post(
       .withMessage(MSG.maxPassword),
   ],
   catchError(async (req, res) => {
+    let { username, password } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.redirect("/signup");
+      errors.array().forEach((message) => {
+        req.flash("errors", message.msg);
+        if (message.path === "username") username = "";
+        if (message.path === "password") password = "";
+      });
+      res.render("signup", { username, password, flash: req.flash() });
+      return;
     }
-    const { username, password } = req.body;
     const user = await persistence.createUser(username, password);
     if (!user) {
       req.flash("errors", MSG.uniqueUsername);

@@ -2,6 +2,10 @@ extends playlists
 
 block listWrap
   if(isEmpty) 
+    if (user !== undefined)
+      a(href=`/${playlistType}/playlist/${playlistId}/contributors/0`) Contributors
+    if(playlistType === "owned")
+      a(href=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}`) Add 
     p There are currently no songs on the playlist.
     .addDiv
     if(isEmpty && (playlistType === "owned" || playlistType === "contribution")) 
@@ -9,8 +13,8 @@ block listWrap
       form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
         .verticalDiv
           .songInputDiv
-            input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL") 
-            input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
+            input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL" value=url) 
+            input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title" value=title) 
         input(class="addBtn" type="submit" value="Add")
   else 
     block list 
@@ -47,8 +51,8 @@ block listWrap
           form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
             .verticalDiv
               .songInputDiv
-                input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL") 
-                input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title") 
+                input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL" value=url) 
+                input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title" value=title) 
             input(class="addBtn" type="submit" value="Add")
       .pageNav 
         if (curPageNum !== 0) 

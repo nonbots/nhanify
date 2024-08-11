@@ -10,10 +10,10 @@ block content
       label(for="visiability") Visibility
       .formDivParent
         .formDivHz
-          input(type="radio" id="private" name="visiability" value="private" checked)
+          input(type="radio" id="private" name="visiability" value="private" checked=isPrivate)
           label(for="private") private
         .formDivHz
-          input(type="radio" id="public" name="visiability" value="public")
+          input(type="radio" id="public" name="visiability" value="public" checked=!isPrivate)
           label(for="public") public
     input(type="submit" class="submit" value="Create")
 
