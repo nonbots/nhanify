@@ -13,7 +13,7 @@ const { parseURL } = require("./lib/playlist.js");
 const flash = require("express-flash");
 const { body, validationResult } = require("express-validator");
 const catchError = require("./lib/catch-error");
-const SONGS_PER_PAGE = 2;
+const SONGS_PER_PAGE = 5;
 const VISIBLE_OFFSET = 2;
 app.set("views", "./views");
 app.set("view engine", "pug");
@@ -61,8 +61,6 @@ app.post(
       .trim()
       .isLength({ min: 1 })
       .withMessage(MSG.emptyUsername)
-      .isLength({ max: 30 })
-      .withMessage(MSG.maxUsername)
       .custom((usernameInput, { req }) => {
         return !(usernameInput === req.session.user.username);
       })
@@ -390,7 +388,6 @@ app.post(
     try {
       await persistence.addSong(
         title,
-        url,
         videoId,
         +playlistId,
         req.session.user.id,
@@ -698,7 +695,6 @@ app.get(
     return res.render("create_playlist", {
       curPageNum: +curPageNum,
       playlistType,
-      pageTitle: "Create Playlist",
       isPrivate: req.session.isPrivate,
     });
   }),

@@ -140,6 +140,7 @@ main {
 .playlistsDiv {
   display: flex;
   flex-direction: column;
+  width: 320px;
   align-items: center;
   height: 100%;
 }
@@ -147,13 +148,14 @@ main {
 #player {
   background-color: grey;
 }
-
-.listHeader {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+.emptyMessage {
   display: flex;
-  width: 100%;
-  justify-content: space-between;
+  margin-top: 1rem;
+  flex-direction: column;
+}
+.listHeader {
+  display: flex;
+  column-gap: 1rem;
 }
 .iframeDiv {
   aspect-ratio: 16 / 9;
@@ -161,7 +163,20 @@ main {
   height: auto;
   background-color: var(--color-bg-dark);
   display: flex;
+  margin-top: 1rem;
   border-radius: 1rem;
+}
+
+.modDiv {
+  display: flex;
+  width: 100%;
+  column-gap: 1rem;
+  justify-content: end;
+}
+
+.descriptionDiv {
+  display: flex;
+  column-gap: 1rem;
 }
 
 .verticalDiv {
@@ -200,6 +215,7 @@ main {
   column-gap: 1.5rem;
   justify-content: right;
   width: 100%;
+  margin-top: 1rem;
 }
 .curPage {
   font-size: 1.1rem;
@@ -241,7 +257,6 @@ main {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0.5rem 0rem 1.5rem 0rem;
 }
 
 .cols {
@@ -269,6 +284,9 @@ main {
 }
 .labelNo {
   width: 8%;
+  display: flex;
+}
+.labelSongTotal {
   display: flex;
 }
 .labelTitle {
@@ -301,8 +319,8 @@ main {
   border-top: 1px solid var(--color-secondary);
   padding: 1rem 0rem;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+  row-gap: 0.5rem;
 }
 
 .currentSong {
@@ -327,7 +345,7 @@ main {
 
 .valAddedBy {
   display: flex;
-  width: 25%;
+  width: 30%;
 }
 
 .valDelete {
@@ -394,7 +412,7 @@ input {
   margin: 0rem;
   background-color: var(--color-secondary);
   color: white;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
   border: none;
   height: 1.5rem;
@@ -418,6 +436,15 @@ input {
 }
 
 /*error*/
+pre {
+  text-wrap: wrap;
+}
+.errorMessages {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+  margin-top: 1rem;
+}
 .errorWrap {
   margin-bottom: 1rem;
 }
@@ -430,16 +457,16 @@ input {
 .errors {
   background-color: #ff000038;
   border: 1px dashed red;
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
   color: #ffdede;
   text-align: left;
 }
 .successes {
   background-color: #4c8a5c;
   border: 1px dashed green;
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
   color: #c7fcd6;
   text-align: left;
 }

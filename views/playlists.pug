@@ -2,24 +2,27 @@ extends layout
 
 block main
   if (playlistTotal === 0) 
-    p There is currently no playlist. 
-    if (user !== undefined && playlistType === "owned")
-      p Click "Create" to create a playlist.
-      a(href=`/${playlistType}/playlists/create/${curPageNum}`) Create 
+    .emptyMessage
+      p There is currently no playlist. 
+      if (user !== undefined && playlistType === "owned")
+        p Click "Create" to create a playlist.
+        a(href=`/${playlistType}/playlists/create/${curPageNum}`) Create 
   else 
     .playlistsDiv
       h1(class="pageTitle") #{pageTitle}
-      - let msgTypes = Object.keys(flash || {})
-      if (msgTypes.length > 0) 
-        each msgType in msgTypes
-          each msg in flash[msgType]
-            pre(class=`${msgType}`) #{msg}
       block listWrap
         block list 
           .listHeader
-            p(class="username") #{playlistTotal} Playlist()  
+            - let playlistLabel = playlistTotal < 2 ? "Playlist" : "Playlists"
+            p(class="username") #{playlistTotal} #{playlistLabel} 
             if (user !== undefined && playlistType === "owned")
               a(href=`/${playlistType}/playlists/create/${curPageNum}`) Create 
+          .errorMessages
+            - let msgTypes = Object.keys(flash || {})
+            if (msgTypes.length > 0) 
+              each msgType in msgTypes
+                each msg in flash[msgType]
+                  pre(class=`${msgType}`) #{msg}
           .pageNav 
             if (curPageNum !== 0) 
               if (playlistType === "owned")
@@ -44,36 +47,38 @@ block main
               if (playlistType === "contribution")
                 a(href=`/playlists/contributing/${curPageNum + 1}`) ⮞
           .cols
-            .label
+            .labelTitle
               p(class="username") Title
-            .label
-              p(class="username") Creator
-            .label
-              p(class="username") Song Total
-            .label
-            .label
+            if (playlistType !== "owned")
+              .labelAddedBy
+                p(class="username") Creator
+            .labelSongTotal
+              p(class="username") Songs
         block values
           .content
             .playListWrap
               each playlist in playlists
                 a(href=`/${playlistType}/playlist/${playlist.id}/0`) 
                   div(class="songCard")
-                    .val
-                      p= playlist.title   
-                    .val
-                      p= playlist.username 
-                    .val
-                      p= playlist.count
-                    .val
-                      if (user !== undefined)
-                        if (playlistType === "owned")
-                          form(action=`/${playlistType}/playlist/${playlist.id}/edit/${curPageNum}` method="get")
-                            input(class="editBtn" type="submit" value="")
-                      .val
-                        if (playlistType === "contribution")
-                          form(class="delete" action=`/playlists/${playlist.id}/delete/contribution/${curPageNum}` method="post")
-                            input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
-                        if (playlistType === "owned")
-                          form(class="delete" action=`/playlists/${playlist.id}/delete/${curPageNum}` method="post")
-                            input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
+                    .descriptionDiv
+                      .valTitle
+                        p= playlist.title   
+                      if (playlistType !== "owned")
+                        .valAddedBy
+                          p= playlist.username 
+                      .valSongTotal
+                        p= playlist.count
+                    if (user !== undefined)
+                      .modDiv 
+                        .val
+                          if (playlistType === "owned")
+                            form(action=`/${playlistType}/playlist/${playlist.id}/edit/${curPageNum}` method="get")
+                              input(class="editBtn" type="submit" value="")
+                        .val
+                          if (playlistType === "contribution")
+                            form(class="delete" action=`/playlists/${playlist.id}/delete/contribution/${curPageNum}` method="post")
+                              input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
+                          if (playlistType === "owned")
+                            form(class="delete" action=`/playlists/${playlist.id}/delete/${curPageNum}` method="post")
+                              input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
           
