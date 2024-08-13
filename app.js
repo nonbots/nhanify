@@ -548,7 +548,7 @@ app.post(
     } else {
       req.flash("successes", MSG.deletePlaylist);
     }
-    const rowCount = await persistence.getUserCreatedPlaylistTotal(userId);
+    const rowCount = await persistence.getYourPlaylistTotal(userId);
     const totalPages = Math.ceil(rowCount.count / SONGS_PER_PAGE);
     if (+curPageNum > totalPages - 1)
       return res.redirect(`/playlists/your/${totalPages - 1}`);
@@ -590,7 +590,7 @@ app.get(
     const curPageNum = +req.params.curPageNum;
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
-    const playlists = await persistence.getPublicPlaylists(offset, limit);
+    const playlists = await persistence.getPublicPlaylistsPage(offset, limit);
     const countRow = await persistence.getPublicPlaylistTotal();
     const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
@@ -622,12 +622,12 @@ app.get(
     const userId = +req.session.user.id;
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
-    const playlists = await persistence.getUserCreatedPlaylists(
+    const playlists = await persistence.getYourPlaylistsPage(
       userId,
       offset,
       limit,
     );
-    const countRow = await persistence.getUserCreatedPlaylistTotal(userId);
+    const countRow = await persistence.getYourPlaylistTotal(userId);
     const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
     let startPage;
@@ -658,7 +658,7 @@ app.get(
     const userId = req.session.user.id;
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
-    const playlists = await persistence.getContributedPlaylists(
+    const playlists = await persistence.getContributionPlaylistsPage(
       userId,
       offset,
       limit,
