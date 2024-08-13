@@ -85,7 +85,8 @@ VALUES
   ('Twitch Stream', 1, false),
   ('Focus Study', 2, false),
   ('Dance Class', 3, false),
-  ('Date Night', 4, true);
+  ('Date Night', 4, true),
+  ('Summer Jam', 5, true);
 
 --insert reference to users and playlist into playlists-users table
 INSERT INTO
@@ -93,7 +94,7 @@ INSERT INTO
 VALUES
   (1, 8),
   (1, 9),
-  (1, 10),
+  (1, 11),
   (2, 7),
   (3, 7),
   (4, 7),
@@ -105,7 +106,7 @@ VALUES
 INSERT INTO
   songs (title, video_id, playlist_id, creator_id)
 VALUES
-  ('Chilling in Tokyo', 'y7qZFji19Rg', 1, 1),
+  ('Chilling In Tokyo', 'y7qZFji19Rg', 1, 1),
   ('Good Days', 'L9VcK_pT1Y4', 1, 1),
   ('Just With My Guitar', 'M0ecZFXs-VM', 1, 1),
   ('Spring Nights', 'InZxeDWR-hQ', 1, 1),
