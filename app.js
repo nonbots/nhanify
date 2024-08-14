@@ -39,8 +39,7 @@ app.use(flash());
 
 function requireAuth(req, res, next) {
   if (!req.session.user) {
-    req.flash("errors", MSG.unauthorizedUser);
-    res.redirect("/playlists/public/0");
+    res.render("error", { statusCode: "401", msg: MSG.error401 });
   } else {
     next();
   }
@@ -89,8 +88,7 @@ app.post(
       userId,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const user = await persistence.getContributor(req.body.username);
     if (!user) {
@@ -127,8 +125,7 @@ app.get(
       req.session.user.id,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const titleRow = await persistence.getPlaylistTitle(+playlistId);
     req.session.title = titleRow.title;
@@ -187,8 +184,7 @@ app.get(
       req.session.user.id,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0"); //change to an error page
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const playlist = await persistence.getPlaylist(+playlistId);
     if (!playlist) {
@@ -231,8 +227,7 @@ app.post(
       req.session.user.id,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0"); //change to an error page
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const visibility = req.body.visiability === "private" ? true : false;
     try {
@@ -268,8 +263,7 @@ app.get(
       req.session.user.id,
     );
     if (!writePlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const song = await persistence.getSong(songId);
     if (!song) {
@@ -311,8 +305,7 @@ app.post(
       req.session.user.id,
     );
     if (!writePlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     try {
       const edited = await persistence.editSong(songId, req.body.title);
@@ -356,8 +349,7 @@ app.post(
       req.session.user.id,
     );
     if (!writePlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -427,8 +419,7 @@ app.post(
       req.session.user.id,
     );
     if (!writePlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0"); //go to error page
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const deleted = await persistence.deleteSong(+songId);
     if (!deleted) {
@@ -451,54 +442,55 @@ app.post(
 app.get(
   "/:playlistType/playlist/:playlistId/:curPageNum",
   catchError(async (req, res, next) => {
+    console.log("IN GET PLAYLIST ROUTE");
     const { curPageNum, playlistType, playlistId } = req.params;
     const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
-    console.log(req.session.url, req.session.title, "IN GET PLAYLIST");
+    console.log("USER IN SESSION", req.session.user);
 
-    if (!req.session.user) {
-      if (!(await persistence.getPublicPlaylist(playlistId))) {
-        return res.redirect("/playlists/public/0");
-      }
+    if (!req.session.user && playlistType !== "public") {
+      //const publicPlaylist = await persistence.getPublicPlaylist(playlistId);
+      //console.log({publicPlaylist});
+      console.log({ playlistType });
+      res.render("error", { statusCode: "401", msg: MSG.error401 });
     } else {
       const authPlaylist = await persistence.getUserAuthorizedPlaylist(
         playlistId,
         req.session.user.id,
       );
       if (!authPlaylist) {
-        req.flash("errors", MSG.unauthorizedUser);
-        return res.redirect("/playlists/your/0");
+        res.render("error", { statusCode: "403", msg: MSG.error403 });
       }
+      const playlist = await persistence.getPlaylistInfoSongs(
+        +playlistId,
+        offset,
+        limit,
+      );
+      const videoIds = playlist.songs.map((song) => song.video_id);
+      const totalPages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
+      const isEmpty = totalPages === 0;
+      let startPage;
+      let endPage;
+      if (!isEmpty) {
+        if (+curPageNum >= totalPages) return next();
+        startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
+        endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
+      }
+      return res.render("playlist", {
+        playlist,
+        pageTitle: playlist.info.title,
+        videoIds,
+        totalPages,
+        curPageNum: +curPageNum,
+        endPage,
+        startPage,
+        isEmpty,
+        playlistType,
+        playlistId: +playlistId,
+        url: req.session.url,
+        title: req.session.title,
+      });
     }
-    const playlist = await persistence.getPlaylistInfoSongs(
-      +playlistId,
-      offset,
-      limit,
-    );
-    const videoIds = playlist.songs.map((song) => song.video_id);
-    const totalPages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
-    }
-    return res.render("playlist", {
-      playlist,
-      pageTitle: playlist.info.title,
-      videoIds,
-      totalPages,
-      curPageNum: +curPageNum,
-      endPage,
-      startPage,
-      isEmpty,
-      playlistType,
-      playlistId: +playlistId,
-      url: req.session.url,
-      title: req.session.title,
-    });
   }),
 );
 
@@ -513,7 +505,7 @@ app.post(
       userId,
     );
     if (!contributionPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser); // should be no playlist not found
+      req.flash("errors", MSG.notExistPlaylistt); // should be no playlist not found
     } else {
       req.flash("successes", MSG.deletePlaylist);
     }
@@ -539,8 +531,7 @@ app.post(
       userId,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0"); //send error page
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const deleted = await persistence.deletePlaylist(+playlistId);
     if (!deleted) {
@@ -566,8 +557,7 @@ app.post(
       req.session.user.id,
     );
     if (!ownedPlaylist) {
-      req.flash("errors", MSG.unauthorizedUser);
-      return res.redirect("/playlists/your/0");
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const deleted = await persistence.deleteContributor(
       +playlistId,

@@ -1,6 +1,8 @@
 {
-  "error500": "This page is currently not available. We are currently addressing the issue.",
-  "error404": "This page does not exist.",
+  "error401": "Oops! Your session has ended. Please log back into your account.",
+  "error500": "Oops! Something went wrong with the server. We are currently addressing the issue.",
+  "error404": "Oops! It looks like the page does not exist.",
+  "error403": "Oops! It looks like you don’t have access to this page.",
   "addedSong": "Song was added to the playlist.",
   "editedSong": "Song was edited.",
   "deleteSong": "Song was deleted from the playlist.",

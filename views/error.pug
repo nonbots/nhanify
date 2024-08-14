@@ -2,5 +2,6 @@ extend layout
 block main 
   p #{statusCode}
   p #{msg}
-  p Click on #[a(href="/playlists/public") Home] to go back to public playlists.
+  if (statusCode === "500") 
+    p Click on #[a(href="/playlists/public") Home] to go back to public playlists.
   
