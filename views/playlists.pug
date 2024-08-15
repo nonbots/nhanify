@@ -4,7 +4,7 @@ block main
   if (playlistTotal === 0) 
     .emptyMessage
       p There is currently no playlist. 
-      if (user !== undefined && playlistType === "owned")
+      if (user !== undefined && playlistType === "your")
         p Click "Create" to create a playlist.
         a(href=`/${playlistType}/playlists/create/${curPageNum}`) Create 
   else 
@@ -15,7 +15,7 @@ block main
           .listHeader
             - let playlistLabel = playlistTotal < 2 ? "Playlist" : "Playlists"
             p(class="username") #{playlistTotal} #{playlistLabel} 
-            if (user !== undefined && playlistType === "owned")
+            if (user !== undefined && playlistType === "your")
               a(href=`/${playlistType}/playlists/create/${curPageNum}`) Create 
           .errorMessages
             - let msgTypes = Object.keys(flash || {})
@@ -25,31 +25,31 @@ block main
                   pre(class=`${msgType}`) #{msg}
           .pageNav 
             if (curPageNum !== 0) 
-              if (playlistType === "owned")
-                a(href=`/playlists/your/${curPageNum - 1}`) ⮜
+              if (playlistType === "your")
+                a(href=`/your/playlists/${curPageNum - 1}`) ⮜
               if (playlistType === "public")
-                a(href=`/playlists/public/${curPageNum - 1}`) ⮜
+                a(href=`/public/playlists/${curPageNum - 1}`) ⮜
               if (playlistType === "contribution")
-                a(href=`/playlists/contributing/${curPageNum - 1}`) ⮜
+                a(href=`/contribution/playlists/${curPageNum - 1}`) ⮜
             .pages
               - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-                if(playlistType === "owned")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/your/${pageNum}`) #{pageNum + 1}
+                if(playlistType === "your")
+                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/your/playlists/${pageNum}`) #{pageNum + 1}
                 if(playlistType === "public")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/public/${pageNum}`) #{pageNum + 1}
+                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/public/playlists/${pageNum}`) #{pageNum + 1}
                 if(playlistType === "contribution")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/playlists/contributing/${pageNum}`) #{pageNum + 1}
+                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/contribution/playlists/${pageNum}`) #{pageNum + 1}
             if (curPageNum < totalPages - 1) 
-              if (playlistType === "owned")
-                a(href=`/playlists/your/${curPageNum + 1}`) ⮞
+              if (playlistType === "your")
+                a(href=`/your/playlists/${curPageNum + 1}`) ⮞
               if (playlistType === "public")
-                a(href=`/playlists/public/${curPageNum + 1}`) ⮞
+                a(href=`/public/playlists/${curPageNum + 1}`) ⮞
               if (playlistType === "contribution")
-                a(href=`/playlists/contributing/${curPageNum + 1}`) ⮞
+                a(href=`/contribution/playlists/${curPageNum + 1}`) ⮞
           .cols
             .labelTitle
               p(class="username") Title
-            if (playlistType !== "owned")
+            if (playlistType !== "your")
               .labelAddedBy
                 p(class="username") Creator
             .labelSongTotal
@@ -63,7 +63,7 @@ block main
                     .descriptionDiv
                       .valTitle
                         p= playlist.title   
-                      if (playlistType !== "owned")
+                      if (playlistType !== "your")
                         .valAddedBy
                           p= playlist.username 
                       .valSongTotal
@@ -71,14 +71,14 @@ block main
                     if (user !== undefined)
                       .modDiv 
                         .val
-                          if (playlistType === "owned")
+                          if (playlistType === "your")
                             form(action=`/${playlistType}/playlist/${playlist.id}/edit/${curPageNum}` method="get")
                               input(class="editBtn" type="submit" value="")
                         .val
                           if (playlistType === "contribution")
                             form(class="delete" action=`/playlists/${playlist.id}/delete/contribution/${curPageNum}` method="post")
                               input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
-                          if (playlistType === "owned")
+                          if (playlistType === "your")
                             form(class="delete" action=`/playlists/${playlist.id}/delete/${curPageNum}` method="post")
                               input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
           

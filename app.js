@@ -87,11 +87,8 @@ app.post(
       return;
     }
     const userId = req.session.user.id;
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
-      playlistId,
-      userId,
-    );
-    if (!ownedPlaylist) {
+    const yourPlaylist = await persistence.getOwnedPlaylist(playlistId, userId);
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -124,12 +121,12 @@ app.get(
   catchError(async (req, res) => {
     const { playlistId, playlistType, curPageNum } = req.params;
 
-    let ownedPlaylist;
-    ownedPlaylist = await persistence.getOwnedPlaylist(
+    let yourPlaylist;
+    yourPlaylist = await persistence.getOwnedPlaylist(
       +playlistId,
       req.session.user.id,
     );
-    if (!ownedPlaylist) {
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -185,11 +182,11 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistId, playlistType, curPageNum } = req.params;
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
+    const yourPlaylist = await persistence.getOwnedPlaylist(
       +playlistId,
       req.session.user.id,
     );
-    if (!ownedPlaylist) {
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -229,11 +226,11 @@ app.post(
       );
     }
 
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
+    const yourPlaylist = await persistence.getOwnedPlaylist(
       +playlistId,
       req.session.user.id,
     );
-    if (!ownedPlaylist) {
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -452,27 +449,61 @@ app.post(
 );
 
 app.get(
+  "/public/playlist/:playlistId/:curPageNum",
+  catchError(async (req, res, next) => {
+    const { curPageNum, playlistId } = req.params;
+    const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
+    const limit = SONGS_PER_PAGE;
+    const playlist = await persistence.getPlaylistInfoSongs(
+      +playlistId,
+      offset,
+      limit,
+    );
+    console.log({ playlist, curPageNum }, "IN PUBLIC");
+    const videoIds = playlist.songs.map((song) => song.video_id);
+    const totalPages = Math.ceil(playlist.songTotal / SONGS_PER_PAGE);
+    const isEmpty = totalPages === 0;
+    let startPage;
+    let endPage;
+    if (!isEmpty) {
+      if (+curPageNum >= totalPages) return next();
+      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
+      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
+    }
+    return res.render("playlist", {
+      playlist,
+      pageTitle: playlist.info.title,
+      videoIds,
+      totalPages,
+      curPageNum: +curPageNum,
+      endPage,
+      startPage,
+      isEmpty,
+      playlistType: "public",
+      playlistId: +playlistId,
+      url: req.session.url,
+      title: req.session.title,
+    });
+  }),
+);
+
+app.get(
   "/:playlistType/playlist/:playlistId/:curPageNum",
+  requireAuth,
   catchError(async (req, res, next) => {
     const { curPageNum, playlistType, playlistId } = req.params;
     const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
 
-    if (!req.session.user && playlistType !== "public") {
-      req.flash("errors", MSG.error401);
-      res.redirect("/login");
+    const authPlaylist = await persistence.getUserAuthorizedPlaylist(
+      playlistId,
+      req.session.user.id,
+    );
+    console.log({ authPlaylist });
+    if (!authPlaylist) {
+      res.status(403);
+      res.render("error", { statusCode: "403", msg: MSG.error403 });
       return;
-    } else if (req.session.user) {
-      const authPlaylist = await persistence.getUserAuthorizedPlaylist(
-        playlistId,
-        req.session.user.id,
-      );
-      console.log({ authPlaylist });
-      if (!authPlaylist) {
-        res.status(403);
-        res.render("error", { statusCode: "403", msg: MSG.error403 });
-        return;
-      }
     }
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
@@ -538,11 +569,11 @@ app.post(
     console.log("IN THIS ROUTE");
     const { playlistId, curPageNum } = req.params;
     const userId = +req.session.user.id;
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
+    const yourPlaylist = await persistence.getOwnedPlaylist(
       +playlistId,
       userId,
     );
-    if (!ownedPlaylist) {
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -565,11 +596,11 @@ app.post(
   requireAuth,
   catchError(async (req, res) => {
     const { contributorId, playlistId, curPageNum, playlistType } = req.params;
-    const ownedPlaylist = await persistence.getOwnedPlaylist(
+    const yourPlaylist = await persistence.getOwnedPlaylist(
       +playlistId,
       req.session.user.id,
     );
-    if (!ownedPlaylist) {
+    if (!yourPlaylist) {
       res.status(403);
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
@@ -589,13 +620,22 @@ app.post(
 );
 
 app.get(
-  "/playlists/public/:curPageNum",
+  "/anon/public/playlists/:curPageNum",
   catchError(async (req, res) => {
-    const curPageNum = +req.params.curPageNum;
-    const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
+    console.log("IN ANON PUBLIC");
+    /*
+    const referrer = req.header('Referrer');
+    const url = new URL(referrer);
+    const type = url.pathname.split('/')[1];
+    if (type !== "public" && !req.session.user 
+    */
+    const { curPageNum } = req.params;
+    const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
+
     const playlists = await persistence.getPublicPlaylistsPage(offset, limit);
     const countRow = await persistence.getPublicPlaylistTotal();
+
     const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
     let startPage;
@@ -605,13 +645,13 @@ app.get(
       startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
       endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
     }
-    return res.render("playlists", {
+    return res.render("public_playlists", {
       startPage,
       endPage,
       curPageNum: +curPageNum,
       totalPages,
       playlists,
-      playlistType: "public",
+      playlistType: "anonPublic",
       pageTitle: "Public Playlists",
       playlistTotal: +countRow.count,
     });
@@ -619,19 +659,40 @@ app.get(
 );
 
 app.get(
-  "/playlists/your/:curPageNum",
+  "/:playlistType/playlists/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const curPageNum = +req.params.curPageNum;
+    const { playlistType, curPageNum } = req.params;
+    console.log({ playlistType }, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
-    const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
-    const limit = SONGS_PER_PAGE;
-    const playlists = await persistence.getYourPlaylistsPage(
-      userId,
-      offset,
-      limit,
-    );
-    const countRow = await persistence.getYourPlaylistTotal(userId);
+    const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
+    let playlists, countRow, pageTitle;
+    if (playlistType === "public") {
+      pageTitle = "Public Playlists";
+      playlists = await persistence.getPublicPlaylistsPage(
+        offset,
+        SONGS_PER_PAGE,
+      );
+      countRow = await persistence.getPublicPlaylistTotal();
+    }
+    if (playlistType === "your") {
+      pageTitle = "Your Playlists";
+      playlists = await persistence.getYourPlaylistsPage(
+        userId,
+        offset,
+        SONGS_PER_PAGE,
+      );
+      countRow = await persistence.getYourPlaylistTotal(userId);
+    }
+    if (playlistType === "contribution") {
+      pageTitle = "Contribution Playlists";
+      playlists = await persistence.getContributionPlaylistsPage(
+        userId,
+        offset,
+        SONGS_PER_PAGE,
+      );
+      countRow = await persistence.getContributionPlaylistTotal(userId);
+    }
     const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
     let startPage;
@@ -645,8 +706,8 @@ app.get(
       startPage,
       endPage,
       totalPages,
-      playlistType: "owned",
-      pageTitle: "Your Playlists",
+      playlistType,
+      pageTitle,
       playlists,
       curPageNum: +curPageNum,
       playlistTotal: +countRow.count,
@@ -654,6 +715,7 @@ app.get(
   }),
 );
 
+/*
 app.get(
   "/playlists/contributing/:curPageNum",
   requireAuth,
@@ -662,6 +724,7 @@ app.get(
     const userId = req.session.user.id;
     const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
+
     const playlists = await persistence.getContributionPlaylistsPage(
       userId,
       offset,
@@ -669,6 +732,7 @@ app.get(
     );
     console.log({ playlists });
     const countRow = await persistence.getContributionPlaylistTotal(userId);
+
     const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
     const isEmpty = totalPages === 0;
     let startPage;
@@ -690,7 +754,7 @@ app.get(
     });
   }),
 );
-
+*/
 app.get(
   "/:playlistType/playlists/create/:curPageNum",
   requireAuth,
@@ -753,9 +817,10 @@ app.post(
   "/signout",
   requireAuth,
   catchError((req, res) => {
+    //flash message of you are signed out
     req.session.destroy((error) => {
       if (error) console.error(error);
-      return res.redirect("/playlists/public/0");
+      return res.redirect("anon/public/playlists/0");
     });
   }),
 );
@@ -789,7 +854,7 @@ app.post(
       req.session.user = user;
       req.flash("successes", MSG.loggedIn);
       if (!redirectUrl) {
-        return res.redirect("/playlists/your/0");
+        return res.redirect("your/playlists/0");
       } else {
         return res.redirect(redirectUrl);
       }
@@ -842,7 +907,7 @@ app.post(
     }
     req.session.user = user;
     req.flash("successes", MSG.createUser);
-    return res.redirect("/playlists/your/0");
+    return res.redirect("/your/playlists/0");
   }),
 );
 
@@ -850,9 +915,9 @@ app.get(
   "/",
   catchError((req, res) => {
     if (req.session.user) {
-      return res.redirect("/playlists/your/0");
+      return res.redirect("/your/playlists/0");
     } else {
-      return res.redirect("/playlists/public/0");
+      return res.redirect("/anon/public/playlists/0");
     }
   }),
 );

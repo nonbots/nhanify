@@ -1,0 +1,51 @@
+extends layout
+
+block main
+  if (playlistTotal === 0) 
+    .emptyMessage
+      p There is currently no public playlist. 
+  else 
+    .playlistsDiv
+      h1(class="pageTitle") Public Playlists
+      block listWrap
+        block list 
+          .listHeader
+            - let playlistLabel = playlistTotal < 2 ? "Playlist" : "Playlists"
+            p(class="username") #{playlistTotal} #{playlistLabel} 
+          .pageNav 
+            if (curPageNum !== 0) 
+              if (playlistType === "public")
+                a(href=`/public/playlists/${curPageNum - 1}`) ⮜
+              if (playlistType === "anonPublic")
+                a(href=`/anon/public/playlists/${curPageNum - 1}`) ⮜
+            .pages
+            - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
+              if (playlistType === "public")
+                a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/public/playlists/${pageNum}`) #{pageNum + 1}
+              if (playlistType === "anonPublic")
+                a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/anon/public/playlists/${pageNum}`) #{pageNum + 1}
+            if (curPageNum < totalPages - 1) 
+              if (playlistType === "public")
+                a(href=`/public/playlists/${curPageNum + 1}`) ⮞
+              if (playlistType === "anonPublic")
+                a(href=`/anon/public/playlists/${curPageNum + 1}`) ⮞
+          .cols
+            .labelTitle
+              p(class="username") Title
+            .labelAddedBy
+              p(class="username") Creator
+            .labelSongTotal
+              p(class="username") Songs
+        block values
+          .content
+            .playListWrap
+              each playlist in playlists
+                a(href=`/public/playlist/${playlist.id}/0`) 
+                  div(class="songCard")
+                    .descriptionDiv
+                      .valTitle
+                        p= playlist.title   
+                      .valAddedBy
+                        p= playlist.username 
+                      .valSongTotal
+                        p= playlist.count

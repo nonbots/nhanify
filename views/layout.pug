@@ -30,18 +30,24 @@ html(lang="en")
               a(href="/signup") Sign Up 
               a(href="/login") Sign In
         .stack2
-          if (playlistType === "public")
-            a(class="hiNavTab" href="/playlists/public/0") Public Playlists 
-          else
-            a(class="navTab" href="/playlists/public/0") Public Playlists 
-          if (user !== undefined)
-            if (playlistType === "owned")
-              a(class="hiNavTab" href="/playlists/your/0") Your Playlists 
-            else 
-              a(class="navTab" href="/playlists/your/0") Your Playlists 
-            if (playlistType === "contribution")
-              a(class="hiNavTab" href="/playlists/contributing/0") Contributing Playlists
+          - console.log({playlistType});
+          if (user === undefined)
+            if (playlistType === "anonPublic")
+              a(class="hiNavTab" href=`/anon/public/playlists/0`) Public Playlists 
             else
-              a(class="navTab" href="/playlists/contributing/0") Contributing Playlists
+              a(class="navTab" href=`/anon/public/playlists/0`) Public Playlists 
+          else
+            if (playlistType === "public")
+              a(class="hiNavTab" href=`/public/playlists/0`) Public Playlists 
+            else
+              a(class="navTab" href=`/public/playlists/0`) Public Playlists 
+            if (playlistType === "your")
+              a(class="hiNavTab" href="/your/playlists/0") Your Playlists 
+            else 
+              a(class="navTab" href="/your/playlists/0") Your Playlists 
+            if (playlistType === "contribution")
+              a(class="hiNavTab" href="/contribution/playlists/0") Contribution Playlists
+            else
+              a(class="navTab" href="/contribution/playlists/0") Contribution Playlists
       main
           block main
