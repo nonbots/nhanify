@@ -9,7 +9,7 @@ const Persistence = require("./lib/pg-persistence.js");
 const persistence = new Persistence();
 const port = 3002;
 const host = "localhost";
-const { parseURL } = require("./lib/playlist.js");
+const { isValidURL, parseURL } = require("./lib/playlist.js");
 const flash = require("express-flash");
 const { body, validationResult } = require("express-validator");
 const catchError = require("./lib/catch-error");
@@ -255,7 +255,7 @@ app.post(
       }
       throw error;
     }
-    return res.redirect(`/playlists/your/${curPageNum}`);
+    return res.redirect(`/your/playlists/${curPageNum}`);
   }),
 );
 app.get(
@@ -346,7 +346,12 @@ app.post(
       .withMessage("Title is empty.")
       .isLength({ max: 72 })
       .withMessage("Title is over the min limit of 72 characters."),
-    body("url").trim().isLength({ min: 1 }).withMessage("Url is empty."),
+    body("url")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Url is empty.")
+      .custom(isValidURL)
+      .withMessage(MSG.invalidURL),
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
@@ -363,8 +368,6 @@ app.post(
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => {
         req.flash("errors", message.msg);
-        if (message.path === "title") title = "";
-        if (message.path === "url") url = "";
       });
       req.session.url = url;
       req.session.title = title;
@@ -372,19 +375,7 @@ app.post(
         `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
       );
     }
-    let videoId;
-    try {
-      videoId = parseURL(url);
-    } catch (error) {
-      if (error.message === "invalidURL") {
-        req.flash("errors", MSG.invalidURL);
-        req.session.title = title;
-        return res.redirect(
-          `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
-        );
-      }
-      throw error;
-    }
+    const videoId = parseURL(url);
     try {
       await persistence.addSong(
         title,
@@ -393,6 +384,7 @@ app.post(
         req.session.user.id,
       );
       req.flash("successes", MSG.addedSong);
+      req.session.title = "";
     } catch (error) {
       console.log("CONSTRAINT", error.constraint);
       if (error.constraint === "unique_video_id_playlist_id") {
@@ -586,8 +578,8 @@ app.post(
     const rowCount = await persistence.getYourPlaylistTotal(userId);
     const totalPages = Math.ceil(rowCount.count / SONGS_PER_PAGE);
     if (+curPageNum > totalPages - 1)
-      return res.redirect(`/playlists/your/${totalPages - 1}`);
-    return res.redirect(`/playlists/your/${curPageNum}`);
+      return res.redirect(`/your/playlists/${totalPages - 1}`);
+    return res.redirect(`/your/playlists/${curPageNum}`);
   }),
 );
 
@@ -622,13 +614,6 @@ app.post(
 app.get(
   "/anon/public/playlists/:curPageNum",
   catchError(async (req, res) => {
-    console.log("IN ANON PUBLIC");
-    /*
-    const referrer = req.header('Referrer');
-    const url = new URL(referrer);
-    const type = url.pathname.split('/')[1];
-    if (type !== "public" && !req.session.user 
-    */
     const { curPageNum } = req.params;
     const offset = +curPageNum < 0 ? 0 : +curPageNum * SONGS_PER_PAGE;
     const limit = SONGS_PER_PAGE;
@@ -715,46 +700,6 @@ app.get(
   }),
 );
 
-/*
-app.get(
-  "/playlists/contributing/:curPageNum",
-  requireAuth,
-  catchError(async (req, res, next) => {
-    const curPageNum = +req.params.curPageNum;
-    const userId = req.session.user.id;
-    const offset = curPageNum < 0 ? 0 : curPageNum * SONGS_PER_PAGE;
-    const limit = SONGS_PER_PAGE;
-
-    const playlists = await persistence.getContributionPlaylistsPage(
-      userId,
-      offset,
-      limit,
-    );
-    console.log({ playlists });
-    const countRow = await persistence.getContributionPlaylistTotal(userId);
-
-    const totalPages = Math.ceil(countRow.count / SONGS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - VISIBLE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + VISIBLE_OFFSET, totalPages - 1);
-    }
-    return res.render("playlists", {
-      totalPages,
-      curPageNum,
-      startPage,
-      endPage,
-      playlists,
-      playlistType: "contribution",
-      pageTitle: "Contributing Playlists",
-      playlistTotal: +countRow.count,
-    });
-  }),
-);
-*/
 app.get(
   "/:playlistType/playlists/create/:curPageNum",
   requireAuth,
@@ -763,7 +708,7 @@ app.get(
     return res.render("create_playlist", {
       curPageNum: +curPageNum,
       playlistType,
-      isPrivate: req.session.isPrivate,
+      isPrivate: true,
     });
   }),
 );
@@ -787,12 +732,11 @@ app.post(
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => {
         req.flash("errors", message.msg);
-        if (message.path === "title") title = "";
       });
       res.render("create_playlist", {
+        title: req.body.title,
         playlistType,
         curPageNum: +curPageNum,
-        title,
         isPrivate,
         flash: req.flash(),
       });
@@ -809,7 +753,7 @@ app.post(
     }
     req.flash("successes", MSG.createPlaylist);
     req.session.isPrivate = isPrivate;
-    return res.redirect(`/playlists/your/${curPageNum}`);
+    return res.redirect(`/your/playlists/${curPageNum}`);
   }),
 );
 
@@ -817,10 +761,10 @@ app.post(
   "/signout",
   requireAuth,
   catchError((req, res) => {
-    //flash message of you are signed out
+    // req.flash("successes", MSG.signout);
     req.session.destroy((error) => {
       if (error) console.error(error);
-      return res.redirect("anon/public/playlists/0");
+      return res.redirect("/login");
     });
   }),
 );
@@ -829,7 +773,11 @@ app.get(
   "/login",
   catchError((req, res) => {
     const redirectUrl = req.query.redirectUrl;
-    if (req.session.user) return res.redirect("/playlists/your/0");
+    if (req.session.user) {
+      req.flash("info", MSG.alreadyLoggedIn);
+      res.redirect("/your/playlists/0");
+      return;
+    }
     return res.render("login", { redirectUrl });
   }),
 );
@@ -854,9 +802,10 @@ app.post(
       req.session.user = user;
       req.flash("successes", MSG.loggedIn);
       if (!redirectUrl) {
-        return res.redirect("your/playlists/0");
+        return res.redirect("/your/playlists/0");
       } else {
-        return res.redirect(redirectUrl);
+        // check of redirectUrl is the same the url in the query
+        return res.redirect(redirectUrl.replaceAll("`", ""));
       }
     } else {
       req.flash("errors", MSG.invalidCred);
@@ -894,10 +843,8 @@ app.post(
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => {
         req.flash("errors", message.msg);
-        if (message.path === "username") username = "";
-        if (message.path === "password") password = "";
       });
-      res.render("signup", { username, password, flash: req.flash() });
+      res.redirect("/signup");
       return;
     }
     const user = await persistence.createUser(username, password);
@@ -917,7 +864,7 @@ app.get(
     if (req.session.user) {
       return res.redirect("/your/playlists/0");
     } else {
-      return res.redirect("/anon/public/playlists/0");
+      return res.redirect("/login");
     }
   }),
 );

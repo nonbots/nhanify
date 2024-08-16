@@ -1,5 +1,6 @@
 {
   "error401": "Oops! Your session has ended. Please log back into your account.",
+  "alreadyLoggedIn": "You are already logged in.",
   "error500": "Oops! Something went wrong with the server. We are currently addressing the issue.",
   "error404": "Oops! It looks like the page does not exist.",
   "error403": "Oops! It looks like you don’t have access to this page.",
@@ -25,6 +26,7 @@
   "createPlaylistError": "Sorry, Something went wrong while creating your playlist. Try again another time.",
   "deleteContributor": "Contributor was deleted.",
   "loggedIn": "You are logged in.",
+  "signout": "You are logged out.",
   "invalidCred": "Credentials are invalid.",
   "minPassword": "Password is under the minimum of 12 characters.",
   "maxPassword": "Password is over the maxium of 72 characters.",

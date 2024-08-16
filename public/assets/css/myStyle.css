@@ -470,3 +470,11 @@ pre {
   color: #c7fcd6;
   text-align: left;
 }
+.info {
+  background-color: #b9b73e;
+  border: 1px dashed yellow;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  color: #f9f9e9;
+  text-align: left;
+}
