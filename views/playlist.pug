@@ -57,7 +57,7 @@ block listWrap
           p(id="curSongTitle") ...
         .valAddedBy
           p(id="curAddedBy") ...
-      if (playlistType !== "public")
+      if (playlistType !== "public" && playlistType !== "anonPublic")
         .addDiv
           form(class="addForm" action=`/${playlistType}/playlist/${playlistId}/addSong/${curPageNum}` method="post")
             .verticalDiv
@@ -67,12 +67,21 @@ block listWrap
             input(class="addBtn" type="submit" value="Add")
       .pageNav 
         if (curPageNum !== 0) 
-          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
+          if (playlistType === "anonPublic")
+            a(href=`/anon/public/playlist/${playlistId}/${curPageNum - 1}`) ⮜
+          else
+            a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
         .pages
           - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-            a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
+            if (playlistType === "anonPublic")
+              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/anon/public/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
+            else
+              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum + 1}
         if (curPageNum < totalPages - 1) 
-          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
+          if (playlistType === "anonPublic")
+            a(href=`/anon/public/playlist/${playlistId}/${curPageNum + 1}`) ⮞
+          else
+            a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
       .cols
         .labelNo
           p(class="username" style) No.

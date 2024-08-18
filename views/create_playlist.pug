@@ -7,13 +7,13 @@ block content
       label(for="title") Title
       input(id="title" type="text" name="title" value=title) 
     .formDiv
-      label(for="visiability") Visibility
+      label(for="visibility") Visibility
       .formDivParent
         .formDivHz
-          input(type="radio" id="private" name="visiability" value="private" checked=isPrivate)
+          input(type="radio" id="private" name="visibility" value="private" checked=isPrivate)
           label(for="private") private
         .formDivHz
-          input(type="radio" id="public" name="visiability" value="public" checked=!isPrivate)
+          input(type="radio" id="public" name="visibility" value="public" checked=!isPrivate)
           label(for="public") public
     input(type="submit" class="submit" value="Create")
 
