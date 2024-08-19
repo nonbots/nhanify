@@ -2,11 +2,23 @@ extends playlists
 
 block listWrap
   if (totalContributors === 0 ) 
+    .errorMessages
+      - let msgTypes = Object.keys(flash || {})
+      if (msgTypes.length > 0) 
+        each msgType in msgTypes
+          each msg in flash[msgType]
+            pre(class=`${msgType}`) #{msg}
     p There are no contributors on this playlist.
   else 
     block list 
         .listHeader
           p(class="username") #{totalContributors} Contributor(s)  
+        .errorMessages
+          - let msgTypes = Object.keys(flash || {})
+          if (msgTypes.length > 0) 
+            each msgType in msgTypes
+              each msg in flash[msgType]
+                pre(class=`${msgType}`) #{msg}
         .pageNav 
           if (curPageNum !== 0) 
             a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum - 1}`) ⮜
@@ -27,7 +39,7 @@ block listWrap
                 .val
                   p= contributor.username   
                 .val
-                  if(playlistType === "owned")
+                  if(playlistType === "your")
                     form(class="delete" action=`/${playlistType}/playlist/${playlistId}/contributors/delete/${contributor.id}/${curPageNum}` method="post")
                       input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="")
 
