@@ -3,7 +3,7 @@ extends playlists
 block listWrap
   if(isEmpty) 
     if (user !== undefined)
-      a(href=`/${playlistType}/playlist/${playlistId}/contributors/0`) Contributors
+      a(href=`/${playlistType}/playlist/${playlistId}/contributors/1`) Contributors
     if(playlistType === "your")
       a(href=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}`) Add 
     p There are currently no songs on the playlist.
@@ -29,7 +29,7 @@ block listWrap
           - let songLabel = playlist.songTotal < 2 ? "Song" : "Songs"
           p(class="username") #{playlist.songTotal} #{songLabel}
         if (user !== undefined)
-          a(href=`/${playlistType}/playlist/${playlistId}/contributors/0`) Contributors
+          a(href=`/${playlistType}/playlist/${playlistId}/contributors/1`) Contributors
         if(playlistType === "your")
           a(href=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}`) Add 
       .errorMessages

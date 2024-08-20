@@ -4,6 +4,11 @@ const session = require("express-session");
 const store = require("connect-loki");
 const LokiStore = store(session);
 const morgan = require("morgan");
+const {
+  NotFoundError,
+  UnauthorizationError,
+  ForbiddenError,
+} = require("./lib/errors.js");
 const { body, validationResult } = require("express-validator");
 const flash = require("express-flash");
 const catchError = require("./lib/catch-error");
@@ -72,15 +77,9 @@ app.get(
       +playlistId,
       req.session.user.id,
     );
-    if (!isYourPlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isYourPlaylist) throw new ForbiddenError();
     const playlist = await persistence.getPlaylistTitle(+playlistId);
-    if (!playlist) {
-      res.status(404);
-      return res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
+    if (!playlist) throw new NotFoundError();
     return res.render("add_contributors", {
       playlistId: +playlistId,
       pageTitle: `Add contributor to ${playlist.title}`,
@@ -107,10 +106,7 @@ app.post(
     const { playlistId, playlistType, curPageNum } = req.params;
     const rerender = async () => {
       const playlist = await persistence.getPlaylistTitle(+playlistId);
-      if (!playlist) {
-        res.status(404);
-        return res.render("error", { statusCode: "404", msg: MSG.error404 });
-      }
+      if (!playlist) throw new NotFoundError();
       return res.render("add_contributors", {
         flash: req.flash(),
         username: req.body.username,
@@ -129,10 +125,7 @@ app.post(
     }
     const userId = req.session.user.id;
     const isYourPlaylist = await persistence.isYourPlaylist(playlistId, userId);
-    if (!isYourPlaylist) {
-      res.status(403);
-      return res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isYourPlaylist) throw new ForbiddenError();
     const contributor = await persistence.getContributor(req.body.username);
     if (!contributor) {
       req.flash("errors", MSG.notExistUsername);
@@ -164,16 +157,9 @@ app.get(
       playlistId,
       req.session.user.id,
     );
-    if (!writePlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!writePlaylist) throw new ForbiddenError();
     const song = await persistence.getSongTitle(songId);
-    if (!song) {
-      res.flash("errors", MSG.notExistSong);
-      res.status(404);
-      return res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
+    if (!song) throw new NotFoundError();
     res.render("edit_song", {
       title: song.title,
       playlistType,
@@ -202,16 +188,10 @@ app.post(
       +playlistId,
       req.session.user.id,
     );
-    if (!writePlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!writePlaylist) throw new ForbiddenError();
     const rerender = async () => {
-      const songTitle = await persistence.getSongTitle(songId);
-      if (!songTitle) {
-        res.flash("errors", MSG.notExistSong);
-        return res.render("error", MSG.error404);
-      }
+      const song = await persistence.getSongTitle(songId);
+      if (!song) throw new NotFoundError();
       res.render("edit_song", {
         flash: req.flash(),
         title: song.title,
@@ -274,12 +254,9 @@ app.post(
       +playlistId,
       req.session.user.id,
     );
-    if (!writePlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!writePlaylist) throw new ForbiddenError();
     const rerender = async () => {
-      const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)  * ITEMS_PER_PAGE;
+      const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
         +playlistId,
         offset,
@@ -288,8 +265,11 @@ app.post(
       const videoIds = playlist.songs.map((song) => song.video_id);
       const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
       const isEmpty = totalPages === 0;
-      const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
-      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+      const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
+      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) {
+        console.log(req.headers.referer, "IN THE GET PLAYLIST ROUTE");
+        return next();
+      }
       const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
       const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
       return res.render("playlist", {
@@ -353,16 +333,9 @@ app.post(
       +playlistId,
       req.session.user.id,
     );
-    if (!writePlaylist) {
-      res.status(403);
-      return res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!writePlaylist) throw new ForbiddenError();
     const deleted = await persistence.deleteSong(+songId);
-    if (!deleted) {
-      req.flash("errors", MSG.notExistSong);
-      res.status(404);
-      return res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
+    if (!deleted) throw new NotFoundError();
     const rowCount = await persistence.getSongTotal(playlistId);
     const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
@@ -383,12 +356,7 @@ app.post(
       +playlistId,
       userId,
     );
-    if (!contributionPlaylist) {
-      req.flash("errors", MSG.notExistPlaylistt);
-      res.status(404);
-      return res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
-
+    if (!contributionPlaylist) throw new NotFoundError();
     const rowCount = await persistence.getContributionPlaylistTotal(userId);
     const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
     if (+curPageNum > totalPages - 1) curPageNum -= 1;
@@ -412,7 +380,7 @@ app.get(
     const countRow = await persistence.getContributorTotal(+playlistId);
     const totalPages = Math.ceil(countRow.count / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
     if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
@@ -439,18 +407,12 @@ app.post(
       +playlistId,
       req.session.user.id,
     );
-    if (!yourPlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!yourPlaylist) throw new ForbiddenError();
     const deleted = await persistence.deleteContributor(
       +playlistId,
       +contributorId,
     );
-    if (!deleted) {
-      res.status(403);
-      return res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!deleted) throw new NotFoundError();
     //flash is not showing
     req.flash("successes", MSG.deleteContributor);
     return res.redirect(
@@ -464,16 +426,13 @@ app.get(
   requireAuth,
   catchError(async (req, res, next) => {
     const { curPageNum, playlistType, playlistId } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)  * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
 
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
       playlistId,
       req.session.user.id,
     );
-    if (!isReadAuth) {
-      res.status(403);
-      return res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isReadAuth) throw new ForbiddenError();
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
       offset,
@@ -482,11 +441,11 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
     if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
     startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    console.log({startPage, endPage}, "IN GET SONGS IN PLAYLIST");
+    console.log({ startPage, endPage }, "IN GET SONGS IN PLAYLIST");
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -512,15 +471,9 @@ app.post(
       +playlistId,
       userId,
     );
-    if (!isYourPlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isYourPlaylist) throw new ForbiddenError();
     const deleted = await persistence.deletePlaylist(+playlistId);
-    if (!deleted) {
-      res.status(404);
-      res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
+    if (!deleted) throw new NotFoundError();
     const playlistTotal = await persistence.getYourPlaylistTotal(userId);
     const totalPages = Math.ceil(playlistTotal / ITEMS_PER_PAGE);
     if (+curPageNum > totalPages - 1) curPageNum -= 1;
@@ -538,15 +491,9 @@ app.get(
       +playlistId,
       req.session.user.id,
     );
-    if (!isYourPlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isYourPlaylist) throw new ForbiddenError();
     const playlist = await persistence.getPlaylist(+playlistId);
-    if (!playlist) {
-      res.status(404);
-      res.render("error", { statusCode: "404", msg: MSG.error404 });
-    }
+    if (!playlist) throw new NotFoundError();
     res.render("edit_playlist", {
       playlist,
       pageTitle: `Edit ${playlist.title}`,
@@ -574,16 +521,10 @@ app.post(
       +playlistId,
       req.session.user.id,
     );
-    if (!isYourPlaylist) {
-      res.status(403);
-      res.render("error", { statusCode: "403", msg: MSG.error403 });
-    }
+    if (!isYourPlaylist) throw new ForbiddenError();
     const rerender = async () => {
       const playlist = await persistence.getPlaylist(+playlistId);
-      if (!playlist) {
-        res.status(404);
-        return res.render("error", { statusCode: "404", msg: MSG.error404 });
-      }
+      if (!playlist) throw new NotFoundError();
       res.render("edit_playlist", {
         flash: req.flash(),
         playlist,
@@ -606,11 +547,7 @@ app.post(
         req.body.title,
         isPrivate,
       );
-      if (!edited) {
-        req.flash("errors", MSG.notExistPlaylist);
-        res.status(404);
-        return res.render("error", { statusCode: "404", msg: MSG.error404 });
-      }
+      if (!edited) throw new NotFoundError();
     } catch (error) {
       if (error.constraint === "unique_creator_id_title") {
         req.flash("errors", MSG.uniquePlaylist);
@@ -627,7 +564,7 @@ app.get(
   "/anon/public/playlist/:playlistId/:curPageNum",
   catchError(async (req, res, next) => {
     const { curPageNum, playlistId } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)* ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
       offset,
@@ -636,10 +573,10 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
     if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const  endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -659,14 +596,13 @@ app.get(
 
 app.get(
   "/:playlistType/playlists/:curPageNum",
-  requireAuth,
-  catchError(async (req, res, next) => {
+  catchError(async (req, res) => {
     const { playlistType, curPageNum } = req.params;
-    console.log({curPageNum}, "IN GET PLAYLIST");
+    console.log({ curPageNum }, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
     const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    
-    // start of the records to grab from 
+
+    // start of the records to grab from
     // 1 <= 1 ? 0* : 1 - 1 * 5 0
     // 2 < 1 ? 0 : 2 - 1 * 5* 5
     // 3 < 1 ? 0 : 3 - 1 * 5* 10
@@ -701,8 +637,9 @@ app.get(
     }
     const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+      throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlists", {
@@ -720,9 +657,9 @@ app.get(
 
 app.get(
   "/anon/public/playlists/:curPageNum",
-  catchError(async (req, res) => {
+  catchError(async (req, res, next) => {
     const { curPageNum } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum -1)  * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
     const playlists = await persistence.getPublicPlaylistsPage(
       offset,
       ITEMS_PER_PAGE,
@@ -730,7 +667,7 @@ app.get(
     const playlistTotal = await persistence.getPublicPlaylistTotal();
     const totalPages = Math.ceil(playlistTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
     if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
@@ -824,7 +761,7 @@ app.get(
   catchError((req, res) => {
     if (req.session.user) {
       req.flash("info", MSG.alreadyLoggedIn);
-      return res.redirect("/your/playlists/0");
+      return res.redirect("/your/playlists/1");
     }
     // store original url
     req.session.originRedirectUrl = req.query.redirectUrl;
@@ -858,7 +795,7 @@ app.post(
     console.log("THE REDIRECT URL", req.query.redirectUrl);
     if (!isValidRedirectURL(req.query.fullRedirectUrl)) {
       console.log("IN INVALID URL");
-      return res.redirect("/your/playlists/0");
+      return res.redirect("/your/playlists/1");
     } else {
       console.log("IN VALID URL");
       if (req.session.requestMethod === "POST")
@@ -911,7 +848,7 @@ app.post(
       throw error;
     }
     req.flash("successes", MSG.createUser);
-    return res.redirect("/your/playlists/0");
+    return res.redirect("/your/playlists/1");
   }),
 );
 
@@ -919,22 +856,34 @@ app.get(
   "/",
   catchError((req, res) => {
     if (req.session.user) {
-      return res.redirect("/your/playlists/0");
+      return res.redirect("/your/playlists/1");
     } else {
       return res.redirect("/login");
     }
   }),
 );
 
-app.get("*", (req, res, next) => {
+/*app.get("*", (req, res, next) => {
   res.status(404);
-  res.render("error", { statusCode: 404, msg: MSG.error404 });
+  res.render("error", { statusCode: 404, msg: MSG.error404, msg2: MSG.errorNav});
 });
-
+*/
 app.use((err, req, res, next) => {
   console.log(err);
-  res.status(500);
-  res.render("error", { statusCode: 500, msg: MSG.error500 });
+  if (err instanceof ForbiddenError) {
+    res.status(403);
+    res.render("error", {
+      statusCode: 403,
+      msg: MSG.error403,
+      msg2: MSG.errorNav,
+    });
+  } else if (err instanceof NotFoundError) {
+    res.status(404);
+    res.render("error", { statusCode: 404, msg: MSG.error404 });
+  } else {
+    res.status(500);
+    res.render("error", { statusCode: 500, msg: MSG.error500 });
+  }
 });
 
 app.listen(PORT, HOST, () => {

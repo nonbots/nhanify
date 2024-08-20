@@ -3,6 +3,7 @@
   "alreadyLoggedIn": "You are already logged in.",
   "error500": "Oops! Something went wrong with the server. We are currently addressing the issue.",
   "error404": "Oops! It looks like the page does not exist.",
+  "errorNav": "Click on the playlist links above to navigate back to your previous page.",
   "error403": "Oops! It looks like you don’t have access to this page.",
   "addedSong": "Song was added to the playlist.",
   "editedSong": "Song was edited.",
