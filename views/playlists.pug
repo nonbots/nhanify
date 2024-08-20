@@ -30,28 +30,14 @@ block main
                 each msg in flash[msgType]
                   pre(class=`${msgType}`) #{msg}
           .pageNav 
-            if (curPageNum !== 0) 
-              if (playlistType === "your")
-                a(href=`/your/playlists/${curPageNum - 1}`) ⮜
-              if (playlistType === "public")
-                a(href=`/public/playlists/${curPageNum - 1}`) ⮜
-              if (playlistType === "contribution")
-                a(href=`/contribution/playlists/${curPageNum - 1}`) ⮜
+            if (curPageNum > 1) 
+              - console.log({curPageNum});
+              a(href=`/${playlistType}/playlists/${curPageNum - 1}`) ⮜
             .pages
               - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-                if(playlistType === "your")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/your/playlists/${pageNum}`) #{pageNum + 1}
-                if(playlistType === "public")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/public/playlists/${pageNum}`) #{pageNum + 1}
-                if(playlistType === "contribution")
-                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/contribution/playlists/${pageNum}`) #{pageNum + 1}
-            if (curPageNum < totalPages - 1) 
-              if (playlistType === "your")
-                a(href=`/your/playlists/${curPageNum + 1}`) ⮞
-              if (playlistType === "public")
-                a(href=`/public/playlists/${curPageNum + 1}`) ⮞
-              if (playlistType === "contribution")
-                a(href=`/contribution/playlists/${curPageNum + 1}`) ⮞
+                  a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlists/${pageNum}`) #{pageNum}
+            if (curPageNum < totalPages) 
+              a(href=`/${playlistType}/playlists/${curPageNum + 1}`) ⮞
           .cols
             .labelTitle
               p(class="username") Title
@@ -64,7 +50,7 @@ block main
           .content
             .playListWrap
               each playlist in playlists
-                a(href=`/${playlistType}/playlist/${playlist.id}/0`) 
+                a(href=`/${playlistType}/playlist/${playlist.id}/1`) 
                   div(class="songCard")
                     .descriptionDiv
                       .valTitle

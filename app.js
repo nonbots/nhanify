@@ -279,7 +279,7 @@ app.post(
       res.render("error", { statusCode: "403", msg: MSG.error403 });
     }
     const rerender = async () => {
-      const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+      const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)  * ITEMS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
         +playlistId,
         offset,
@@ -288,13 +288,10 @@ app.post(
       const videoIds = playlist.songs.map((song) => song.video_id);
       const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
       const isEmpty = totalPages === 0;
-      let startPage;
-      let endPage;
-      if (!isEmpty) {
-        if (+curPageNum >= totalPages) return next();
-        startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-        endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-      }
+      const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+      const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+      const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
       return res.render("playlist", {
         flash: req.flash(),
         playlist,
@@ -311,7 +308,6 @@ app.post(
         title,
       });
     };
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => {
@@ -406,7 +402,7 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
     const limit = ITEMS_PER_PAGE;
     const contributors = await persistence.getContributorsPage(
       +playlistId,
@@ -416,13 +412,10 @@ app.get(
     const countRow = await persistence.getContributorTotal(+playlistId);
     const totalPages = Math.ceil(countRow.count / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-    }
+    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("contributors", {
       contributors,
       playlistId,
@@ -471,7 +464,7 @@ app.get(
   requireAuth,
   catchError(async (req, res, next) => {
     const { curPageNum, playlistType, playlistId } = req.params;
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)  * ITEMS_PER_PAGE;
 
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
       playlistId,
@@ -489,13 +482,11 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-    }
+    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+    console.log({startPage, endPage}, "IN GET SONGS IN PLAYLIST");
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -636,7 +627,7 @@ app.get(
   "/anon/public/playlist/:playlistId/:curPageNum",
   catchError(async (req, res, next) => {
     const { curPageNum, playlistId } = req.params;
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1)* ITEMS_PER_PAGE;
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
       offset,
@@ -645,13 +636,10 @@ app.get(
     const videoIds = playlist.songs.map((song) => song.video_id);
     const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-    }
+    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    const  endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -672,10 +660,18 @@ app.get(
 app.get(
   "/:playlistType/playlists/:curPageNum",
   requireAuth,
-  catchError(async (req, res) => {
+  catchError(async (req, res, next) => {
     const { playlistType, curPageNum } = req.params;
+    console.log({curPageNum}, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
+    
+    // start of the records to grab from 
+    // 1 <= 1 ? 0* : 1 - 1 * 5 0
+    // 2 < 1 ? 0 : 2 - 1 * 5* 5
+    // 3 < 1 ? 0 : 3 - 1 * 5* 10
+    // 4 < 1 ? 0 : 4 - 1 * 5* 15
+
     let playlists, playlistTotal, pageTitle;
     if (playlistType === "public") {
       pageTitle = "Public Playlists";
@@ -705,13 +701,10 @@ app.get(
     }
     const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-    }
+    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlists", {
       startPage,
       endPage,
@@ -729,7 +722,7 @@ app.get(
   "/anon/public/playlists/:curPageNum",
   catchError(async (req, res) => {
     const { curPageNum } = req.params;
-    const offset = +curPageNum < 0 ? 0 : +curPageNum * ITEMS_PER_PAGE;
+    const offset = +curPageNum <= 1 ? 0 : (+curPageNum -1)  * ITEMS_PER_PAGE;
     const playlists = await persistence.getPublicPlaylistsPage(
       offset,
       ITEMS_PER_PAGE,
@@ -737,13 +730,10 @@ app.get(
     const playlistTotal = await persistence.getPublicPlaylistTotal();
     const totalPages = Math.ceil(playlistTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
-    let startPage;
-    let endPage;
-    if (!isEmpty) {
-      if (+curPageNum >= totalPages) return next();
-      startPage = Math.max(+curPageNum - PAGE_OFFSET, 0);
-      endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages - 1);
-    }
+    const totalPagesUpdated = !isEmpty ?  totalPages : totalPages + 1;
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("public_playlists", {
       startPage,
       endPage,
