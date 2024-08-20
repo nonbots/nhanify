@@ -9,7 +9,11 @@ const flash = require("express-flash");
 const catchError = require("./lib/catch-error");
 const Persistence = require("./lib/pg-persistence.js");
 const persistence = new Persistence();
-const { isValidURL, parseURL } = require("./lib/playlist.js");
+const {
+  isValidRedirectURL,
+  isValidURL,
+  parseURL,
+} = require("./lib/playlist.js");
 const MSG = require("./lib/msg.json");
 const PORT = 3002;
 const HOST = "localhost";
@@ -41,10 +45,11 @@ app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     const requestURL = encodeURIComponent(req.originalUrl);
+    const fullRequestURL = `http://${HOST}:${PORT}${requestURL}`;
     req.session.requestMethod = req.method;
     req.session.referrer = req.header("Referrer");
     req.flash("errors", MSG.error401);
-    res.redirect(`/login?redirectUrl=${requestURL}`);
+    res.redirect(`/login?fullRedirectUrl=${fullRequestURL}`);
   } else {
     next();
   }
@@ -849,7 +854,6 @@ app.post(
       errors.array().forEach((message) => req.flash("errors", message.msg));
       return res.render("login", { flash: req.flash() });
     }
-    const redirectUrl = req.query.redirectUrl;
     const { username, password } = req.body;
     const authenticatedUser = await persistence.authenticateUser(
       username,
@@ -861,12 +865,16 @@ app.post(
     }
     req.session.user = authenticatedUser;
     req.flash("successes", MSG.loggedIn);
-    if (!redirectUrl || redirectUrl !== req.session.originRedirectUrl)
+    console.log("THE REDIRECT URL", req.query.redirectUrl);
+    if (!isValidRedirectURL(req.query.fullRedirectUrl)) {
+      console.log("IN INVALID URL");
       return res.redirect("/your/playlists/0");
-    if (req.session.requestMethod === "POST")
-      return res.redirect(req.session.referrer);
-    //browser takes care of of cross scripting
-    return res.redirect(redirectUrl);
+    } else {
+      console.log("IN VALID URL");
+      if (req.session.requestMethod === "POST")
+        return res.redirect(req.session.referrer);
+      return res.redirect(req.query.fullRedirectUrl);
+    }
   }),
 );
 
