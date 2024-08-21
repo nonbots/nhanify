@@ -30,13 +30,7 @@ html(lang="en")
               a(href="/signup") Sign Up 
               a(href="/login") Sign In
         .stack2
-          - console.log({playlistType});
-          if (user === undefined)
-            if (playlistType === "anonPublic")
-              a(class="hiNavTab" href=`/anon/public/playlists/1`) Public Playlists 
-            else
-              a(class="navTab" href=`/anon/public/playlists/1`) Public Playlists 
-          else
+          if (user !== undefined)
             if (playlistType === "public")
               a(class="hiNavTab" href=`/public/playlists/1`) Public Playlists 
             else

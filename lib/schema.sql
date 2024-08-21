@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS nhanify;
+
 DROP TABLE IF EXISTS playlists_users;
 
 DROP TABLE IF EXISTS songs;
@@ -5,6 +7,9 @@ DROP TABLE IF EXISTS songs;
 DROP TABLE IF EXISTS playlists;
 
 DROP TABLE IF EXISTS users;
+
+--create the database
+CREATE DATABASE nhanify;
 
 --create a users table
 CREATE TABLE users (

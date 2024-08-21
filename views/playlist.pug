@@ -66,22 +66,13 @@ block listWrap
                 input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title" value=title) 
             input(class="addBtn" type="submit" value="Add")
       .pageNav 
-        if (curPageNum > 0) 
-          if (playlistType === "anonPublic")
-            a(href=`/anon/public/playlist/${playlistId}/${curPageNum - 1}`) ⮜
-          else
-            a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
+        if (curPageNum > 1) 
+          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum - 1}`) ⮜
         .pages
           - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-            if (playlistType === "anonPublic")
-              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/anon/public/playlist/${playlistId}/${pageNum}`) #{pageNum}
-            else
-              a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum}
+            a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/${pageNum}`) #{pageNum}
         if (curPageNum < totalPages) 
-          if (playlistType === "anonPublic")
-            a(href=`/anon/public/playlist/${playlistId}/${curPageNum + 1}`) ⮞
-          else
-            a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
+          a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum + 1}`) ⮞
       .cols
         .labelNo
           p(class="username" style) No.

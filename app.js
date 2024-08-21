@@ -1,14 +1,11 @@
+const { HOST, PORT, SECRET } = process.env;
 const express = require("express");
 const app = express();
 const session = require("express-session");
 const store = require("connect-loki");
 const LokiStore = store(session);
 const morgan = require("morgan");
-const {
-  NotFoundError,
-  UnauthorizationError,
-  ForbiddenError,
-} = require("./lib/errors.js");
+const { NotFoundError, ForbiddenError } = require("./lib/errors.js");
 const { body, validationResult } = require("express-validator");
 const flash = require("express-flash");
 const catchError = require("./lib/catch-error");
@@ -20,8 +17,6 @@ const {
   parseURL,
 } = require("./lib/playlist.js");
 const MSG = require("./lib/msg.json");
-const PORT = 3002;
-const HOST = "localhost";
 const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 2;
 
@@ -41,7 +36,7 @@ app.use(
     name: "nhanify-id",
     resave: false,
     saveUninitialized: true,
-    secret: "this is not very secure",
+    secret: SECRET,
     store: new LokiStore({}),
   }),
 );
@@ -266,10 +261,8 @@ app.post(
       const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
       const isEmpty = totalPages === 0;
       const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) {
-        console.log(req.headers.referer, "IN THE GET PLAYLIST ROUTE");
-        return next();
-      }
+      if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+        throw new NotFoundError();
       const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
       const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
       return res.render("playlist", {
@@ -380,8 +373,10 @@ app.get(
     const countRow = await persistence.getContributorTotal(+playlistId);
     const totalPages = Math.ceil(countRow.count / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
+    console.log({ isEmpty });
     const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+      throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("contributors", {
@@ -442,7 +437,8 @@ app.get(
     const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
     const isEmpty = totalPages === 0;
     const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
+    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+      throw new NotFoundError();
     startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     console.log({ startPage, endPage }, "IN GET SONGS IN PLAYLIST");
@@ -475,8 +471,13 @@ app.post(
     const deleted = await persistence.deletePlaylist(+playlistId);
     if (!deleted) throw new NotFoundError();
     const playlistTotal = await persistence.getYourPlaylistTotal(userId);
-    const totalPages = Math.ceil(playlistTotal / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
     if (+curPageNum > totalPages - 1) curPageNum -= 1;
+    /*
+     *
+    const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
+    if (+curPageNum > totalPages - 1) curPageNum -= 1;
+     */
     req.flash("successes", MSG.deletePlaylist);
     return res.redirect(`/your/playlists/${curPageNum}`);
   }),
@@ -560,48 +561,18 @@ app.post(
     return res.redirect(`/your/playlists/${curPageNum}`);
   }),
 );
-app.get(
-  "/anon/public/playlist/:playlistId/:curPageNum",
-  catchError(async (req, res, next) => {
-    const { curPageNum, playlistId } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    const playlist = await persistence.getPlaylistInfoSongs(
-      +playlistId,
-      offset,
-      ITEMS_PER_PAGE,
-    );
-    const videoIds = playlist.songs.map((song) => song.video_id);
-    const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
-    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    return res.render("playlist", {
-      playlist,
-      pageTitle: playlist.info.title,
-      videoIds,
-      totalPages,
-      curPageNum: +curPageNum,
-      playlistType: "anonPublic",
-      endPage,
-      startPage,
-      isEmpty,
-      playlistId: +playlistId,
-      url: req.session.url,
-      title: req.session.title,
-    });
-  }),
-);
 
 app.get(
   "/:playlistType/playlists/:curPageNum",
+  requireAuth,
   catchError(async (req, res) => {
     const { playlistType, curPageNum } = req.params;
     console.log({ curPageNum }, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
     const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-
+    /*
+const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
+    */
     // start of the records to grab from
     // 1 <= 1 ? 0* : 1 - 1 * 5 0
     // 2 < 1 ? 0 : 2 - 1 * 5* 5
@@ -642,6 +613,14 @@ app.get(
       throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+
+    /*
+      const isEmpty = totalPages === 0;
+      const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
+      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) throw new NotFoundError();
+      const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+      const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+    */
     return res.render("playlists", {
       startPage,
       endPage,
@@ -650,35 +629,6 @@ app.get(
       pageTitle,
       playlists,
       curPageNum: +curPageNum,
-      playlistTotal,
-    });
-  }),
-);
-
-app.get(
-  "/anon/public/playlists/:curPageNum",
-  catchError(async (req, res, next) => {
-    const { curPageNum } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    const playlists = await persistence.getPublicPlaylistsPage(
-      offset,
-      ITEMS_PER_PAGE,
-    );
-    const playlistTotal = await persistence.getPublicPlaylistTotal();
-    const totalPages = Math.ceil(playlistTotal / ITEMS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1) return next();
-    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    return res.render("public_playlists", {
-      startPage,
-      endPage,
-      curPageNum: +curPageNum,
-      totalPages,
-      playlistType: "anonPublic",
-      playlists,
-      pageTitle: "Public Playlists",
       playlistTotal,
     });
   }),
@@ -863,11 +813,10 @@ app.get(
   }),
 );
 
-/*app.get("*", (req, res, next) => {
-  res.status(404);
-  res.render("error", { statusCode: 404, msg: MSG.error404, msg2: MSG.errorNav});
+app.use("*", (req, res, next) => {
+  next(new NotFoundError());
 });
-*/
+
 app.use((err, req, res, next) => {
   console.log(err);
   if (err instanceof ForbiddenError) {
@@ -879,7 +828,11 @@ app.use((err, req, res, next) => {
     });
   } else if (err instanceof NotFoundError) {
     res.status(404);
-    res.render("error", { statusCode: 404, msg: MSG.error404 });
+    res.render("error", {
+      statusCode: 404,
+      msg: MSG.error404,
+      msg2: MSG.errorNav,
+    });
   } else {
     res.status(500);
     res.render("error", { statusCode: 500, msg: MSG.error500 });
