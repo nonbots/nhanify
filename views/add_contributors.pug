@@ -3,10 +3,10 @@ extends signup
 block header
     h1(class="pageTitle") #{pageTitle}
 block content
-    form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}` method="post")
-      .formDiv
-        label(for="username") username
-        input(id="username" type="text" name="username" value=username) 
-      input(type="submit" class="submit" value="Add")
-     
+  form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/contributors/add/${curPageNum}` method="post")
+    .formDiv
+      label(for="username") username
+      input(id="username" type="text" name="username" value=username) 
+    input(type="submit" class="submit" value="Add")
+  a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum}`) Back
 

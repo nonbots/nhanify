@@ -9,6 +9,7 @@ block listWrap
           each msg in flash[msgType]
             pre(class=`${msgType}`) #{msg}
     p There are no contributors on this playlist.
+    a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum}`) Back
   else 
     block list 
         .listHeader
@@ -42,4 +43,5 @@ block listWrap
                   if(playlistType === "your")
                     form(class="delete" action=`/${playlistType}/playlist/${playlistId}/contributors/delete/${contributor.id}/${curPageNum}` method="post")
                       input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="")
+      a(href=`/${playlistType}/playlist/${playlistId}/${curPageNum}`) Back
 
