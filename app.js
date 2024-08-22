@@ -1,4 +1,4 @@
-const { HOST, PORT, SECRET } = process.env;
+const { HOST, PORT, SESSION_SECRET } = process.env;
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -36,7 +36,7 @@ app.use(
     name: "nhanify-id",
     resave: false,
     saveUninitialized: true,
-    secret: SECRET,
+    secret: SESSION_SECRET,
     store: new LokiStore({}),
   }),
 );
@@ -350,9 +350,9 @@ app.post(
       userId,
     );
     if (!contributionPlaylist) throw new NotFoundError();
-    const playlistTotal =
-      await persistence.getContributionPlaylistTotal(userId);
-    const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
+    const playlist = await persistence.getContributionPlaylistTotal(userId);
+    if (!playlist) throw new NotFoundError();
+    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
     if (+curPageNum > totalPages && +curPageNum !== 1)
       curPageNum = +curPageNum - 1;
@@ -365,20 +365,17 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    const limit = ITEMS_PER_PAGE;
+    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
+    const contributor = await persistence.getContributorTotal(+playlistId);
+    if (!contributor) throw new NotFound();
+    const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
+    if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+      throw new NotFoundError();
     const contributors = await persistence.getContributorsPage(
       +playlistId,
       offset,
-      limit,
+      ITEMS_PER_PAGE,
     );
-    const countRow = await persistence.getContributorTotal(+playlistId);
-    const totalPages = Math.ceil(countRow.count / ITEMS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    console.log({ isEmpty });
-    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
-      throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("contributors", {
@@ -390,7 +387,7 @@ app.get(
       curPageNum: +curPageNum,
       endPage,
       totalPages,
-      totalContributors: +countRow.count,
+      totalContributors: +contributor.count,
     });
   }),
 );
@@ -447,7 +444,6 @@ app.get(
       throw new NotFoundError();
     startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    console.log({ startPage, endPage }, "IN GET SONGS IN PLAYLIST");
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -476,8 +472,9 @@ app.post(
     if (!isYourPlaylist) throw new ForbiddenError();
     const deleted = await persistence.deletePlaylist(+playlistId);
     if (!deleted) throw new NotFoundError();
-    const playlistTotal = await persistence.getYourPlaylistTotal(userId);
-    const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
+    const playlist = await persistence.getYourPlaylistTotal(userId);
+    if (!playlist) throw new NotFoundError();
+    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
     if (+curPageNum > totalPages && +curPageNum !== 1)
       curPageNum = +curPageNum - 1;
@@ -569,43 +566,48 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     let { playlistType, curPageNum } = req.params;
-    console.log({ curPageNum }, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    // 0 <= 1 ? 0 : 0 -1 * 5 => 0
-    // 1 <= 1 ? 0 : 1 -1  * 5 => 0
-    // 2 <= 1 ? 0 : 2 -1  * 5 => 5
-    let playlists, playlistTotal, pageTitle;
+    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
+    let totalPages, playlists, playlist, pageTitle;
+
     if (playlistType === "public") {
       pageTitle = "Public Playlists";
+      playlist = await persistence.getPublicPlaylistTotal();
+      if (!playlist) throw new NotFoundError();
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+        throw new NotFoundError();
       playlists = await persistence.getPublicPlaylistsPage(
         offset,
         ITEMS_PER_PAGE,
       );
-      playlistTotal = await persistence.getPublicPlaylistTotal();
     }
     if (playlistType === "your") {
       pageTitle = "Your Playlists";
+      playlist = await persistence.getYourPlaylistTotal(userId);
+      if (!playlist) throw new NotFoundError();
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+        throw new NotFoundError();
       playlists = await persistence.getYourPlaylistsPage(
         userId,
         offset,
         ITEMS_PER_PAGE,
       );
-      playlistTotal = await persistence.getYourPlaylistTotal(userId);
     }
     if (playlistType === "contribution") {
       pageTitle = "Contribution Playlists";
+      playlist = await persistence.getContributionPlaylistTotal(userId);
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+        throw new NotFoundError();
+      if (!playlist) throw new NotFoundError();
       playlists = await persistence.getContributionPlaylistsPage(
         userId,
         offset,
         ITEMS_PER_PAGE,
       );
-      playlistTotal = await persistence.getContributionPlaylistTotal(userId);
     }
-    const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
-    console.log(curPageNum, ">", totalPages, "||", curPageNum, "< 1");
-    if (+curPageNum > totalPages + 1 || +curPageNum < 1)
-      throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlists", {
@@ -616,7 +618,7 @@ app.get(
       pageTitle,
       playlists,
       curPageNum: +curPageNum,
-      playlistTotal,
+      playlistTotal: +playlist.count,
     });
   }),
 );
@@ -700,7 +702,6 @@ app.get(
       req.flash("info", MSG.alreadyLoggedIn);
       return res.redirect("/your/playlists/1");
     }
-    // store original url
     req.session.originRedirectUrl = req.query.redirectUrl;
     return res.render("login");
   }),
@@ -729,12 +730,9 @@ app.post(
     }
     req.session.user = authenticatedUser;
     req.flash("successes", MSG.loggedIn);
-    console.log("THE REDIRECT URL", req.query.redirectUrl);
     if (!isValidRedirectURL(req.query.fullRedirectUrl)) {
-      console.log("IN INVALID URL");
       return res.redirect("/your/playlists/1");
     } else {
-      console.log("IN VALID URL");
       if (req.session.requestMethod === "POST")
         return res.redirect(req.session.referrer);
       return res.redirect(req.query.fullRedirectUrl);

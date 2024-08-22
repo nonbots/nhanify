@@ -27,7 +27,7 @@ block listWrap
             - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
               a(class=`${(pageNum === curPageNum) ? "curPage" : ""}` href=`/${playlistType}/playlist/${playlistId}/contributors/${pageNum}`) #{pageNum}
           if (curPageNum < totalPages) 
-            a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum}`) ⮞
+            a(href=`/${playlistType}/playlist/${playlistId}/contributors/${curPageNum + 1}`) ⮞
         .cols
           .label
             p(class="username") username

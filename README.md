@@ -7,18 +7,12 @@ postgreSQL version: 14.13
 
 1. Install node (this should also install npm).
 2. Install postgreSQL (this should come with the psql client).
-3. Install all dependencies by executing `npm install`
-4. Create an .env file to store senstive information needed for the application such as:
-
-- host
-- port
-- session secret
-- database password
-- database name
-
-5. Make the database, schema and seed data by executing `npm run remakedb`.
+3. Install all dependencies by executing `npm install` in the terminal.
+4. Go to the `.env.example` file in the root project folder and make a copy called `.env`.
+   Fill the values needed for the application in the copy, except for `PG_DATABASE`.
+5. Make the database, schema and seed data by executing `npm run remakedb` in the terminal.
 6. Start the application by executing `npm start`.
-7. Open the Chrome browser and navigate to website by inputing the url with the host and port.
+7. Open the Chrome browser and navigate to the website by inputing the url with the host and port.
 
 ##Application Description
 This application allows users to share their playlists to other users on the application.
