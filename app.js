@@ -350,10 +350,12 @@ app.post(
       userId,
     );
     if (!contributionPlaylist) throw new NotFoundError();
-    const rowCount = await persistence.getContributionPlaylistTotal(userId);
-    const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
-    if (+curPageNum > totalPages - 1) curPageNum -= 1;
+    const playlistTotal =
+      await persistence.getContributionPlaylistTotal(userId);
+    const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
+    if (+curPageNum > totalPages && +curPageNum !== 1)
+      curPageNum = +curPageNum - 1;
     return res.redirect(`/contribution/playlists/${curPageNum}`);
   }),
 );
@@ -397,7 +399,7 @@ app.post(
   "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const { contributorId, playlistId, curPageNum, playlistType } = req.params;
+    let { contributorId, playlistId, curPageNum, playlistType } = req.params;
     const yourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -408,10 +410,14 @@ app.post(
       +contributorId,
     );
     if (!deleted) throw new NotFoundError();
-    //flash is not showing
+    const playlist = await persistence.getContributorTotal(+playlistId);
+    if (!playlist) throw new NotFoundError();
+    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteContributor);
+    if (+curPageNum > totalPages && +curPageNum !== 1)
+      curPageNum = +curPageNum - 1;
     return res.redirect(
-      `/${playlistType}/playlist/${+playlistId}/contributors/${+curPageNum}`,
+      `/${playlistType}/playlist/${playlistId}/contributors/${curPageNum}`,
     );
   }),
 );
@@ -472,13 +478,9 @@ app.post(
     if (!deleted) throw new NotFoundError();
     const playlistTotal = await persistence.getYourPlaylistTotal(userId);
     const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
-    if (+curPageNum > totalPages - 1) curPageNum -= 1;
-    /*
-     *
-    const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
-    if (+curPageNum > totalPages - 1) curPageNum -= 1;
-     */
     req.flash("successes", MSG.deletePlaylist);
+    if (+curPageNum > totalPages && +curPageNum !== 1)
+      curPageNum = +curPageNum - 1;
     return res.redirect(`/your/playlists/${curPageNum}`);
   }),
 );
@@ -566,19 +568,13 @@ app.get(
   "/:playlistType/playlists/:curPageNum",
   requireAuth,
   catchError(async (req, res) => {
-    const { playlistType, curPageNum } = req.params;
+    let { playlistType, curPageNum } = req.params;
     console.log({ curPageNum }, "IN GET PLAYLIST");
     const userId = +req.session.user.id;
     const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    /*
-const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-    */
-    // start of the records to grab from
-    // 1 <= 1 ? 0* : 1 - 1 * 5 0
-    // 2 < 1 ? 0 : 2 - 1 * 5* 5
-    // 3 < 1 ? 0 : 3 - 1 * 5* 10
-    // 4 < 1 ? 0 : 4 - 1 * 5* 15
-
+    // 0 <= 1 ? 0 : 0 -1 * 5 => 0
+    // 1 <= 1 ? 0 : 1 -1  * 5 => 0
+    // 2 <= 1 ? 0 : 2 -1  * 5 => 5
     let playlists, playlistTotal, pageTitle;
     if (playlistType === "public") {
       pageTitle = "Public Playlists";
@@ -607,20 +603,11 @@ const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
       playlistTotal = await persistence.getContributionPlaylistTotal(userId);
     }
     const totalPages = Math.ceil(+playlistTotal / ITEMS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+    console.log(curPageNum, ">", totalPages, "||", curPageNum, "< 1");
+    if (+curPageNum > totalPages + 1 || +curPageNum < 1)
       throw new NotFoundError();
     const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
     const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-
-    /*
-      const isEmpty = totalPages === 0;
-      const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-      if (+curPageNum > totalPagesUpdated || +curPageNum < 1) throw new NotFoundError();
-      const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-      const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    */
     return res.render("playlists", {
       startPage,
       endPage,
