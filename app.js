@@ -250,18 +250,17 @@ app.post(
       req.session.user.id,
     );
     if (!writePlaylist) throw new ForbiddenError();
+
     const rerender = async () => {
-      const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
+      const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
         +playlistId,
         offset,
         ITEMS_PER_PAGE,
       );
-      const videoIds = playlist.songs.map((song) => song.video_id);
-      const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
-      const isEmpty = totalPages === 0;
-      const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-      if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
+      const videoIds= playlist.songs.map((song) => song.video_id);
+      const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
+      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
         throw new NotFoundError();
       const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
       const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
@@ -274,7 +273,7 @@ app.post(
         curPageNum: +curPageNum,
         endPage,
         startPage,
-        isEmpty,
+        playlistTotal: +playlist.songTotal,
         playlistType,
         playlistId: +playlistId,
         url,
@@ -329,10 +328,12 @@ app.post(
     if (!writePlaylist) throw new ForbiddenError();
     const deleted = await persistence.deleteSong(+songId);
     if (!deleted) throw new NotFoundError();
-    const rowCount = await persistence.getSongTotal(playlistId);
-    const totalPages = Math.ceil(rowCount.count / ITEMS_PER_PAGE);
+    const song  = await persistence.getSongTotal(playlistId);
+    if (!song) throw new NotFoundError();
+    const totalPages = Math.ceil(+song.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
-    if (curPageNum > totalPages - 1) curPageNum -= 1;
+    if (+curPageNum > totalPages && +curPageNum !== 1)
+      curPageNum = +curPageNum - 1;
     return res.redirect(
       `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
     );
@@ -424,26 +425,25 @@ app.get(
   requireAuth,
   catchError(async (req, res, next) => {
     const { curPageNum, playlistType, playlistId } = req.params;
-    const offset = +curPageNum <= 1 ? 0 : (+curPageNum - 1) * ITEMS_PER_PAGE;
-
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
-      playlistId,
+      +playlistId,
       req.session.user.id,
     );
     if (!isReadAuth) throw new ForbiddenError();
+    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
+    const playlistTotal = await persistence.getSongTotal(+playlistId);
+    if (!playlistTotal) throw new NotFoundError();
+    const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
+    if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+      throw new NotFoundError();
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
       offset,
       ITEMS_PER_PAGE,
     );
     const videoIds = playlist.songs.map((song) => song.video_id);
-    const totalPages = Math.ceil(playlist.songTotal / ITEMS_PER_PAGE);
-    const isEmpty = totalPages === 0;
-    const totalPagesUpdated = !isEmpty ? totalPages : totalPages + 1;
-    if (+curPageNum > totalPagesUpdated || +curPageNum < 1)
-      throw new NotFoundError();
-    startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
+    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
     return res.render("playlist", {
       playlist,
       pageTitle: playlist.info.title,
@@ -452,7 +452,7 @@ app.get(
       curPageNum: +curPageNum,
       endPage,
       startPage,
-      isEmpty,
+      playlistTotal: +playlist.songTotal,
       playlistType,
       playlistId: +playlistId,
     });
@@ -827,3 +827,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, HOST, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${HOST}:${PORT} 🎵`);
 });
+/*
+ i login as "admin123456789", this account not added as contributor, nor as the creator. But this account can access this link : http://localhost:3000/your/playlist/15/contributors/1 where playlist with id15 is other's private playlist.
+ */
