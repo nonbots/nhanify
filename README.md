@@ -10,11 +10,11 @@
 3. Install all dependencies by executing `npm install` in the terminal.
 4. Create the database by executing `createdb databasename` in the terminal. 
 You can choose any name for you database. Be sure to include the name in your `.env` in the `PG_DATABASE` field in the next step.
-4. Go to the `.env.example` file in the root project folder and make a copy called `.env`.
+5. Go to the `.env.example` file in the root project folder and make a copy called `.env`.
    Fill the values needed for the application in the copy. Use the database name that you created in the previous step for the `PG_DATABASE` field.
-5. Make schema and seed data by executing `npm run remakedb` in the terminal.
-6. Start the application by executing `npm start`.
-7. Open the Chrome browser and navigate to the website by inputing the url with the `HOST` and `PORT`specified in your `.env`.
+6. Make schema and seed data by executing `psql -d databasename < lib/schema_data.sql` in the terminal. `databasename` is the database name you used to create the database in step 4 and the value for `PG_DATABASE` in step 5.
+7. Start the application by executing `npm start`.
+8. Open the Chrome browser and navigate to the website by inputing the url with the `HOST` and `PORT`specified in your `.env`.
 
 ## Application Description
 This application allows users to share their playlists to other users on the application.
