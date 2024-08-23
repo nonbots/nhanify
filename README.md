@@ -1,9 +1,9 @@
-##Software Installations
+## Software Installations
 node version: 21.7.1
 browser: Chrome 127.0.6533.119
 postgreSQL version: 14.13
 
-##Installation Instructions:
+## Installation Instructions:
 
 1. Install node (this should also install npm).
 2. Install postgreSQL (this should come with the psql client).
@@ -16,7 +16,7 @@ You can choose any name for you database. Be sure to include the name in your `.
 6. Start the application by executing `npm start`.
 7. Open the Chrome browser and navigate to the website by inputing the url with the `HOST` and `PORT`specified in your `.env`.
 
-##Application Description
+## Application Description
 This application allows users to share their playlists to other users on the application.
 Users can also add contributors, other users on the application, to their playlists which
 allow contributors to add, delete and modify songs on the playlists. The application uses
