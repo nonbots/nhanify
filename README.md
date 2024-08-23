@@ -1,7 +1,7 @@
 ## Software Installations
-node version: 21.7.1
-browser: Chrome 127.0.6533.119
-postgreSQL version: 14.13
+1. node version: 21.7.1
+2. browser: Chrome 127.0.6533.119
+3. postgreSQL version: 14.13
 
 ## Installation Instructions:
 
@@ -35,5 +35,5 @@ The application includes:
   - View can delete contributors on the `Contributors` page.
 3. The `Contribution Playlists` page
 - This page displays all the playlists that the signed in user is a contributor of.
-- Oncde a user clicks on a specific playlist within this page, users can:
-  - A contributor has the permission to add, delete, edit, and view songs on the playlist.
+- Once a contributor clicks on a specific playlist within this page, the contributor can:
+  - Add, delete, edit, and view songs on the playlist.
