@@ -366,6 +366,8 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
+    const auth = await persistence.isReadPlaylistAuthorized(+playlistId, req.session.userId);
+    if (!auth) throw new ForbiddenError();
     const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
     const contributor = await persistence.getContributorTotal(+playlistId);
     if (!contributor) throw new NotFound();
@@ -432,9 +434,11 @@ app.get(
     if (!isReadAuth) throw new ForbiddenError();
     const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
     const playlistTotal = await persistence.getSongTotal(+playlistId);
+    console.log({playlistTotal});
     if (!playlistTotal) throw new NotFoundError();
     const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
     if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+      //1 > 0  && 1 !== 1 || 1 < 1
       throw new NotFoundError();
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
@@ -452,7 +456,7 @@ app.get(
       curPageNum: +curPageNum,
       endPage,
       startPage,
-      playlistTotal: +playlist.songTotal,
+      playlistTotal: +playlistTotal.count,
       playlistType,
       playlistId: +playlistId,
     });
