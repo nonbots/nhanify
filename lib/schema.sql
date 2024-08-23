@@ -1,8 +1,12 @@
 
-DROP DATABASE IF EXISTS nhanify;
+--DROP DATABASE IF EXISTS nhanify;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS playlists;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS playlists_users;
 --create the database
-CREATE DATABASE nhanify;
-\c nhanify;
+--CREATE DATABASE nhanify;
+--\c nhanify;
 --create a users table
 CREATE TABLE users (
   id serial PRIMARY KEY,
