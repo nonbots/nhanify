@@ -455,7 +455,7 @@ pre {
   align-items: center;
 }
 .errorTxt {
-  overflow:unset;
+  overflow: unset;
 }
 .errors {
   background-color: #ff000038;

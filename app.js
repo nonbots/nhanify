@@ -56,7 +56,7 @@ function requireAuth(req, res, next) {
 }
 
 app.use((req, res, next) => {
-  if (req.url === '/favicon.ico') return  res.status(204).end(); 
+  if (req.url === "/favicon.ico") return res.status(204).end();
   res.locals.user = req.session.user;
   res.locals.flash = req.session.flash;
   delete req.session.flash;
@@ -259,7 +259,7 @@ app.post(
         offset,
         ITEMS_PER_PAGE,
       );
-      const videoIds= playlist.songs.map((song) => song.video_id);
+      const videoIds = playlist.songs.map((song) => song.video_id);
       const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
       if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
         throw new NotFoundError();
@@ -329,7 +329,7 @@ app.post(
     if (!writePlaylist) throw new ForbiddenError();
     const deleted = await persistence.deleteSong(+songId);
     if (!deleted) throw new NotFoundError();
-    const song  = await persistence.getSongTotal(playlistId);
+    const song = await persistence.getSongTotal(playlistId);
     if (!song) throw new NotFoundError();
     const totalPages = Math.ceil(+song.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
@@ -367,7 +367,10 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
-    const auth = await persistence.isReadPlaylistAuthorized(+playlistId, req.session.user.id);
+    const auth = await persistence.isReadPlaylistAuthorized(
+      +playlistId,
+      req.session.user.id,
+    );
     if (!auth) throw new ForbiddenError();
     const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
     const contributor = await persistence.getContributorTotal(+playlistId);
