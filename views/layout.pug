@@ -15,13 +15,11 @@ html(lang="en")
       .navTopWrap 
         .stack1
           .navTopLeft
-            if user !== undefined 
-              .home
-                a(class="logo" href="/your/playlists/1") N
+            .home
+              a(class="logo" href="/your/playlists/1") N
+            
+            if (user !== undefined)
               p(class="username") #{user.username}
-            else 
-              .home
-                a(class="logo" href="/public/playlists/1") N
           .navTopRight
             if (user !== undefined)
               form(class="buttonForm" action="/signout" method="post")

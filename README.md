@@ -37,3 +37,7 @@ The application includes:
 - This page displays all the playlists that the signed in user is a contributor of.
 - Once a contributor clicks on a specific playlist within this page, the contributor can:
   - Add, delete, edit, and view songs on the playlist.
+  - When adding a song, the `Youtube URL` input is constrained to 3 specific hostnames and 2 pathnames.
+    1. //https://www.youtube.com/watch?v=_QkGAaYtXA0 (browser)
+    2. //https://youtu.be/_QkGAaYtXA0?si=ypKoIW-8nJ2grUHZ (browser shared copy url)
+    3. //https://m.youtube.com/watch?v=QkGAaYtXA0 (mobile shared copy url)

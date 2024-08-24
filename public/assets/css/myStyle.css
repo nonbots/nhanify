@@ -454,6 +454,9 @@ pre {
   justify-content: center;
   align-items: center;
 }
+.errorTxt {
+  overflow:unset;
+}
 .errors {
   background-color: #ff000038;
   border: 1px dashed red;

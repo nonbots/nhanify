@@ -56,6 +56,7 @@ function requireAuth(req, res, next) {
 }
 
 app.use((req, res, next) => {
+  if (req.url === '/favicon.ico') return  res.status(204).end(); 
   res.locals.user = req.session.user;
   res.locals.flash = req.session.flash;
   delete req.session.flash;
@@ -366,7 +367,7 @@ app.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, curPageNum } = req.params;
-    const auth = await persistence.isReadPlaylistAuthorized(+playlistId, req.session.userId);
+    const auth = await persistence.isReadPlaylistAuthorized(+playlistId, req.session.user.id);
     if (!auth) throw new ForbiddenError();
     const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
     const contributor = await persistence.getContributorTotal(+playlistId);
@@ -434,7 +435,6 @@ app.get(
     if (!isReadAuth) throw new ForbiddenError();
     const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
     const playlistTotal = await persistence.getSongTotal(+playlistId);
-    console.log({playlistTotal});
     if (!playlistTotal) throw new NotFoundError();
     const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
     if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
@@ -544,10 +544,10 @@ app.post(
       await rerender();
       return;
     }
-    const isPrivate = req.body.visiability === "private" ? true : false;
+    const isPrivate = req.body.visiability === "private";
     try {
       const edited = await persistence.editPlaylist(
-        playlistId,
+        +playlistId,
         req.body.title,
         isPrivate,
       );
@@ -831,6 +831,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, HOST, () => {
   console.log(`🎵 Nhanify music ready to rock on http://${HOST}:${PORT} 🎵`);
 });
-/*
- i login as "admin123456789", this account not added as contributor, nor as the creator. But this account can access this link : http://localhost:3000/your/playlist/15/contributors/1 where playlist with id15 is other's private playlist.
- */
