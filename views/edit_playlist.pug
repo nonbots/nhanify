@@ -2,7 +2,7 @@ extends signup
 block header
   h1(class="pageTitle") #{pageTitle}
 block content
-  form(class="inputForm" action=`/${playlistType}/playlist/${playlistId}/edit/${curPageNum}` method="post")
+  form(class="inputForm" action=`/${playlistType}/playlists/${page}/playlist/${playlistId}/edit` method="post")
     .formDiv
       label(for="title") Title
       input(id="title" type="text" name="title" value=title || playlist.title) 
@@ -17,4 +17,4 @@ block content
           input(type="radio" id="public" name="visiability" value="public" checked=visiability || vis === "public")
           label(for="public") public
     input(type="submit" class="submit" value="Save")
-  a(href=`/${playlistType}/playlists/${curPageNum}`) Back
+  a(href=`/${playlistType}/playlists/${page}`) Back

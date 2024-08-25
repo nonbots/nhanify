@@ -49,7 +49,7 @@ function requireAuth(req, res, next) {
     req.session.requestMethod = req.method;
     req.session.referrer = req.header("Referrer");
     req.flash("errors", MSG.error401);
-    res.redirect(`/login?fullRedirectUrl=${fullRequestURL}`);
+    res.redirect(`/signin?fullRedirectUrl=${fullRequestURL}`);
   } else {
     next();
   }
@@ -63,11 +63,78 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get(
-  "/:playlistType/playlist/:playlistId/contributors/add/:curPageNum",
+// Delete contributor from a playlist.
+app.post(
+  "/:playlistType/playlists/playlist/:playlistId/contributors/:page/:contributorId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    const { playlistId, playlistType, curPageNum } = req.params;
+    let { contributorId, playlistId, page, playlistType } = req.params;
+    const yourPlaylist = await persistence.isYourPlaylist(
+      +playlistId,
+      req.session.user.id,
+    );
+    if (!yourPlaylist) throw new ForbiddenError();
+    const deleted = await persistence.deleteContributor(
+      +playlistId,
+      +contributorId,
+    );
+    if (!deleted) throw new NotFoundError();
+    const contributor = await persistence.getContributorTotal(+playlistId);
+    if (!contributor) throw new NotFoundError();
+    const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
+    req.flash("successes", MSG.deleteContributor);
+    if (+page > totalPages && +page !== 1)
+      page = +page - 1;
+    return res.redirect(
+      `/${playlistType}/playlists/playlist/${page}/${playlistId}`,
+    );
+  }),
+);
+
+// Get the contributors on a playlist.
+app.get(
+  "/:playlistType/playlists/playlist/:playlistId/contributors/:page",
+  requireAuth,
+  catchError(async (req, res) => {
+    const { playlistType, playlistId, page } = req.params;
+    const auth = await persistence.isReadPlaylistAuthorized(
+      +playlistId,
+      req.session.user.id,
+    );
+    if (!auth) throw new ForbiddenError();
+    const offset = (+page - 1) * ITEMS_PER_PAGE;
+    const contributor = await persistence.getContributorTotal(+playlistId);
+    if (!contributor) throw new NotFound();
+    const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
+    if ((+page > totalPages && +page !== 1) || +page < 1)
+      throw new NotFoundError();
+    const contributors = await persistence.getContributorsPage(
+      +playlistId,
+      offset,
+      ITEMS_PER_PAGE,
+    );
+    const startPage = Math.max(+page - PAGE_OFFSET, 1);
+    const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
+    return res.render("contributors", {
+      contributors,
+      playlistId,
+      pageTitle: `${contributors.playlistTitle} Contributors`,
+      playlistType,
+      startPage,
+      page: +page,
+      endPage,
+      totalPages,
+      totalContributors: +contributor.count,
+    });
+  }),
+);
+
+// Get the add contributor's form.
+app.get(
+  "/:playlistType/playlists/playlist/:page/:playlistId/contributors/add",
+  requireAuth,
+  catchError(async (req, res) => {
+    const { playlistId, playlistType, page } = req.params;
 
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
@@ -80,12 +147,14 @@ app.get(
       playlistId: +playlistId,
       pageTitle: `Add contributor to ${playlist.title}`,
       playlistType,
-      curPageNum: +curPageNum,
+      page: +page,
     });
   }),
 );
+
+// Add contributor to a playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/contributors/add/:curPageNum",
+  "/:playlistType/playlists/playlist/:page/:playlistId/contributors/add",
   requireAuth,
   [
     body("username")
@@ -99,7 +168,7 @@ app.post(
   ],
   catchError(async (req, res) => {
     const errors = validationResult(req);
-    const { playlistId, playlistType, curPageNum } = req.params;
+    const { playlistId, playlistType, page } = req.params;
     const rerender = async () => {
       const playlist = await persistence.getPlaylistTitle(+playlistId);
       if (!playlist) throw new NotFoundError();
@@ -109,7 +178,7 @@ app.post(
         playlistId: +playlistId,
         pageTitle: `Add contributor to ${playlist.title}`,
         playlistType,
-        curPageNum: +curPageNum,
+        page: +page,
       });
     };
     if (!errors.isEmpty()) {
@@ -139,16 +208,17 @@ app.post(
     }
     req.flash("successes", MSG.addContributor);
     return res.redirect(
-      `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
+      `/${playlistType}/playlists/playlist/${page}/${playlistId}`,
     );
   }),
 );
 
+// Get the song's edit form.
 app.get(
-  "/:playlistType/playlist/:playlistId/:songId/editSong/:curPageNum",
+  "/:playlistType/playlists/playlist/:page/:playlistId/:songId/edit",
   requireAuth,
   catchError(async (req, res) => {
-    const { playlistType, playlistId, songId, curPageNum } = req.params;
+    const { playlistType, playlistId, songId, page } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       playlistId,
       req.session.user.id,
@@ -162,13 +232,14 @@ app.get(
       playlistId,
       songId,
       pageTitle: `Edit ${song.title}`,
-      curPageNum,
+      page,
     });
   }),
 );
 
+// Edit a song on a playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/:songId/editSong/:curPageNum",
+  "/:playlistType/playlists/playlist/:page/:playlistId/:songId/edit",
   requireAuth,
   [
     body("title")
@@ -179,7 +250,7 @@ app.post(
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   catchError(async (req, res) => {
-    const { playlistType, playlistId, songId, curPageNum } = req.params;
+    const { playlistType, playlistId, songId, page } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -195,7 +266,7 @@ app.post(
         playlistId,
         songId,
         pageTitle: `Edit ${song.title}`,
-        curPageNum,
+        page,
       });
     };
     const errors = validationResult(req);
@@ -221,13 +292,14 @@ app.post(
     }
     req.flash("successes", MSG.editedSong);
     return res.redirect(
-      `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
+      `/${playlistType}/playlists/playlist/${page}/${playlistId}`,
     );
   }),
 );
 
+// Add a song to a playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/addSong/:curPageNum",
+  "/:playlistType/playlists/playlist/:page/:playlistId/add",
   requireAuth,
   [
     body("title")
@@ -244,7 +316,7 @@ app.post(
       .withMessage(MSG.invalidURL),
   ],
   catchError(async (req, res) => {
-    const { playlistType, playlistId, curPageNum } = req.params;
+    const { playlistType, playlistId, page } = req.params;
     const { title, url } = req.body;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
@@ -253,7 +325,7 @@ app.post(
     if (!writePlaylist) throw new ForbiddenError();
 
     const rerender = async () => {
-      const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
+      const offset = (+page - 1) * ITEMS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
         +playlistId,
         offset,
@@ -261,17 +333,17 @@ app.post(
       );
       const videoIds = playlist.songs.map((song) => song.video_id);
       const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
-      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
+      if ((+page > totalPages && +page !== 1) || +page < 1)
         throw new NotFoundError();
-      const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-      const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
+      const startPage = Math.max(+page - PAGE_OFFSET, 1);
+      const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
       return res.render("playlist", {
         flash: req.flash(),
         playlist,
         pageTitle: playlist.info.title,
         videoIds,
         totalPages,
-        curPageNum: +curPageNum,
+        page: +page,
         endPage,
         startPage,
         playlistTotal: +playlist.songTotal,
@@ -312,16 +384,17 @@ app.post(
     }
     req.flash("successes", MSG.addedSong);
     return res.redirect(
-      `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
+      `/${playlistType}/playlists/playlist/${page}/${playlistId}`,
     );
   }),
 );
 
+// Delete a song from playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/:songId/deleteSong/:curPageNum",
+  "/:playlistType/playlists/playlist/:page/:playlistId/:songId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    let { playlistType, playlistId, songId, curPageNum } = req.params;
+    let { playlistType, playlistId, songId, page } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -333,19 +406,63 @@ app.post(
     if (!song) throw new NotFoundError();
     const totalPages = Math.ceil(+song.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
-    if (+curPageNum > totalPages && +curPageNum !== 1)
-      curPageNum = +curPageNum - 1;
+    if (+page > totalPages && +page !== 1)
+      page = +page - 1;
     return res.redirect(
-      `/${playlistType}/playlist/${playlistId}/${curPageNum}`,
+      `/${playlistType}/playlists/playlist/${page}/${playlistId}`,
     );
   }),
 );
 
+
+// Get a playlist.
+app.get(
+  "/:playlistType/playlists/playlist/:page/:playlistId",
+  requireAuth,
+  catchError(async (req, res, next) => {
+    console.log("IN GET PLAYLIST");
+    const { page, playlistType, playlistId } = req.params;
+    const isReadAuth = await persistence.isReadPlaylistAuthorized(
+      +playlistId,
+      req.session.user.id,
+    );
+    if (!isReadAuth) throw new ForbiddenError();
+    const offset = (+page - 1) * ITEMS_PER_PAGE;
+    const playlistTotal = await persistence.getSongTotal(+playlistId);
+    if (!playlistTotal) throw new NotFoundError();
+    const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
+    console.log(+page, ">", totalPages, "&&", +page, "!== 1 ||", +page, "< 1");
+    if ((+page > totalPages && +page !== 1) || +page < 1)
+      throw new NotFoundError();
+    const playlist = await persistence.getPlaylistInfoSongs(
+      +playlistId,
+      offset,
+      ITEMS_PER_PAGE,
+    );
+    const videoIds = playlist.songs.map((song) => song.video_id);
+    const startPage = Math.max(+page - PAGE_OFFSET, 1);
+    const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
+    return res.render("playlist", {
+      playlist,
+      pageTitle: playlist.info.title,
+      videoIds,
+      totalPages,
+      page: +page,
+      endPage,
+      startPage,
+      playlistTotal: +playlistTotal.count,
+      playlistType,
+      playlistId: +playlistId,
+    });
+  }),
+);
+
+// Delete contribution playlist.
 app.post(
-  "/playlists/:playlistId/delete/contribution/:curPageNum",
+  "/contribution/playlists/:page/playlist/:playlistId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    let { playlistId, curPageNum } = req.params;
+    let { playlistId, page } = req.params;
     const userId = req.session.user.id;
     const contributionPlaylist = await persistence.deleteContributionPlaylist(
       +playlistId,
@@ -356,121 +473,18 @@ app.post(
     if (!playlist) throw new NotFoundError();
     const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
-    if (+curPageNum > totalPages && +curPageNum !== 1)
-      curPageNum = +curPageNum - 1;
-    return res.redirect(`/contribution/playlists/${curPageNum}`);
+    if (+page > totalPages && +page !== 1)
+      page = +page - 1;
+    return res.redirect(`/contribution/playlists/${page}`);
   }),
 );
 
-app.get(
-  "/:playlistType/playlist/:playlistId/contributors/:curPageNum",
-  requireAuth,
-  catchError(async (req, res) => {
-    const { playlistType, playlistId, curPageNum } = req.params;
-    const auth = await persistence.isReadPlaylistAuthorized(
-      +playlistId,
-      req.session.user.id,
-    );
-    if (!auth) throw new ForbiddenError();
-    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
-    const contributor = await persistence.getContributorTotal(+playlistId);
-    if (!contributor) throw new NotFound();
-    const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
-    if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
-      throw new NotFoundError();
-    const contributors = await persistence.getContributorsPage(
-      +playlistId,
-      offset,
-      ITEMS_PER_PAGE,
-    );
-    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    return res.render("contributors", {
-      contributors,
-      playlistId,
-      pageTitle: `${contributors.playlistTitle} Contributors`,
-      playlistType,
-      startPage,
-      curPageNum: +curPageNum,
-      endPage,
-      totalPages,
-      totalContributors: +contributor.count,
-    });
-  }),
-);
-
+// Delete a playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/contributors/delete/:contributorId/:curPageNum",
+  "/:playlistType/playlists/:page/playlist/:playlistId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    let { contributorId, playlistId, curPageNum, playlistType } = req.params;
-    const yourPlaylist = await persistence.isYourPlaylist(
-      +playlistId,
-      req.session.user.id,
-    );
-    if (!yourPlaylist) throw new ForbiddenError();
-    const deleted = await persistence.deleteContributor(
-      +playlistId,
-      +contributorId,
-    );
-    if (!deleted) throw new NotFoundError();
-    const playlist = await persistence.getContributorTotal(+playlistId);
-    if (!playlist) throw new NotFoundError();
-    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
-    req.flash("successes", MSG.deleteContributor);
-    if (+curPageNum > totalPages && +curPageNum !== 1)
-      curPageNum = +curPageNum - 1;
-    return res.redirect(
-      `/${playlistType}/playlist/${playlistId}/contributors/${curPageNum}`,
-    );
-  }),
-);
-
-app.get(
-  "/:playlistType/playlist/:playlistId/:curPageNum",
-  requireAuth,
-  catchError(async (req, res, next) => {
-    const { curPageNum, playlistType, playlistId } = req.params;
-    const isReadAuth = await persistence.isReadPlaylistAuthorized(
-      +playlistId,
-      req.session.user.id,
-    );
-    if (!isReadAuth) throw new ForbiddenError();
-    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
-    const playlistTotal = await persistence.getSongTotal(+playlistId);
-    if (!playlistTotal) throw new NotFoundError();
-    const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
-    if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
-      //1 > 0  && 1 !== 1 || 1 < 1
-      throw new NotFoundError();
-    const playlist = await persistence.getPlaylistInfoSongs(
-      +playlistId,
-      offset,
-      ITEMS_PER_PAGE,
-    );
-    const videoIds = playlist.songs.map((song) => song.video_id);
-    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    return res.render("playlist", {
-      playlist,
-      pageTitle: playlist.info.title,
-      videoIds,
-      totalPages,
-      curPageNum: +curPageNum,
-      endPage,
-      startPage,
-      playlistTotal: +playlistTotal.count,
-      playlistType,
-      playlistId: +playlistId,
-    });
-  }),
-);
-
-app.post(
-  "/playlists/:playlistId/delete/:curPageNum",
-  requireAuth,
-  catchError(async (req, res) => {
-    let { playlistId, curPageNum } = req.params;
+    let { playlistId, page } = req.params;
     const userId = +req.session.user.id;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
@@ -483,17 +497,18 @@ app.post(
     if (!playlist) throw new NotFoundError();
     const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
-    if (+curPageNum > totalPages && +curPageNum !== 1)
-      curPageNum = +curPageNum - 1;
-    return res.redirect(`/your/playlists/${curPageNum}`);
+    if (+page > totalPages && +page !== 1)
+      page = +page - 1;
+    return res.redirect(`/your/playlists/${page}`);
   }),
 );
 
+// Get a playlist's edit form.
 app.get(
-  "/:playlistType/playlist/:playlistId/edit/:curPageNum",
+  "/:playlistType/playlists/:page/playlist/:playlistId/edit",
   requireAuth,
   catchError(async (req, res) => {
-    const { playlistId, playlistType, curPageNum } = req.params;
+    const { playlistId, playlistType, page } = req.params;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -506,13 +521,14 @@ app.get(
       pageTitle: `Edit ${playlist.title}`,
       playlistId: +playlistId,
       playlistType,
-      curPageNum: +curPageNum,
+      page: +page,
     });
   }),
 );
 
+// Edit a playlist.
 app.post(
-  "/:playlistType/playlist/:playlistId/edit/:curPageNum",
+  "/:playlistType/playlists/:page/playlist/:playlistId/edit",
   requireAuth,
   [
     body("title")
@@ -523,7 +539,7 @@ app.post(
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   catchError(async (req, res) => {
-    const { playlistType, playlistId, curPageNum } = req.params;
+    const { playlistType, playlistId, page } = req.params;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -538,7 +554,7 @@ app.post(
         pageTitle: `Edit ${playlist.title}`,
         playlistId: +playlistId,
         playlistType,
-        curPageNum: +curPageNum,
+        page: +page,
       });
     };
     const errors = validationResult(req);
@@ -564,87 +580,13 @@ app.post(
       throw error;
     }
     req.flash("successes", MSG.playlistEdited);
-    return res.redirect(`/your/playlists/${curPageNum}`);
+    return res.redirect(`/your/playlists/${page}`);
   }),
 );
 
-app.get(
-  "/:playlistType/playlists/:curPageNum",
-  requireAuth,
-  catchError(async (req, res) => {
-    let { playlistType, curPageNum } = req.params;
-    const userId = +req.session.user.id;
-    const offset = (+curPageNum - 1) * ITEMS_PER_PAGE;
-    let totalPages, playlists, playlist, pageTitle;
-
-    if (playlistType === "public") {
-      pageTitle = "Public Playlists";
-      playlist = await persistence.getPublicPlaylistTotal();
-      if (!playlist) throw new NotFoundError();
-      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
-      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
-        throw new NotFoundError();
-      playlists = await persistence.getPublicPlaylistsPage(
-        offset,
-        ITEMS_PER_PAGE,
-      );
-    }
-    if (playlistType === "your") {
-      pageTitle = "Your Playlists";
-      playlist = await persistence.getYourPlaylistTotal(userId);
-      if (!playlist) throw new NotFoundError();
-      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
-      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
-        throw new NotFoundError();
-      playlists = await persistence.getYourPlaylistsPage(
-        userId,
-        offset,
-        ITEMS_PER_PAGE,
-      );
-    }
-    if (playlistType === "contribution") {
-      pageTitle = "Contribution Playlists";
-      playlist = await persistence.getContributionPlaylistTotal(userId);
-      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
-      if ((+curPageNum > totalPages && +curPageNum !== 1) || +curPageNum < 1)
-        throw new NotFoundError();
-      if (!playlist) throw new NotFoundError();
-      playlists = await persistence.getContributionPlaylistsPage(
-        userId,
-        offset,
-        ITEMS_PER_PAGE,
-      );
-    }
-    const startPage = Math.max(+curPageNum - PAGE_OFFSET, 1);
-    const endPage = Math.min(+curPageNum + PAGE_OFFSET, totalPages);
-    return res.render("playlists", {
-      startPage,
-      endPage,
-      totalPages,
-      playlistType,
-      pageTitle,
-      playlists,
-      curPageNum: +curPageNum,
-      playlistTotal: +playlist.count,
-    });
-  }),
-);
-
-app.get(
-  "/:playlistType/playlists/create/:curPageNum",
-  requireAuth,
-  catchError((req, res) => {
-    const { playlistType, curPageNum } = req.params;
-    return res.render("create_playlist", {
-      curPageNum: +curPageNum,
-      playlistType,
-      isPrivate: true,
-    });
-  }),
-);
-
+// Create a playlist.
 app.post(
-  "/:playlistType/playlists/create/:curPageNum",
+  "/:playlistType/playlists/:page/create",
   requireAuth,
   [
     body("title")
@@ -655,7 +597,7 @@ app.post(
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   catchError(async (req, res) => {
-    const { playlistType, curPageNum } = req.params;
+    const { playlistType, page } = req.params;
     const { title, visibility } = req.body;
     const isPrivate = visibility === "private";
     const errors = validationResult(req);
@@ -666,7 +608,7 @@ app.post(
       return res.render("create_playlist", {
         title,
         playlistType,
-        curPageNum: +curPageNum,
+        page: +page,
         isPrivate,
         flash: req.flash(),
       });
@@ -679,7 +621,7 @@ app.post(
         return res.render("create_playlist", {
           title,
           playlistType,
-          curPageNum: +curPageNum,
+          page: +page,
           isPrivate,
           flash: req.flash(),
         });
@@ -687,35 +629,116 @@ app.post(
       throw error;
     }
     req.flash("successes", MSG.createPlaylist);
-    return res.redirect(`/your/playlists/${curPageNum}`);
+    return res.redirect(`/your/playlists/${page}`);
   }),
 );
 
+// Get a create playlist form.
+app.get(
+  "/:playlistType/playlists/:page/create",
+  requireAuth,
+  catchError((req, res) => {
+    const { playlistType, page } = req.params;
+    return res.render("create_playlist", {
+      page: +page,
+      playlistType,
+      isPrivate: true,
+    });
+  }),
+);
+
+
+// Get a page of playlists.
+app.get(
+  "/:playlistType/playlists/:page",
+  requireAuth,
+  catchError(async (req, res) => {
+    let { playlistType, page } = req.params;
+    const userId = +req.session.user.id;
+    const offset = (+page - 1) * ITEMS_PER_PAGE;
+    let totalPages, playlists, playlist, pageTitle;
+
+    if (playlistType === "public") {
+      pageTitle = "Public Playlists";
+      playlist = await persistence.getPublicPlaylistTotal();
+      if (!playlist) throw new NotFoundError();
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+page > totalPages && +page !== 1) || +page < 1)
+        throw new NotFoundError();
+      playlists = await persistence.getPublicPlaylistsPage(
+        offset,
+        ITEMS_PER_PAGE,
+      );
+    }
+    if (playlistType === "your") {
+      pageTitle = "Your Playlists";
+      playlist = await persistence.getYourPlaylistTotal(userId);
+      if (!playlist) throw new NotFoundError();
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+page > totalPages && +page !== 1) || +page < 1)
+        throw new NotFoundError();
+      playlists = await persistence.getYourPlaylistsPage(
+        userId,
+        offset,
+        ITEMS_PER_PAGE,
+      );
+    }
+    if (playlistType === "contribution") {
+      pageTitle = "Contribution Playlists";
+      playlist = await persistence.getContributionPlaylistTotal(userId);
+      totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+      if ((+page > totalPages && +page !== 1) || +page < 1)
+        throw new NotFoundError();
+      if (!playlist) throw new NotFoundError();
+      playlists = await persistence.getContributionPlaylistsPage(
+        userId,
+        offset,
+        ITEMS_PER_PAGE,
+      );
+    }
+    const startPage = Math.max(+page - PAGE_OFFSET, 1);
+    const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
+    return res.render("playlists", {
+      startPage,
+      endPage,
+      totalPages,
+      playlistType,
+      pageTitle,
+      playlists,
+      page: +page,
+      playlistTotal: +playlist.count,
+    });
+  }),
+);
+
+// Sign out.
 app.post(
   "/signout",
   requireAuth,
   catchError((req, res) => {
     req.session.destroy((error) => {
       if (error) console.error(error);
-      return res.redirect("/login");
+      return res.redirect("/signin");
     });
   }),
 );
 
+// Get signin form.
 app.get(
-  "/login",
+  "/signin",
   catchError((req, res) => {
     if (req.session.user) {
       req.flash("info", MSG.alreadyLoggedIn);
       return res.redirect("/your/playlists/1");
     }
     req.session.originRedirectUrl = req.query.redirectUrl;
-    return res.render("login");
+    return res.render("signin");
   }),
 );
 
+// Sign in. 
 app.post(
-  "/login",
+  "/signin",
   [
     body("username").trim().isLength({ min: 1 }).withMessage(MSG.emptyUsername),
     body("password").trim().isLength({ min: 1 }).withMessage(MSG.emptyPassword),
@@ -724,7 +747,7 @@ app.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.render("login", { flash: req.flash() });
+      return res.render("signin", { flash: req.flash() });
     }
     const { username, password } = req.body;
     const authenticatedUser = await persistence.authenticateUser(
@@ -733,7 +756,7 @@ app.post(
     );
     if (!authenticatedUser) {
       req.flash("errors", MSG.invalidCred);
-      return res.render("login", { flash: req.flash() });
+      return res.render("signin", { flash: req.flash() });
     }
     req.session.user = authenticatedUser;
     req.flash("successes", MSG.loggedIn);
@@ -747,6 +770,7 @@ app.post(
   }),
 );
 
+//Get signup form.
 app.get(
   "/signup",
   catchError((req, res) => {
@@ -754,6 +778,7 @@ app.get(
   }),
 );
 
+// Sign up.
 app.post(
   "/signup",
   [
@@ -794,17 +819,19 @@ app.post(
   }),
 );
 
+// Get the home page.
 app.get(
   "/",
   catchError((req, res) => {
     if (req.session.user) {
       return res.redirect("/your/playlists/1");
     } else {
-      return res.redirect("/login");
+      return res.redirect("/signin");
     }
   }),
 );
 
+// error handlers
 app.use("*", (req, res, next) => {
   next(new NotFoundError());
 });
