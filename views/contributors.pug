@@ -9,7 +9,7 @@ block listWrap
           each msg in flash[msgType]
             pre(class=`${msgType}`) #{msg}
     p There are no contributors on this playlist.
-    a(href=`/${playlistType}/playlists/playlist/${page}/${playlistId}`) Back
+    a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`) Back
   else 
     block list 
         .listHeader
@@ -21,13 +21,13 @@ block listWrap
               each msg in flash[msgType]
                 pre(class=`${msgType}`) #{msg}
         .pageNav 
-          if (page > 1) 
-            a(href=`/${playlistType}/playlists/playlist/${playlistId}/contributors/${page - 1}`) ⮜
+          if (pageCb > 1) 
+            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb - 1}`) ⮜
           .pages
             - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-              a(class=`${(pageNum === page) ? "curPage" : ""}` href=`/${playlistType}/playlists/playlist/${playlistId}/contributors/${pageNum}`) #{pageNum}
-          if (page < totalPages) 
-            a(href=`/${playlistType}/playlists/playlist/${playlistId}/contributors/${page + 1}`) ⮞
+              a(class=`${(pageNum === pageCb) ? "curPage" : ""}` href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageNum}`) #{pageNum}
+          if (pageCb < totalPages) 
+            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb + 1}`) ⮞
         .cols
           .label
             p(class="username") username
@@ -41,7 +41,7 @@ block listWrap
                   p= contributor.username   
                 .val
                   if(playlistType === "your")
-                    form(class="delete" action=`/${playlistType}/playlists/playlist/${playlistId}/contributors/${page}/${contributor.id}/delete` method="post")
+                    form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb}/${contributor.id}/delete` method="post")
                       input(onclick= "confirmSubmit(event, 'Delete contributor from the playlist?')" class="deleteBtn" type="submit" value="")
-      a(href=`/${playlistType}/playlists/playlist/${page}/${playlistId}`) Back
+      a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`) Back
 

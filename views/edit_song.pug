@@ -2,9 +2,9 @@ extends signup
 block header
   h1(class="pageTitle") #{pageTitle}
 block content
-  form(class="inputForm" action=`/${playlistType}/playlists/playlist/${page}/${playlistId}/${songId}/edit` method="post")
+  form(class="inputForm" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${songId}/edit` method="post")
     .formDiv
       label(for="title") Title
       input(id="title" type="text" name="title" value=title || song.title) 
     input(type="submit" class="submit" value="Save")
-  a(href=`/${playlistType}/playlists/playlist/${page}/${playlistId}`) Back
+  a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`) Back
