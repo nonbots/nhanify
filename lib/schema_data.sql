@@ -1,12 +1,16 @@
 DROP TABLE IF EXISTS playlists_users;
+
 DROP TABLE IF EXISTS songs;
+
 DROP TABLE IF EXISTS playlists;
+
 DROP TABLE IF EXISTS users;
+
 --create a users table
 CREATE TABLE users (
   id serial PRIMARY KEY,
   username text NOT NULL,
-  password text NOT NULL,
+  password text,
   CONSTRAINT unique_username UNIQUE (username)
 );
 

@@ -1,4 +1,5 @@
-const { HOST, PORT, SESSION_SECRET } = process.env;
+const { CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
+  process.env;
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -63,6 +64,66 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/twitchAuth", (req, res) => {
+  res.redirect(
+    `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=http://localhost:3002/twitchAuthResponse&scope=user:read:email&state=c3ab8aa609ea11e793ae92361f002671&nonce=c3ab8aa609ea11e793ae92361f002671`,
+  );
+});
+
+app.get("/twitchAuthResponse", async (req, res) => {
+  const payload = {
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    code: req.query.code,
+    grant_type: "authorization_code",
+    redirect_uri: REDIRECT_URI,
+  };
+  const token = await fetch("https://id.twitch.tv/oauth2/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(payload).toString(),
+  });
+  const response = await token.json();
+  const authUser = await fetch("https://api.twitch.tv/helix/users", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${response.access_token}`,
+      "Client-Id": CLIENT_ID,
+    },
+  });
+  const responseAuthUser = await authUser.json();
+  console.log({ responseAuthUser });
+  if (responseAuthUser.message === "Invalid OAuth token")
+    return res.render("sigin");
+  const username = responseAuthUser.data[0].display_name;
+  console.log({ username });
+  const user = await persistence.findUser(username);
+  console.log({ user });
+  if (!user) {
+    req.flash("errors", "No account associated with the username. ");
+    req.session.twitchUsername = username;
+    return res.redirect("/twitchSignup");
+  }
+  req.flash("successes", "You are logged in");
+  req.session.user = user;
+  return res.redirect("/your/playlists/1");
+});
+
+app.get("/twitchSignup", (req, res) => {
+  const twitchUsername = req.session.twitchUsername;
+  if (!twitchUsername) return res.redirect("/signin");
+  return res.render("twitch_signup", { twitchUsername });
+});
+app.post("/twitchSignup/create", async (req, res) => {
+  const user = await persistence.createUserTwitch(req.session.twitchUsername);
+  req.session.user = user;
+  req.flash("successes", MSG.createUser);
+  return res.redirect("/your/playlists/1");
+});
+app.post("/twitchSignup/cancel", (req, res) => {
+  delete req.session.twitchUsername;
+  return res.redirect("/signin");
+});
 // Get the add contributor's form.
 app.get(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId/contributors/add",
@@ -91,7 +152,8 @@ app.post(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId/contributors/:pageCb/:contributorId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    let { pageCb, pagePl, contributorId, playlistId, page, playlistType } = req.params;
+    let { pageCb, pagePl, contributorId, playlistId, page, playlistType } =
+      req.params;
     const yourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -106,8 +168,7 @@ app.post(
     if (!contributor) throw new NotFoundError();
     const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteContributor);
-    if (+pageCb > totalPages && +pageCb !== 1)
-      pageCb = +pageCb - 1;
+    if (+pageCb > totalPages && +pageCb !== 1) pageCb = +pageCb - 1;
     return res.redirect(
       `/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`,
     );
@@ -172,7 +233,7 @@ app.post(
   catchError(async (req, res) => {
     const errors = validationResult(req);
     const { playlistId, playlistType, page, pagePl } = req.params;
-    console.log("IN ADD", {pagePl});
+    console.log("IN ADD", { pagePl });
     const rerender = async () => {
       const playlist = await persistence.getPlaylistTitle(+playlistId);
       if (!playlist) throw new NotFoundError();
@@ -223,7 +284,7 @@ app.get(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId/:songId/edit",
   requireAuth,
   catchError(async (req, res) => {
-    const { playlistType, playlistId, songId, page, pagePl} = req.params;
+    const { playlistType, playlistId, songId, page, pagePl } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       playlistId,
       req.session.user.id,
@@ -256,7 +317,7 @@ app.post(
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   catchError(async (req, res) => {
-    const { playlistType, playlistId, songId, page, pagePl} = req.params;
+    const { playlistType, playlistId, songId, page, pagePl } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -323,7 +384,7 @@ app.post(
       .withMessage(MSG.invalidURL),
   ],
   catchError(async (req, res) => {
-    const { playlistType, playlistId, page, pagePl} = req.params;
+    const { playlistType, playlistId, page, pagePl } = req.params;
     const { title, url } = req.body;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
@@ -402,7 +463,7 @@ app.post(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId/:songId/delete",
   requireAuth,
   catchError(async (req, res) => {
-    let { playlistType, playlistId, songId, page, pagePl} = req.params;
+    let { playlistType, playlistId, songId, page, pagePl } = req.params;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -414,8 +475,7 @@ app.post(
     if (!song) throw new NotFoundError();
     const totalPages = Math.ceil(+song.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
-    if (+pagePl > totalPages && +pagePl !== 1)
-      pagePl = +pagePl - 1;
+    if (+pagePl > totalPages && +pagePl !== 1) pagePl = +pagePl - 1;
     return res.redirect(
       `/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`,
     );
@@ -519,7 +579,16 @@ app.get(
     const playlistTotal = await persistence.getSongTotal(+playlistId);
     if (!playlistTotal) throw new NotFoundError();
     const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
-    console.log(+pagePl, ">", totalPages, "&&", +pagePl, "!== 1 ||", +pagePl, "< 1");
+    console.log(
+      +pagePl,
+      ">",
+      totalPages,
+      "&&",
+      +pagePl,
+      "!== 1 ||",
+      +pagePl,
+      "< 1",
+    );
     if ((+pagePl > totalPages && +pagePl !== 1) || +pagePl < 1)
       throw new NotFoundError();
     const playlist = await persistence.getPlaylistInfoSongs(
@@ -527,7 +596,7 @@ app.get(
       offset,
       ITEMS_PER_PAGE,
     );
-    console.log({playlist, offset, playlistId});
+    console.log({ playlist, offset, playlistId });
     const videoIds = playlist.songs.map((song) => song.video_id);
     const startPage = Math.max(+pagePl - PAGE_OFFSET, 1);
     const endPage = Math.min(+pagePl + PAGE_OFFSET, totalPages);
@@ -563,8 +632,7 @@ app.post(
     if (!playlist) throw new NotFoundError();
     const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
-    if (+page > totalPages && +page !== 1)
-      page = +page - 1;
+    if (+page > totalPages && +page !== 1) page = +page - 1;
     return res.redirect(`/contribution/playlists/${page}`);
   }),
 );
@@ -587,12 +655,10 @@ app.post(
     if (!playlist) throw new NotFoundError();
     const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
-    if (+page > totalPages && +page !== 1)
-      page = +page - 1;
+    if (+page > totalPages && +page !== 1) page = +page - 1;
     return res.redirect(`/your/playlists/${page}`);
   }),
 );
-
 
 // Create a playlist.
 app.post(
@@ -656,7 +722,6 @@ app.get(
     });
   }),
 );
-
 
 // Get a page of playlists.
 app.get(
@@ -746,7 +811,7 @@ app.get(
   }),
 );
 
-// Sign in. 
+// Sign in.
 app.post(
   "/signin",
   [
