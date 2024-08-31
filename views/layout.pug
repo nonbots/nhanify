@@ -27,8 +27,13 @@ html(lang="en")
             else
               a(href="/signup") Sign Up 
               a(href="/signin") Sign In
-        .stack2
-          if (user !== undefined)
+        .stack2  
+          if (user === undefined)
+            if (playlistType === "anonPublic")
+              a(class="hiNavTab" href=`/anon/public/playlists/1`) Public Playlists 
+            else
+              a(class="navTab" href=`/anon/public/playlists/1`) Public Playlists 
+          else
             if (playlistType === "public")
               a(class="hiNavTab" href=`/public/playlists/1`) Public Playlists 
             else
