@@ -7,7 +7,7 @@ const store = require("connect-loki");
 const LokiStore = store(session);
 const morgan = require("morgan");
 const { NotFoundError, ForbiddenError } = require("./lib/errors.js");
-const { getPlaylists } = require("./lib/middleware.js");
+const { getPlaylists, getPlaylist } = require("./lib/middleware.js");
 const { body, validationResult } = require("express-validator");
 const flash = require("express-flash");
 const catchError = require("./lib/catch-error");
@@ -563,57 +563,61 @@ app.post(
     return res.redirect(`/your/playlists/${page}`);
   }),
 );
+
 // Get a playlist.
 app.get(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId",
   requireAuth,
   catchError(async (req, res, next) => {
-    console.log("IN GET PLAYLIST");
-    //"/:playlistType/playlists/:page/playlist/playlistId/edit",
     const { page, pagePl, playlistType, playlistId } = req.params;
+
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
       +playlistId,
       req.session.user.id,
     );
     if (!isReadAuth) throw new ForbiddenError();
-    const offset = (+pagePl - 1) * ITEMS_PER_PAGE;
-    const playlistTotal = await persistence.getSongTotal(+playlistId);
-    if (!playlistTotal) throw new NotFoundError();
-    const totalPages = Math.ceil(+playlistTotal.count / ITEMS_PER_PAGE);
-    console.log(
-      +pagePl,
-      ">",
-      totalPages,
-      "&&",
-      +pagePl,
-      "!== 1 ||",
-      +pagePl,
-      "< 1",
+    const data = await getPlaylist(
+      persistence,
+      ITEMS_PER_PAGE,
+      PAGE_OFFSET,
+      playlistType,
+      playlistId,
+      page,
+      pagePl,
     );
-    if ((+pagePl > totalPages && +pagePl !== 1) || +pagePl < 1)
-      throw new NotFoundError();
+    return res.render("playlist", data);
+  }),
+);
+
+app.get(
+  "/anon/public/playlists/:page/playlist/:pagePl/:playlistId",
+  catchError(async (req, res) => {
+    const { page, playlistId, pagePl } = req.params;
+    /*    const offset = (+page - 1) * ITEMS_PER_PAGE;
     const playlist = await persistence.getPlaylistInfoSongs(
       +playlistId,
       offset,
       ITEMS_PER_PAGE,
     );
-    console.log({ playlist, offset, playlistId });
+    if (!playlist) throw new NotFoundError();
     const videoIds = playlist.songs.map((song) => song.video_id);
-    const startPage = Math.max(+pagePl - PAGE_OFFSET, 1);
-    const endPage = Math.min(+pagePl + PAGE_OFFSET, totalPages);
-    return res.render("playlist", {
-      playlist,
-      pageTitle: playlist.info.title,
-      videoIds,
-      totalPages,
-      page: +page,
-      pagePl: +pagePl,
-      endPage,
-      startPage,
-      playlistTotal: +playlistTotal.count,
-      playlistType,
-      playlistId: +playlistId,
-    });
+    const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
+    if ((+page > totalPages && +page !== 1) || +page < 1)
+      throw new NotFoundError();
+    if (!playlist) throw new NotFoundError();
+    const startPage = Math.max(+page - PAGE_OFFSET, 1);
+    const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
+    */
+    const data = await getPlaylist(
+      persistence,
+      ITEMS_PER_PAGE,
+      PAGE_OFFSET,
+      "anonPublic",
+      +playlistId,
+      +page,
+      +pagePl,
+    );
+    return res.render("playlist", data);
   }),
 );
 
@@ -731,42 +735,15 @@ app.get(
   catchError(async (req, res) => {
     let { playlistType, page } = req.params;
     const userId = +req.session.user.id;
-    getPlaylist(playlistType, page, userId);
-  }),
-);
-
-app.get(
-  "/anon/public/playlist/:playlistId/:page",
-  catchError(async (req, res) => {
-    const { page, playlistId } = req.params;
-    const offset = (+page - 1) * ITEMS_PER_PAGE;
-    const playlist = await persistence.getPlaylistInfoSongs(
-      +playlistId,
-      offset,
+    const data = await getPlaylists(
+      playlistType,
+      page,
       ITEMS_PER_PAGE,
+      persistence,
+      PAGE_OFFSET,
+      userId,
     );
-    if (!playlist) throw new NotFoundError();
-    const videoIds = playlist.songs.map((song) => song.video_id);
-    const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
-    if ((+page > totalPages && +page !== 1) || +page < 1)
-      throw new NotFoundError();
-    if (!playlist) throw new NotFoundError();
-    const startPage = Math.max(+page - PAGE_OFFSET, 1);
-    const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
-    return res.render("playlist", {
-      playlist,
-      pageTitle: playlist.info.title,
-      videoIds,
-      totalPages,
-      page: +page,
-      playlistType: "anonPublic",
-      endPage,
-      startPage,
-      playlistTotal: +playlist.count,
-      playlistId: +playlistId,
-      url: req.session.url,
-      title: req.session.title,
-    });
+    return res.render("playlists", data);
   }),
 );
 
@@ -774,7 +751,8 @@ app.get(
   "/anon/public/playlists/:page",
   catchError(async (req, res) => {
     const { page } = req.params;
-    const offset = (+page - 1) * ITEMS_PER_PAGE;
+    /*
+     * const offset = (+page - 1) * ITEMS_PER_PAGE;
     const playlists = await persistence.getPublicPlaylistsPage(
       offset,
       ITEMS_PER_PAGE,
@@ -786,16 +764,16 @@ app.get(
       throw new NotFoundError();
     const startPage = Math.max(+page - PAGE_OFFSET, 1);
     const endPage = Math.min(+page + PAGE_OFFSET, totalPages);
-    return res.render("public_playlists", {
-      startPage,
-      endPage,
-      page: +page,
-      totalPages,
-      playlistType: "anonPublic",
-      playlists,
-      pageTitle: "Public Playlists",
-      playlistTotal: +playlist.count,
-    });
+    */
+    const data = await getPlaylists(
+      "anonPublic",
+      page,
+      ITEMS_PER_PAGE,
+      persistence,
+      PAGE_OFFSET,
+    );
+    console.log({ data });
+    return res.render("public_playlists", data);
   }),
 );
 // Sign out.

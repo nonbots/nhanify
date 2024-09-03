@@ -15,7 +15,10 @@ block main
           each msgType in msgTypes
             each msg in flash[msgType]
               pre(class=`${msgType}`) #{msg}
-      a(href=`/${playlistType}/playlists/${page}`) Back
+      if (!(playlistType === "anonPublic"))
+        a(href=`/${playlistType}/playlists/${page}`) Back
+      else
+        a(href=`/anon/public/playlists/${page}`) Back
       .playlistsDiv
         .addDiv
           form(class="addForm" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/add` method="post")
@@ -44,7 +47,10 @@ block main
               each msgType in msgTypes
                 each msg in flash[msgType]
                   pre(class=`${msgType}`) #{msg}
-          a(href=`/${playlistType}/playlists/${page}`) Back
+          if (!(playlistType === "anonPublic"))
+            a(href=`/${playlistType}/playlists/${page}`) Back
+          else
+            a(href=`/anon/public/playlists/${page}`) Back
           .iframeDiv
             #player
           .currentSongcols
