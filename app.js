@@ -1,4 +1,4 @@
-const { CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
+const { DOMAIN, CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
   process.env;
 const express = require("express");
 const app = express();
@@ -47,7 +47,7 @@ app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     const requestURL = encodeURIComponent(req.originalUrl);
-    const fullRequestURL = `http://${HOST}:${PORT}${requestURL}`;
+    const fullRequestURL = `http://${DOMAIN}${requestURL}`;
     req.session.requestMethod = req.method;
     req.session.referrer = req.header("Referrer");
     req.flash("errors", MSG.error401);
