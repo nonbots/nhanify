@@ -1,4 +1,4 @@
-const { DOMAIN, CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
+const { PROTOCOL, DOMAIN, CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
   process.env;
 const express = require("express");
 const app = express();
@@ -47,7 +47,7 @@ app.use(flash());
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     const requestURL = encodeURIComponent(req.originalUrl);
-    const fullRequestURL = `http://${DOMAIN}${requestURL}`;
+    const fullRequestURL = `${DOMAIN}${requestURL}`;
     req.session.requestMethod = req.method;
     req.session.referrer = req.header("Referrer");
     req.flash("errors", MSG.error401);
@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 
 app.get("/twitchAuth", (req, res) => {
   res.redirect(
-    `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=http://localhost:3002/twitchAuthResponse&scope=user:read:email&state=c3ab8aa609ea11e793ae92361f002671&nonce=c3ab8aa609ea11e793ae92361f002671`,
+    `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user:read:email&state=c3ab8aa609ea11e793ae92361f002671&nonce=c3ab8aa609ea11e793ae92361f002671`,
   );
 });
 
