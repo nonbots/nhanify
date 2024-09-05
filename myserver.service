@@ -1,0 +1,36 @@
+[Unit]
+Description=Nhanify
+# Documentation=https://
+# Author: Natan Cabral
+[Service]
+# Start Service and Examples
+ExecStart=/home/ubuntu/.nvm/versions/node/v21.7.3/bin/node app.js
+# ExecStart=/usr/bin/sudo /usr/bin/node /home/myserver/server.js
+# ExecStart=/usr/local/bin/node /var/www/project/myserver/server.js
+# Options Stop and Restart
+# ExecStop=
+# ExecReload=
+# Required on some systems
+WorkingDirectory=/home/ubuntu/nhanify
+#WorkingDirectory=/var/www/myproject/
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+Restart=always
+# Restart=on-failure
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nhanify
+# #### please, not root users
+# RHEL/Fedora uses 'nobody'
+User=ubuntu
+# Debian/Ubuntu uses 'nogroup', RHEL/Fedora uses 'nobody'
+# Group=nogroup
+# variables
+EnvironmentFile=/home/ubuntu/nhanify/.env
+# Environment=NODE_ENV=production
+# Environment=NODE_PORT=3001
+# Environment="SECRET=pGNqduRFkB4K9C2vijOmUDa2kPtUhArN"
+# Environment="ANOTHER_SECRET=JP8YLOc2bsNlrGuD6LVTq7L36obpjzxd"
+[Install]
+WantedBy=multi-user.target

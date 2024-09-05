@@ -1,5 +1,13 @@
-const { PROTOCOL, DOMAIN, CLIENT_SECRET, REDIRECT_URI, CLIENT_ID, HOST, PORT, SESSION_SECRET } =
-  process.env;
+const {
+  PROTOCOL,
+  DOMAIN,
+  CLIENT_SECRET,
+  REDIRECT_URI,
+  CLIENT_ID,
+  HOST,
+  PORT,
+  SESSION_SECRET,
+} = process.env;
 const express = require("express");
 const app = express();
 const session = require("express-session");

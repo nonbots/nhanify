@@ -1,11 +1,12 @@
 ## Software Installations
-
 1. node version: 21.7.1
 2. browser: Chrome 127.0.6533.119
 3. postgreSQL version: 14.13
 
-## Installation Instructions:
+## Systemd Unit for Services
+1. Go to the root folder and add the `myserver.service` to your systemd folder.
 
+## Installation Instructions:
 1. Install node (this should also install npm).
 2. Install postgreSQL (this should come with the psql client).
 3. Install all dependencies by executing `npm install` in the terminal.
@@ -18,7 +19,6 @@
 8. Open the Chrome browser and navigate to the website by inputing the url with the `HOST` and `PORT`specified in your `.env`.
 
 ## Application Description
-
 This application allows users to share their playlists to other users on the application.
 Users can also add contributors, other users on the application, to their playlists which
 allow contributors to add, delete and modify songs on the playlists. The application uses
@@ -47,3 +47,5 @@ The application includes:
     1. //https://www.youtube.com/watch?v=_QkGAaYtXA0 (browser)
     2. //https://youtu.be/_QkGAaYtXA0?si=ypKoIW-8nJ2grUHZ (browser shared copy url)
     3. //https://m.youtube.com/watch?v=QkGAaYtXA0 (mobile shared copy url)
+  
+

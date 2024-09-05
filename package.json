@@ -10,7 +10,10 @@
     "prettier": "npx prettier . --write",
     "test": "jest --verbose --detectOpenHandles",
     "start": "nodemon --env-file=.env app.js",
-    "remakedb": "psql -d nhanify < lib/schema_data.sql"
+    "remakedb": "psql -d nhanify < lib/schema_data.sql",
+    "start-ec2": "ssh nhanify 'sudo systemctl start myserver.service'",
+    "stop-ec2": "ssh nhanify 'sudo systemctl stop myserver.service'",
+    "status-ec2": "ssh nhanify 'sudo systemctl status myserver.service'"
   },
   "author": "",
   "license": "ISC",
