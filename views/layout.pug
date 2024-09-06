@@ -25,7 +25,6 @@ html(lang="en")
               form(class="buttonForm" action="/signout" method="post")
                 input(type="submit" value="Sign Out")
             else
-              a(href="/signup") Sign Up 
               a(href="/signin") Sign In
         .stack2  
           if (user === undefined)

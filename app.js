@@ -101,13 +101,10 @@ app.get("/twitchAuthResponse", async (req, res) => {
     },
   });
   const responseAuthUser = await authUser.json();
-  console.log({ responseAuthUser });
   if (responseAuthUser.message === "Invalid OAuth token")
     return res.render("sigin");
   const username = responseAuthUser.data[0].display_name;
-  console.log({ username });
   const user = await persistence.findUser(username);
-  console.log({ user });
   if (!user) {
     req.flash("errors", "No account associated with the username. ");
     req.session.twitchUsername = username;
@@ -242,7 +239,6 @@ app.post(
   catchError(async (req, res) => {
     const errors = validationResult(req);
     const { playlistId, playlistType, page, pagePl } = req.params;
-    console.log("IN ADD", { pagePl });
     const rerender = async () => {
       const playlist = await persistence.getPlaylistTitle(+playlistId);
       if (!playlist) throw new NotFoundError();
@@ -753,7 +749,6 @@ app.get(
       persistence,
       PAGE_OFFSET,
     );
-    console.log({ data });
     return res.render("public_playlists", data);
   }),
 );
@@ -780,89 +775,6 @@ app.get(
     }
     req.session.originRedirectUrl = req.query.redirectUrl;
     return res.render("signin");
-  }),
-);
-
-// Sign in.
-app.post(
-  "/signin",
-  [
-    body("username").trim().isLength({ min: 1 }).withMessage(MSG.emptyUsername),
-    body("password").trim().isLength({ min: 1 }).withMessage(MSG.emptyPassword),
-  ],
-  catchError(async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      errors.array().forEach((message) => req.flash("errors", message.msg));
-      return res.render("signin", { flash: req.flash() });
-    }
-    const { username, password } = req.body;
-    const authenticatedUser = await persistence.authenticateUser(
-      username,
-      password,
-    );
-    if (!authenticatedUser) {
-      req.flash("errors", MSG.invalidCred);
-      return res.render("signin", { flash: req.flash() });
-    }
-    req.session.user = authenticatedUser;
-    req.flash("successes", MSG.loggedIn);
-    if (!isValidRedirectURL(req.query.fullRedirectUrl)) {
-      return res.redirect("/your/playlists/1");
-    } else {
-      if (req.session.requestMethod === "POST")
-        return res.redirect(req.session.referrer);
-      return res.redirect(req.query.fullRedirectUrl);
-    }
-  }),
-);
-
-//Get signup form.
-app.get(
-  "/signup",
-  catchError((req, res) => {
-    return res.render("signup");
-  }),
-);
-
-// Sign up.
-app.post(
-  "/signup",
-  [
-    body("username")
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage(MSG.emptyUsername)
-      .isLength({ max: 30 })
-      .withMessage(MSG.maxUsername),
-    body("password")
-      .trim()
-      .isLength({ min: 12 })
-      .withMessage(MSG.minPassword)
-      .isLength({ max: 72 })
-      .withMessage(MSG.maxPassword),
-  ],
-  catchError(async (req, res) => {
-    const { username, password } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      errors.array().forEach((message) => {
-        req.flash("errors", message.msg);
-      });
-      return res.render("signup", { flash: req.flash() });
-    }
-    try {
-      const createdUser = await persistence.createUser(username, password);
-      req.session.user = createdUser;
-    } catch (error) {
-      if (error.constraint === "unique_username") {
-        req.flash("errors", MSG.uniqueUsername);
-        return res.render("signup", { flash: req.flash() });
-      }
-      throw error;
-    }
-    req.flash("successes", MSG.createUser);
-    return res.redirect("/your/playlists/1");
   }),
 );
 
