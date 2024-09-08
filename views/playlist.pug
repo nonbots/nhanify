@@ -28,7 +28,6 @@ block main
                 input(class="inputURL" id="title" type="text" name="title" placeholder="Video Title" value=title) 
             input(class="addBtn" type="submit" value="Add")
   else 
-    - console.log("IN PUG", {pagePl});
     .playlistsDiv
       h1(class="pageTitle") #{pageTitle}
       block listWrap 
@@ -80,13 +79,22 @@ block main
                 input(class="addBtn" type="submit" value="Add")
           .pageNav 
             if (pagePl > 1) 
-              a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`) ⮜
+              if (playlistType !== "anonPublic")
+                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`) ⮜
+              else 
+                a(href=`/anon/public/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`) ⮜
             .pages
               - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
-                -console.log({pageNum, page});
-                a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/${playlistType}/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
+                if (playlistType !== "anonPublic")
+                  a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/${playlistType}/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
+                else 
+                  a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/anon/public/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
+
             if (pagePl < totalPages) 
-              a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+              if (playlistType !== "anonPublic")
+                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+              else 
+                a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
           .cols
             .labelNo
               p(class="username" style) No.
