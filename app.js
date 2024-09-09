@@ -1,5 +1,4 @@
 const {
-  PROTOCOL,
   DOMAIN,
   CLIENT_SECRET,
   REDIRECT_URI,
@@ -390,7 +389,7 @@ app.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, page, pagePl } = req.params;
-    const { title, url } = req.body;
+    const title = req.body.title.replace(/[\u200B-\u200D\uFEFF]/g, "");
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -423,7 +422,7 @@ app.post(
         playlistTotal: +playlist.songTotal,
         playlistType,
         playlistId: +playlistId,
-        url,
+        url: req.body.url,
         title,
       });
     };
@@ -435,7 +434,7 @@ app.post(
       await rerender();
       return;
     }
-    const videoId = parseURL(url);
+    const videoId = parseURL(req.body.url);
     try {
       await persistence.addSong(
         title,
@@ -669,8 +668,8 @@ app.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, page } = req.params;
-    const { title, visibility } = req.body;
-    const isPrivate = visibility === "private";
+    const title = req.body.title.replace(/[\u200B-\u200D\uFEFF]/g, "");
+    const isPrivate = req.body.visibility === "private";
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       errors.array().forEach((message) => {
