@@ -48,8 +48,15 @@ body {
   display: flex;
   color: var(--color-secondary);
   padding-top: 1rem;
+  justify-content: center;
 }
 
+.signin {
+    border: medium solid var(--color-primary);
+    border-radius: .5rem;
+    width: fit-content;
+    padding: 1rem;
+}
 .stack1 {
   display: flex;
   flex-direction: row;
@@ -239,6 +246,13 @@ main {
   background-size: 20px 20px;
   border: 0px;
 }
+
+.jam {
+  height:200px; 
+  background: transparent url("../icons/wiggle_outine.gif") 50% 50% no-repeat;
+  background-size: 200px  200px;
+  border: 0px;
+}
 .deleteBtn {
   background: transparent url("../icons/delete.png") 50% 50% no-repeat;
   border: 0px;
@@ -385,7 +399,7 @@ p {
 .mainWrap {
   display: flex;
   flex-direction: column;
-  row-gap: 2rem;
+  row-gap: 1rem;
 }
 
 .inputForm {
@@ -408,15 +422,6 @@ label {
   font-weight: 300;
 }
 
-input {
-  margin: 0rem;
-  background-color: var(--color-secondary);
-  color: white;
-  border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  border: none;
-  height: 1.5rem;
-}
 
 .formDivParent {
   display: flex;
