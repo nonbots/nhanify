@@ -376,7 +376,10 @@ app.post(
   [
     body("title")
       .trim()
-      .isLength({ min: 1 })
+      .custom((usernameInput) => {
+        const input = usernameInput.replace(/[\u200B-\u200D\uFEFF]/g, "");
+        return input.length !== 0;
+      })
       .withMessage("Title is empty.")
       .isLength({ max: 72 })
       .withMessage("Title is over the min limit of 72 characters."),
@@ -389,7 +392,6 @@ app.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, page, pagePl } = req.params;
-    const title = req.body.title.replace(/[\u200B-\u200D\uFEFF]/g, "");
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -423,7 +425,7 @@ app.post(
         playlistType,
         playlistId: +playlistId,
         url: req.body.url,
-        title,
+        title: req.body.title,
       });
     };
     const errors = validationResult(req);
@@ -661,14 +663,16 @@ app.post(
   [
     body("title")
       .trim()
-      .isLength({ min: 1 })
+      .custom((usernameInput) => {
+        const input = usernameInput.replace(/[\u200B-\u200D\uFEFF]/g, "");
+        return input.length !== 0;
+      })
       .withMessage("Title is empty.")
       .isLength({ max: 72 })
       .withMessage("Title is over the min limit of 72 characters."),
   ],
   catchError(async (req, res) => {
     const { playlistType, page } = req.params;
-    const title = req.body.title.replace(/[\u200B-\u200D\uFEFF]/g, "");
     const isPrivate = req.body.visibility === "private";
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -676,7 +680,7 @@ app.post(
         req.flash("errors", message.msg);
       });
       return res.render("create_playlist", {
-        title,
+        title: req.body.title,
         playlistType,
         page: +page,
         isPrivate,
