@@ -6,7 +6,7 @@
 
 ## Setup
 
-1. **Systemd**: Copy `myserver.service` to your systemd folder (When hosting locally).
+1. **Systemd**: Copy `myserver.service` to your systemd folder (if you want to host the application on a remote or local server).
 2. **Install Node.js & PostgreSQL**: Ensure both are installed, with `npm` and `psql` available.
 3. **Install Dependencies**: Run `npm install` in the project root.
 4. **Create DB**: Run `createdb <databasename>`, and add it to `PG_DATABASE` in `.env`.
