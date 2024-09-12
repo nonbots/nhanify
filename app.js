@@ -397,7 +397,6 @@ app.post(
       req.session.user.id,
     );
     if (!writePlaylist) throw new ForbiddenError();
-
     const rerender = async () => {
       const offset = (+pagePl - 1) * ITEMS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
@@ -438,12 +437,18 @@ app.post(
     }
     const videoId = parseURL(req.body.url);
     try {
-      await persistence.addSong(
-        title,
+      const song = await persistence.addSong(
+        req.body.title,
         videoId,
         +playlistId,
         req.session.user.id,
       );
+      if (song.rowCount === 0) {
+        req.flash("errors", MSG.overSongsLimit);
+        return res.redirect(
+          `/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}`,
+        );
+      }
     } catch (error) {
       if (error.constraint === "unique_video_id_playlist_id") {
         req.flash("errors", MSG.uniqueSong);
@@ -688,12 +693,16 @@ app.post(
       });
     }
     try {
-      await persistence.createPlaylist(title, isPrivate, req.session.user.id);
+      const playlist = await persistence.createPlaylist(req.body.title, isPrivate, req.session.user.id);
+      if (+playlist.rowCount === 0) {
+        req.flash("errors", MSG.overPlaylistsLimit);
+        return res.redirect(`/your/playlists/${page}`);
+      }
     } catch (error) {
       if (error.constraint === "unique_creator_id_title") {
         req.flash("errors", MSG.uniquePlaylist);
         return res.render("create_playlist", {
-          title,
+          title:req.body.title,
           playlistType,
           page: +page,
           isPrivate,
