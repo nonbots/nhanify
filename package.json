@@ -15,7 +15,8 @@
     "make-seed": "psql -d nhanify < lib/seed.sql",
     "start-ec2": "ssh nhanify 'sudo systemctl start myserver.service'",
     "stop-ec2": "ssh nhanify 'sudo systemctl stop myserver.service'",
-    "status-ec2": "ssh nhanify 'sudo systemctl status myserver.service'"
+    "status-ec2": "ssh nhanify 'sudo systemctl status myserver.service'",
+    "prepare": "husky"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +36,7 @@
     "dotenv": "^16.4.5",
     "eslint": "^7.12.1",
     "eslint-cli": "^1.1.1",
+    "husky": "^9.1.6",
     "jest": "^29.7.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.0",
