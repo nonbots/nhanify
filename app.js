@@ -693,7 +693,11 @@ app.post(
       });
     }
     try {
-      const playlist = await persistence.createPlaylist(req.body.title, isPrivate, req.session.user.id);
+      const playlist = await persistence.createPlaylist(
+        req.body.title,
+        isPrivate,
+        req.session.user.id,
+      );
       if (+playlist.rowCount === 0) {
         req.flash("errors", MSG.overPlaylistsLimit);
         return res.redirect(`/your/playlists/${page}`);
@@ -702,7 +706,7 @@ app.post(
       if (error.constraint === "unique_creator_id_title") {
         req.flash("errors", MSG.uniquePlaylist);
         return res.render("create_playlist", {
-          title:req.body.title,
+          title: req.body.title,
           playlistType,
           page: +page,
           isPrivate,

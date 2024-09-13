@@ -1,1 +1,2 @@
 npm test
+npx prettier . --check
