@@ -176,11 +176,8 @@ main {
   border-radius: 1rem;
 }
 
-.modDiv {
-  display: flex;
-  width: 100%;
-  column-gap: 1rem;
-  justify-content: end;
+.padding {
+  padding: 4px;
 }
 
 .descriptionDiv {
@@ -515,9 +512,25 @@ pre {
   text-align: start;
 }
 
-.textTitle p {
+.textGeneric {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.textGeneric p {
   font-size: 24px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.modDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.padding {
+  margin-left: 4px;
 }
 
 .textRow {
