@@ -541,3 +541,7 @@ pre {
 .publicPlaylist {
   font-weight: bold;
 }
+
+.rotate180 {
+  transform: rotate(180deg);
+}
