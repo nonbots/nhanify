@@ -47,29 +47,31 @@ block main
                   div(class="marginatedTop")
                     .cardBlock
                       .textStart
-                        .textTitle
+                        .textGeneric
                           p= playlist.title
+                          if (user !== undefined)
+                            .modDiv
+                              .padding
+                                if (playlistType === "your")
+                                  form(action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/edit` method="get")
+                                    input(class="editBtn" type="submit" value="")
+                              .padding
+                                if (playlistType === "contribution")
+                                    form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
+                                      input(onclick="confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
+                              .padding
+                                if (playlistType === "your")
+                                  form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
+                                    input(onclick="confirmSubmit(event, 'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
                         div(class="textRow")
-                          .madeBy
-                            p Made by:
-                          .publicPlaylist
-                            p= playlist.username
+                          if (playlistType !== 'your')
+                            .madeBy
+                              p Made by:
+                            .publicPlaylist
+                              p= playlist.username
                         div(class="textRow")
                           .madeBy
                             p Total Songs:
                           .publicPlaylist
                             p= playlist.count
-                      if (user !== undefined)
-                        .modDiv
-                          .val
-                            if (playlistType === "your")
-                              form(action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/edit` method="get")
-                                input(class="editBtn" type="submit" value="")
-                          .val
-                            if (playlistType === "contribution")
-                              form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
-                                input(onclick="confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
-                            if (playlistType === "your")
-                              form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
-                                input(onclick="confirmSubmit(event, 'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
 
