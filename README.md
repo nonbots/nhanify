@@ -1,8 +1,26 @@
+# Nhanify
+
+[![NodeJS](https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white)](#) 
+[![Express.js](https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB)](#) 
+[![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](#) 
+[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](#)
+[![Jest](https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=fff)](#)
+
+Nhanify allows users to create and share playlists, and collaborate with others to build personalized music collections.
+
+## Table of Contents
+
+- [Nhanify](#nhanify)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [Application Overview](#application-overview)
+    - [Features](#features)
+
 ## Prerequisites
 
-- Node.js >= 21.7.1
-- Chrome >= 127.0.6533.119
-- PostgreSQL >= 14.13
+- [Node.js](https://nodejs.org/en/download/prebuilt-installer) >= 21.7.1
+- [PostgreSQL](https://www.postgresql.org/download/) >= 14.13
 
 ## Setup
 
