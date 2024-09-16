@@ -20,23 +20,24 @@ block main
               a(class=`${(pageNum === page) ? "curPage" : ""}` href=`/anon/public/playlists/${pageNum}`) #{pageNum}
             if (page < totalPages) 
               a(href=`/anon/public/playlists/${page + 1}`) ⮞
-          .cols
-            .labelTitle
-              p(class="username") Title
-            .labelAddedBy
-              p(class="username") Creator
-            .labelSongTotal
-              p(class="username") Songs
         block values
           .content
             .playListWrap
               each playlist in playlists
                 a(href=`/anon/public/playlists/${page}/playlist/1/${playlist.id}`) 
-                  div(class="songCard")
-                    .descriptionDiv
-                      .valTitle
-                        p= playlist.title   
-                      .valAddedBy
-                        p= playlist.username 
-                      .valSongTotal
-                        p= playlist.count
+                  div(class="marginatedTop")
+                    .cardBlock
+                      .textStart
+                        .textTitle
+                          p= playlist.title
+                        div(class="textRow")
+                          .madeBy
+                            p Made by:
+                          .publicPlaylist
+                            p= playlist.username
+                        div(class="textRow")
+                          .madeBy
+                            p Total Songs:
+                          .publicPlaylist
+                            p= playlist.count
+

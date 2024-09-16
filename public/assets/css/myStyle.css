@@ -147,9 +147,9 @@ main {
 .playlistsDiv {
   display: flex;
   flex-direction: column;
-  width: 60%;
+  width: 80%;
   align-items: center;
-  height: 100%;
+  min-height: 100%;
   min-width: 320px;
   max-width: 700px;
 }
@@ -176,16 +176,19 @@ main {
   border-radius: 1rem;
 }
 
-.modDiv {
-  display: flex;
-  width: 100%;
-  column-gap: 1rem;
-  justify-content: end;
+.padding {
+  padding: 4px;
 }
 
 .descriptionDiv {
   display: flex;
-  column-gap: 1rem;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.descriptionDiv p {
+  padding: 8px;
+  text-align: start;
 }
 
 .verticalDiv {
@@ -268,6 +271,7 @@ main {
   border: none;
   height: 1.5rem;
   width: 15%;
+  cursor: pointer;
 }
 .addForm {
   display: flex;
@@ -314,6 +318,15 @@ main {
   display: flex;
 }
 
+.valEdit {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.valDelete {
+  cursor: pointer;
+}
+
 .content {
   display: flex;
   width: 100%;
@@ -332,11 +345,23 @@ main {
 }
 
 .songCard {
-  border-top: 1px solid var(--color-secondary);
-  padding: 1rem 0rem;
+  padding: 0.4rem 0.6rem;
+  margin-top: 5px;
+  margin-bottom: 5px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
   row-gap: 0.5rem;
+  background-color: #0C2448;
+  border-radius: 6px;
+}
+
+.songBtns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
 }
 
 .currentSong {
@@ -347,31 +372,26 @@ main {
   flex-direction: row;
   width: 100%;
   column-gap: 1rem;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 .valNo {
   display: flex;
   width: 8%;
+  justify-content: center;
 }
 
 .valTitle {
   display: flex;
-  width: 40%;
+  width: 50%;
+  justify-content: flex-start;
 }
 
 .valAddedBy {
   display: flex;
   width: 30%;
-}
-
-.valDelete {
-  display: flex;
-  width: 5%;
-}
-
-.valEdit {
-  display: flex;
-  width: 5%;
+  justify-content: flex-start;
 }
 
 p {
@@ -497,3 +517,57 @@ pre {
   color: #f9f9e9;
   text-align: left;
 }
+
+.marginatedTop {
+  margin-top: 12px;
+}
+
+.cardBlock {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: #0C2448;
+  border-radius: 4px;
+  text-align: start;
+}
+
+.textStart {
+  text-align: start;
+}
+
+.textGeneric {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.textGeneric p {
+  font-size: 24px;
+  margin-bottom: 0;
+}
+
+.modDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.padding {
+  margin-left: 4px;
+}
+
+.textRow {
+  display: flex;
+  flex-direction: row;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.madeBy {
+  margin-right: 2px;
+}
+
+.publicPlaylist {
+  font-weight: bold;
+}
+
