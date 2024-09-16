@@ -176,11 +176,8 @@ main {
   border-radius: 1rem;
 }
 
-.modDiv {
-  display: flex;
-  width: 100%;
-  column-gap: 1rem;
-  justify-content: end;
+.padding {
+  padding: 4px;
 }
 
 .descriptionDiv {
@@ -497,3 +494,56 @@ pre {
   color: #f9f9e9;
   text-align: left;
 }
+
+.marginatedTop {
+  margin-top: 12px;
+}
+
+.cardBlock {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: #0C2448;
+  border-radius: 4px;
+  text-align: start;
+}
+
+.textStart {
+  text-align: start;
+}
+
+.textGeneric {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.textGeneric p {
+  font-size: 24px;
+  margin-bottom: 0;
+}
+
+.modDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.padding {
+  margin-left: 4px;
+}
+
+.textRow {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 12px;
+}
+
+.madeBy {
+  margin-right: 2px;
+}
+
+.publicPlaylist {
+  font-weight: bold;
+}
+
