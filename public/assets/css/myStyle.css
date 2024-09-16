@@ -498,7 +498,7 @@ pre {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  background-color: #0C2448;
+  background-color: #0c2448;
   border-radius: 4px;
   text-align: start;
 }
@@ -541,4 +541,3 @@ pre {
 .publicPlaylist {
   font-weight: bold;
 }
-
