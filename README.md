@@ -24,10 +24,10 @@ This app lets users share and collaborate on playlists, with song playback via t
 ### Features
 
 1. **Public Playlists**: Lists all public playlists.
-2. **Your Playlists**: 
+2. **Your Playlists**:
    - View, create, edit, delete playlists.
    - Add/remove contributors (must be registered users).
-3. **Contribution Playlists**: 
+3. **Contribution Playlists**:
    - Manage playlists where you're a contributor (add, delete, edit songs).
    - Accepts specific YouTube URLs:
      - `https://www.youtube.com/watch?v=...`
