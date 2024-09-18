@@ -492,3 +492,6 @@ pre {
   color: #f9f9e9;
   text-align: left;
 }
+.rotate180 {
+  transform: rotate(180deg);
+}
