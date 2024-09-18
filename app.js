@@ -26,8 +26,8 @@ const {
   parseURL,
 } = require("./lib/playlist.js");
 const MSG = require("./lib/msg.json");
-const ITEMS_PER_PAGE = 5;
-const PAGE_OFFSET = 2;
+const ITEMS_PER_PAGE = 10;
+const PAGE_OFFSET = 4;
 
 app.set("views", "./views");
 app.set("view engine", "pug");
