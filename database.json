@@ -6,7 +6,7 @@
     "host": "localhost",
     "database": { "ENV": "PG_DATABASE" },
     "port": "5432",
-    "ssl": { "rejectUnauthorized": false },
+    "ssl": false,
     "schema": "my_schema"
   }
 }
