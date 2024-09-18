@@ -1,0 +1,12 @@
+{
+  "pg": {
+    "driver": "pg",
+    "user": { "ENV": "PG_USER" },
+    "password": { "ENV": "PG_PASSWORD" },
+    "host": "localhost",
+    "database": { "ENV": "PG_DATABASE" },
+    "port": "5432",
+    "ssl": { "rejectUnauthorized": false },
+    "schema": "my_schema"
+  }
+}

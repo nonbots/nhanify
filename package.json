@@ -24,6 +24,8 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "connect-loki": "^1.2.0",
+    "db-migrate": "^0.11.14",
+    "db-migrate-pg": "^1.5.2",
     "express": "^4.18.2",
     "express-flash": "^0.0.2",
     "express-session": "^1.18.0",
