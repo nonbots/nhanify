@@ -39,39 +39,39 @@ block main
                 a(class=`${(pageNum === page) ? "curPage" : ""}` href=`/${playlistType}/playlists/${pageNum}`) #{pageNum}
             if (page < totalPages) 
               a(href=`/${playlistType}/playlists/${page + 1}`) ⮞
-          .cols
-            .labelTitle
-              p(class="username") Title
-            if (playlistType !== "your")
-              .labelAddedBy
-                p(class="username") Creator
-            .labelSongTotal
-              p(class="username") Songs
         block values
           .content
             .playListWrap
               each playlist in playlists
-                a(href=`/${playlistType}/playlists/${page}/playlist/1/${playlist.id}`) 
-                  div(class="songCard")
-                    .descriptionDiv
-                      .valTitle
-                        p= playlist.title   
-                      if (playlistType !== "your")
-                        .valAddedBy
-                          p= playlist.username 
-                      .valSongTotal
-                        p= playlist.count
-                    if (user !== undefined)
-                      .modDiv 
-                        .val
-                          if (playlistType === "your")
-                            form(action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/edit` method="get")
-                              input(class="editBtn" type="submit" value="")
-                        .val
-                          if (playlistType === "contribution")
-                            form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
-                              input(onclick = "confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
-                          if (playlistType === "your")
-                            form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
-                              input(onclick = "confirmSubmit(event,'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
-          
+                a(href=`/anon/public/playlists/${page}/playlist/1/${playlist.id}`) 
+                  div(class="marginatedTop")
+                    .cardBlock
+                      .textStart
+                        .textGeneric
+                          p= playlist.title
+                          if (user !== undefined)
+                            .modDiv
+                              .padding
+                                if (playlistType === "your")
+                                  form(action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/edit` method="get")
+                                    input(class="editBtn" type="submit" value="")
+                              .padding
+                                if (playlistType === "contribution")
+                                    form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
+                                      input(onclick="confirmSubmit(event, 'Do you want to remove the playlist. You will no longer be contributing to the playlist.')" class="stopContributionBtn" type="submit" value="Stop Contributing")
+                              .padding
+                                if (playlistType === "your")
+                                  form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${playlist.id}/delete` method="post")
+                                    input(onclick="confirmSubmit(event, 'Do you want to delete the playlist? This will remove the playlist for contributors as well.')" class="deleteBtn" type="submit" value="")
+                        div(class="textRow")
+                          if (playlistType !== 'your')
+                            .madeBy
+                              p Made by:
+                            .publicPlaylist
+                              p= playlist.username
+                        div(class="textRow")
+                          .madeBy
+                            p Total Songs:
+                          .publicPlaylist
+                            p= playlist.count
+
