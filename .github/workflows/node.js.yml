@@ -73,5 +73,6 @@ jobs:
         # Environment variables used by the `client.js` script to create
         # a new PostgreSQL table.
       - run: npm run build --if-present
+      - run: npx db-migrate up --env pg
       - run: npm test
       - run: npx prettier . --check
