@@ -94,9 +94,11 @@ block main
 
             if (pagePl < totalPages) 
               if (playlistType !== "anonPublic")
-                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg`)
               else 
-                a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+                a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg` class="rotate180")
           .cols
             .labelNo
               p(class="username" style) No.
