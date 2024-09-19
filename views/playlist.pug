@@ -82,9 +82,11 @@ block main
           .pageNav 
             if (pagePl > 1) 
               if (playlistType !== "anonPublic")
-                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`) ⮜
+                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg`)
               else 
-                a(href=`/anon/public/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`) ⮜
+                a(href=`/anon/public/playlists/${page}/playlist/${pagePl - 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg` class="rotate180")
             .pages
               - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
                 if (playlistType !== "anonPublic")
