@@ -54,14 +54,6 @@ block main
             a(href=`/anon/public/playlists/${page}`) Back
           .iframeDiv
             #player
-          .currentSongcols
-            .labelPlayIcon
-            .labelNo
-              p(class="username") No.
-            .labelTitle
-              p(class="username") Title
-            .labelAddedBy
-              p(class="username") Added By
           .currentSong
             .playIcon
               p ♫
@@ -91,7 +83,6 @@ block main
                   a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/${playlistType}/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
                 else 
                   a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/anon/public/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
-
             if (pagePl < totalPages) 
               if (playlistType !== "anonPublic")
                 a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
@@ -99,31 +90,25 @@ block main
               else 
                 a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
                   img(src=`/assets/icons/arrow.svg` class="rotate180")
-          .cols
-            .labelNo
-              p(class="username" style) No.
-            .labelTitle
-              p(class="username") Title
-            .labelAddedBy
-              p(class="username") Added By
         block values
           .content
             .playListWrap
               each song in playlist.songs
                 div(class="songCard" data-video-id=`${song.video_id}`)
-                  .descriptionDiv
+                 .descriptionDiv
                     .valNo
                       p= playlist.songs.indexOf(song) + 1
                     .valTitle
                       p= song.title   
                     .valAddedBy
                       p= song.added_by
-                  .modDiv
                     if (user !== undefined && playlistType !== "public")
-                      .valEdit
-                        form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/edit` method="get")
-                          input(class="editBtn" type="submit" value="")
-                      .valDelete
-                        if (user !== undefined)
-                          form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/delete` method="post")
-                            input(onclick = "confirmSubmit(event,'Do you want to delete the song from the playlist?')" class="deleteBtn" type="submit" value="")
+                      div(class="songBtns")
+                        .valEdit
+                          form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/edit` method="get")
+                            input(class="editBtn" type="submit" value="")
+                        .valDelete
+                          if (user !== undefined)
+                            form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/delete` method="post")
+                              input(onclick = "confirmSubmit(event,'Do you want to delete the song from the playlist?')" class="deleteBtn" type="submit" value="")
+

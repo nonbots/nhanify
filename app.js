@@ -101,7 +101,7 @@ app.get("/twitchAuthResponse", async (req, res) => {
   });
   const responseAuthUser = await authUser.json();
   if (responseAuthUser.message === "Invalid OAuth token")
-    return res.render("sigin");
+    return res.render("signin");
   const username = responseAuthUser.data[0].display_name;
   const user = await persistence.findUser(username);
   if (!user) {
