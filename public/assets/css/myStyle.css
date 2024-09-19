@@ -288,7 +288,7 @@ main {
 
 .labelPlayIcon {
   display: flex;
-  width: 7%;
+  width: 5%;
 }
 
 .currentSongcols {
@@ -304,12 +304,17 @@ main {
   display: flex;
 }
 .labelTitle {
-  width: 40%;
+  width: 52%;
   display: flex;
 }
 .labelAddedBy {
-  width: 30%;
+  width: 25%;
   display: flex;
+}
+
+.labelDuration {
+  display: flex;
+  width: 15%;
 }
 
 .content {
@@ -353,12 +358,17 @@ main {
 
 .valTitle {
   display: flex;
-  width: 40%;
+  width: 52%;
 }
 
 .valAddedBy {
   display: flex;
-  width: 30%;
+  width: 25%;
+}
+
+.valDuration {
+  display: flex;
+  width: 15%;
 }
 
 .valDelete {

@@ -6,6 +6,7 @@ const {
   HOST,
   PORT,
   SESSION_SECRET,
+  YT_API_KEY,
 } = process.env;
 const express = require("express");
 const app = express();
@@ -24,9 +25,10 @@ const {
   isValidRedirectURL,
   isValidURL,
   parseURL,
+  getVidInfo,
 } = require("./lib/playlist.js");
 const MSG = require("./lib/msg.json");
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
 
 app.set("views", "./views");
@@ -374,18 +376,6 @@ app.post(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId/add",
   requireAuth,
   [
-    body("title")
-      .trim()
-      .custom((usernameInput) => {
-        const input = usernameInput.replace(
-          /[\x00|\x01|\x02|\x03|\x04|\x05|\x06|\x07|\x08|\x09|\x0A|\x0B|\x0C|\x0D|\x0E|\x0F|\x10|\x11|\x12|\x13|\x14|\x15|\x16|\x17|\x18|\x19|\x1A|\x1B|\x1C|\x1D|\x1E|\x1F|\xA0]/g,
-          "",
-        );
-        return input.length !== 0;
-      })
-      .withMessage("Title is empty.")
-      .isLength({ max: 72 })
-      .withMessage("Title is over the min limit of 72 characters."),
     body("url")
       .trim()
       .isLength({ min: 1 })
@@ -438,13 +428,15 @@ app.post(
       await rerender();
       return;
     }
-    const videoId = parseURL(req.body.url);
+    //const videoId = parseURL(req.body.url);
+    const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
     try {
       const song = await persistence.addSong(
-        req.body.title,
-        videoId,
+        vidInfo.title,
+        vidInfo.videoId,
         +playlistId,
         req.session.user.id,
+        vidInfo.durationSecs,
       );
       if (song.rowCount === 0) {
         req.flash("errors", MSG.overSongsLimit);
