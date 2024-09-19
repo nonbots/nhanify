@@ -22,12 +22,14 @@ block listWrap
                 pre(class=`${msgType}`) #{msg}
         .pageNav 
           if (pageCb > 1) 
-            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb - 1}`) ⮜
+            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb - 1}`)
+              img(src=`/assets/icons/arrow.svg`)
           .pages
             - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
               a(class=`${(pageNum === pageCb) ? "curPage" : ""}` href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageNum}`) #{pageNum}
           if (pageCb < totalPages) 
-            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb + 1}`) ⮞
+            a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/${pageCb + 1}`)
+              img(src=`/assets/icons/arrow.svg` class="rotate180")
         .cols
           .label
             p(class="username") username

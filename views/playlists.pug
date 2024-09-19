@@ -23,20 +23,24 @@ block main
             p(class="username") #{playlistTotal} #{playlistLabel} 
             if (user !== undefined && playlistType === "your")
               a(href=`/${playlistType}/playlists/${page}/create`) Create 
-          .errorMessages
-            - let msgTypes = Object.keys(flash || {})
-            if (msgTypes.length > 0) 
-              each msgType in msgTypes
-                each msg in flash[msgType]
-                  pre(class=`${msgType}`) #{msg}
+          if (Object.keys(flash).length > 0)
+            .errorMessages
+            if (Object.keys(flash).length > 0)
+              - let msgTypes = Object.keys(flash || {})
+              if (msgTypes.length > 0) 
+                each msgType in msgTypes
+                  each msg in flash[msgType]
+                    pre(class=`${msgType}`) #{msg}
           .pageNav 
             if (page > 1) 
-              a(href=`/${playlistType}/playlists/${page - 1}`) ⮜
+              a(href=`/${playlistType}/playlists/${page - 1}`)
+                img(src=`/assets/icons/arrow.svg`)
             .pages
               - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
                 a(class=`${(pageNum === page) ? "curPage" : ""}` href=`/${playlistType}/playlists/${pageNum}`) #{pageNum}
             if (page < totalPages) 
-              a(href=`/${playlistType}/playlists/${page + 1}`) ⮞
+              a(href=`/${playlistType}/playlists/${page + 1}`)
+                img(src=`/assets/icons/arrow.svg` class="rotate180")
         block values
           .content
             .playListWrap

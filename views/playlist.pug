@@ -40,12 +40,14 @@ block main
               a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/1`) Contributors
             if(playlistType === "your")
               a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/add`) Add 
-          .errorMessages
-            - let msgTypes = Object.keys(flash || {})
-            if (msgTypes.length > 0) 
-              each msgType in msgTypes
-                each msg in flash[msgType]
-                  pre(class=`${msgType}`) #{msg}
+          - console.log({flash});
+          if (Object.keys(flash).length > 0)
+            .errorMessages
+              - let msgTypes = Object.keys(flash || {})
+              if (msgTypes.length > 0) 
+                each msgType in msgTypes
+                  each msg in flash[msgType]
+                    pre(class=`${msgType}`) #{msg}
           if (!(playlistType === "anonPublic"))
             a(href=`/${playlistType}/playlists/${page}`) Back
           else
@@ -83,9 +85,11 @@ block main
                   a(class=`${(pageNum === pagePl) ? "curPage" : ""}` href=`/anon/public/playlists/${page}/playlist/${pageNum}/${playlistId}`) #{pageNum}
             if (pagePl < totalPages) 
               if (playlistType !== "anonPublic")
-                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+                a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg`)
               else 
-                a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`) ⮞
+                a(href=`/anon/public/playlists/${page}/playlist/${pagePl + 1}/${playlistId}`)
+                  img(src=`/assets/icons/arrow.svg` class="rotate180")
         block values
           .content
             .playListWrap

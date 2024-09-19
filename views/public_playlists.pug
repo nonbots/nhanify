@@ -14,12 +14,14 @@ block main
             p(class="username") #{playlistTotal} #{playlistLabel} 
           .pageNav 
             if (page > 1) 
-              a(href=`/anon/public/playlists/${page - 1}`) ⮜
+              a(href=`/anon/public/playlists/${page - 1}`)
+                img(src=`/assets/icons/arrow.svg`)
             .pages
             - for (let pageNum  = startPage ; pageNum <= endPage; pageNum++)
               a(class=`${(pageNum === page) ? "curPage" : ""}` href=`/anon/public/playlists/${pageNum}`) #{pageNum}
             if (page < totalPages) 
-              a(href=`/anon/public/playlists/${page + 1}`) ⮞
+              a(href=`/anon/public/playlists/${page + 1}`)
+                img(src=`/assets/icons/arrow.svg` class="rotate180")
         block values
           .content
             .playListWrap
