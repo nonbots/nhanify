@@ -24,6 +24,8 @@ body {
   text-align: center;
   background-color: var(--color-bg-dark);
   color: white;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .bWrap {

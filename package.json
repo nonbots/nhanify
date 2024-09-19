@@ -16,6 +16,7 @@
     "start-ec2": "ssh nhanify 'sudo systemctl start myserver.service'",
     "stop-ec2": "ssh nhanify 'sudo systemctl stop myserver.service'",
     "status-ec2": "ssh nhanify 'sudo systemctl status myserver.service'",
+    "deploy-ec2": "ssh -t nhanify 'cd nhanify && git pull && npm install && npx db-migrate up --env pg && sudo systemctl restart myserver.service'",
     "prepare": "husky"
   },
   "author": "",
