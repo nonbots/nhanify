@@ -17,10 +17,14 @@ console.log(songs);
 // iterate through the songs and get the video id and pass to the YT Data api
 for (const song of songs) {
   // connecting to the YOUTUBE Data API to grab the duration and return an object containing duration
-  const vidInfo = await getVidInfoByVidId(song.video_id, YT_API_KEY); //vidInfo.ducation => sec
-  await setTimeout(100);
-  console.log(`Title: ${vidInfo.title}`);
-  await updateSongDuration(song.video_id, vidInfo.durationSecs);
+  try {
+    const vidInfo = await getVidInfoByVidId(song.video_id, YT_API_KEY); //vidInfo.ducation => sec
+    await setTimeout(100);
+    console.log(`Title: ${vidInfo.title}`);
+    await updateSongDuration(song.video_id, vidInfo.durationSecs);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 // insert the duration into the specific record associated with the video id.
