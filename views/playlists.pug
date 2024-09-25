@@ -23,9 +23,9 @@ block main
             p(class="username") #{playlistTotal} #{playlistLabel} 
             if (user !== undefined && playlistType === "your")
               a(href=`/${playlistType}/playlists/${page}/create`) Create 
-          if (Object.keys(flash).length > 0)
+          if (flash && Object.keys(flash).length > 0)
             .errorMessages
-            if (Object.keys(flash).length > 0)
+            if (flash && Object.keys(flash).length > 0)
               - let msgTypes = Object.keys(flash || {})
               if (msgTypes.length > 0) 
                 each msgType in msgTypes

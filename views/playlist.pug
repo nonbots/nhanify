@@ -39,8 +39,7 @@ block main
               a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/1`) Contributors
             if(playlistType === "your")
               a(href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/contributors/add`) Add 
-          - console.log({flash});
-          if (Object.keys(flash).length > 0)
+          if (flash && Object.keys(flash).length > 0)
             .errorMessages
               - let msgTypes = Object.keys(flash || {})
               if (msgTypes.length > 0) 
