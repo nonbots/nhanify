@@ -1,4 +1,18 @@
-const { durationSecsToHHMMSS } = require("./playlist.js");
+const { durationSecsToHHMMSS } = require("../lib/playlist.js");
+
+function requireAuth(req, res, next) {
+  if (!req.session.user) {
+    const requestURL = encodeURIComponent(req.originalUrl);
+    const fullRequestURL = `${DOMAIN}${requestURL}`;
+    req.session.requestMethod = req.method;
+    req.session.referrer = req.header("Referrer");
+    req.flash("errors", MSG.error401);
+    res.redirect(`/signin?fullRedirectUrl=${fullRequestURL}`);
+  } else {
+    next();
+  }
+}
+
 async function getPlaylists(
   playlistType,
   page,
@@ -103,4 +117,4 @@ async function getPlaylist(
   };
 }
 
-module.exports = { getPlaylists, getPlaylist };
+module.exports = { getPlaylists, getPlaylist, requireAuth };
