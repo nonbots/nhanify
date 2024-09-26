@@ -76,3 +76,4 @@ jobs:
       - run: npx db-migrate up --env pg
       - run: npm test
       - run: npx prettier . --check
+      - run: npx eslint .

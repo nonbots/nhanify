@@ -8,6 +8,7 @@
   },
   "scripts": {
     "prettier": "npx prettier . --write",
+    "lint": "npx eslint --fix .",
     "test": "jest --verbose --detectOpenHandles",
     "start": "nodemon --env-file=.env app.js",
     "make-db": "psql -d nhanify < lib/schema.sql && psql -d nhanify < migrations/sqls/20240918190940-add-duration-up.sql && psql -d nhanify < lib/seed.sql",
@@ -35,10 +36,12 @@
     "pug": "^3.0.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
     "babel-eslint": "^10.1.0",
     "dotenv": "^16.4.5",
-    "eslint": "^7.12.1",
+    "eslint": "^9.11.1",
     "eslint-cli": "^1.1.1",
+    "globals": "^15.9.0",
     "husky": "^9.1.6",
     "jest": "^29.7.0",
     "morgan": "^1.10.0",

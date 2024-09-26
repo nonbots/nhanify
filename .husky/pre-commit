@@ -1,2 +1,3 @@
 npm test
 npx prettier . --check
+npx eslint --fix .
