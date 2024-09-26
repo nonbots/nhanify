@@ -185,6 +185,11 @@ songsRouter.post(
     }
     //const videoId = parseURL(req.body.url);
     const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
+    if (!vidInfo) {
+      req.flash("errors", MSG.invalidVideoId);
+      await rerender();
+      return;
+    }
     try {
       const song = await persistence.addSong(
         vidInfo.title,

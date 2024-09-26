@@ -1,4 +1,5 @@
 {
+  "invalidVideoId": "Looks like we can't find your video. Please check your video id in your Youtube URL and try again.",
   "error401": "Oops! Your session has ended. Please log back into your account.",
   "alreadyLoggedIn": "You are already logged in.",
   "error500": "Oops! Something went wrong with the server. We are currently addressing the issue.",

@@ -175,6 +175,7 @@ playlistsRouter.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, page } = req.params;
+    const persistence = req.app.locals.persistence;
     const isPrivate = req.body.visibility === "private";
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
