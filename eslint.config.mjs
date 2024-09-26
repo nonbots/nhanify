@@ -1,5 +1,6 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
+import pluginJest from "eslint-plugin-jest";
 
 export default [
   {
@@ -12,8 +13,17 @@ export default [
     },
   },
   {
+    files: ["**/*.{test,spec}.js"],
+    plugins: {
+      jest: pluginJest,
+    },
     languageOptions: {
-      globals: globals.browser,
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      ...pluginJest.configs.recommended.rules,
     },
   },
   pluginJs.configs.recommended,
