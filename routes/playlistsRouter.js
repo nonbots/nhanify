@@ -6,8 +6,6 @@ const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { getPlaylists, getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
-const Persistence = require("../lib/pg-persistence.js");
-const persistence = new Persistence();
 const MSG = require("../lib/msg.json");
 const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
@@ -17,6 +15,7 @@ playlistsRouter.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistId, playlistType, page } = req.params;
+    const persistence = req.app.locals.persistence;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -48,6 +47,7 @@ playlistsRouter.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, page } = req.params;
+    const persistence = req.app.locals.persistence;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -98,7 +98,7 @@ playlistsRouter.get(
   catchError(async (req, res) => {
     const { page, playlistId, pagePl } = req.params;
     const data = await getPlaylist(
-      persistence,
+      req.app.locals.persistence,
       ITEMS_PER_PAGE,
       PAGE_OFFSET,
       "anonPublic",
@@ -117,6 +117,7 @@ playlistsRouter.post(
   catchError(async (req, res) => {
     let { playlistId, page } = req.params;
     const userId = req.session.user.id;
+    const persistence = req.app.locals.persistence;
     const contributionPlaylist = await persistence.deleteContributionPlaylist(
       +playlistId,
       userId,
@@ -241,7 +242,7 @@ playlistsRouter.get(
       playlistType,
       page,
       ITEMS_PER_PAGE,
-      persistence,
+      req.app.locals.persistence,
       PAGE_OFFSET,
       userId,
     );
@@ -260,7 +261,7 @@ playlistsRouter.get(
       "anonPublic",
       page,
       ITEMS_PER_PAGE,
-      persistence,
+      req.app.locals.persistence,
       PAGE_OFFSET,
     );
     return res.render("public_playlists", data);

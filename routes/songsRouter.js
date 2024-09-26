@@ -1,7 +1,5 @@
 const { Router } = require("express");
 const songsRouter = Router();
-const Persistence = require("../lib/pg-persistence.js");
-const persistence = new Persistence();
 const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
@@ -20,13 +18,14 @@ songsRouter.get(
   catchError(async (req, res, next) => {
     const { page, pagePl, playlistType, playlistId } = req.params;
 
+    const persistence = req.app.locals.persistence;
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
       +playlistId,
       req.session.user.id,
     );
     if (!isReadAuth) throw new ForbiddenError();
     const data = await getPlaylist(
-      persistence,
+      req.app.locals.persistence,
       ITEMS_PER_PAGE,
       PAGE_OFFSET,
       playlistType,
@@ -44,6 +43,7 @@ songsRouter.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, songId, page, pagePl } = req.params;
+    const persistence = req.app.locals.persistence;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       playlistId,
       req.session.user.id,
@@ -77,6 +77,7 @@ songsRouter.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, songId, page, pagePl } = req.params;
+    const persistence = req.app.locals.persistence;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -138,6 +139,7 @@ songsRouter.post(
   ],
   catchError(async (req, res) => {
     const { playlistType, playlistId, page, pagePl } = req.params;
+    const persistence = req.app.locals.persistence;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,
@@ -223,6 +225,7 @@ songsRouter.post(
   requireAuth,
   catchError(async (req, res) => {
     let { playlistType, playlistId, songId, page, pagePl } = req.params;
+    const persistence = req.app.locals.persistence;
     const writePlaylist = await persistence.isWriteSongAuthorized(
       +playlistId,
       req.session.user.id,

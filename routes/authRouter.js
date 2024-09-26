@@ -1,6 +1,4 @@
 const { CLIENT_SECRET, REDIRECT_URI, CLIENT_ID } = process.env;
-const Persistence = require("../lib/pg-persistence.js");
-const persistence = new Persistence();
 const { Router } = require("express");
 const authRouter = Router();
 const { requireAuth } = require("./middleware.js");
@@ -45,7 +43,9 @@ authRouter.get("/twitchAuthResponse", async (req, res) => {
       "Client-Id": CLIENT_ID,
     },
   });
+
   const responseAuthUser = await authUser.json();
+  const persistence = req.app.locals.persistence;
   if (responseAuthUser.message === "Invalid OAuth token")
     return res.render("signin");
   const username = responseAuthUser.data[0].display_name;
@@ -66,6 +66,7 @@ authRouter.get("/twitchSignup", (req, res) => {
   return res.render("twitch_signup", { twitchUsername });
 });
 authRouter.post("/twitchSignup/create", async (req, res) => {
+  const persistence = req.app.locals.persistence;
   const user = await persistence.createUserTwitch(req.session.twitchUsername);
   req.session.user = user;
   req.flash("successes", MSG.createUser);

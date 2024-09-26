@@ -20,7 +20,7 @@ const { body, validationResult } = require("express-validator");
 const flash = require("express-flash");
 const catchError = require("./routes/catch-error.js");
 const Persistence = require("./lib/pg-persistence.js");
-const persistence = new Persistence();
+app.locals.persistence = new Persistence();
 const {
   isValidRedirectURL,
   isValidURL,

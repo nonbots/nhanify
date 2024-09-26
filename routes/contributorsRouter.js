@@ -5,8 +5,6 @@ const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { body, validationResult } = require("express-validator");
 const MSG = require("../lib/msg.json");
-const Persistence = require("../lib/pg-persistence.js");
-const persistence = new Persistence();
 const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
 
