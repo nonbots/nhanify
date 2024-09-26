@@ -1,13 +1,4 @@
-const {
-  DOMAIN,
-  CLIENT_SECRET,
-  REDIRECT_URI,
-  CLIENT_ID,
-  HOST,
-  PORT,
-  SESSION_SECRET,
-  YT_API_KEY,
-} = process.env;
+const { HOST, PORT, SESSION_SECRET } = process.env;
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -15,25 +6,14 @@ const store = require("connect-loki");
 const LokiStore = store(session);
 const morgan = require("morgan");
 const { NotFoundError, ForbiddenError } = require("./lib/errors.js");
-const { getPlaylists, getPlaylist } = require("./routes/middleware.js");
-const { body, validationResult } = require("express-validator");
 const flash = require("express-flash");
-const catchError = require("./routes/catch-error.js");
 const Persistence = require("./lib/pg-persistence.js");
 app.locals.persistence = new Persistence();
-const {
-  isValidRedirectURL,
-  isValidURL,
-  parseURL,
-  getVidInfo,
-} = require("./lib/playlist.js");
 const MSG = require("./lib/msg.json");
 const { playlistsRouter } = require("./routes/playlistsRouter.js");
 const { songsRouter } = require("./routes/songsRouter.js");
 const { contributorsRouter } = require("./routes/contributorsRouter.js");
 const { authRouter } = require("./routes/authRouter.js");
-const ITEMS_PER_PAGE = 5;
-const PAGE_OFFSET = 4;
 app.set("views", "./views");
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -72,7 +52,7 @@ app.use("*", (req, res, next) => {
   next(new NotFoundError());
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.log(err);
   if (err instanceof ForbiddenError) {
     res.status(403);

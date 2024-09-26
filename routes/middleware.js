@@ -1,3 +1,6 @@
+const { DOMAIN } = process.env;
+const { NotFoundError } = require("../lib/errors.js");
+const MSG = require("../lib/msg.json");
 const { durationSecsToHHMMSS } = require("../lib/playlist.js");
 
 function requireAuth(req, res, next) {

@@ -3,7 +3,7 @@ const songsRouter = Router();
 const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
-const { getPlaylists, getPlaylist } = require("./middleware.js");
+const { getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
 const { isValidURL, getVidInfo } = require("../lib/playlist.js");
 const { YT_API_KEY } = process.env;
@@ -15,7 +15,7 @@ const PAGE_OFFSET = 4;
 songsRouter.get(
   "/:playlistType/playlists/:page/playlist/:pagePl/:playlistId",
   requireAuth,
-  catchError(async (req, res, next) => {
+  catchError(async (req, res) => {
     const { page, pagePl, playlistType, playlistId } = req.params;
 
     const persistence = req.app.locals.persistence;

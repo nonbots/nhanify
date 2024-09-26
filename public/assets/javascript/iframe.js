@@ -1,4 +1,4 @@
-console.log("IFRAME IS RUNNING");
+/* global YT */
 // 2. This code loads the IFrame Player API code asynchronously.
 var tag = document.createElement("script");
 
@@ -7,21 +7,20 @@ var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 const videoIds = [];
-const songs = []; //[{title, addedBy, songIdx},...]
 const currentVideoId = 0; //get the current video from server/db
 const currentTime = 0; // get from server
 const songCards = document.querySelectorAll(".songCard");
-console.log({ songCards });
 
 songCards.forEach((songCard, index) => {
   videoIds.push(songCard.dataset.videoId);
-  songCard.addEventListener("click", function (event) {
+  songCard.addEventListener("click", function () {
     player.playVideoAt(index);
   });
 });
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
 var player;
+// eslint-disable-next-line no-unused-vars
 function onYouTubeIframeAPIReady() {
   player = new YT.Player("player", {
     height: "auto",
@@ -39,7 +38,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 // 4. The API will call this function when the video player is ready.
-function onPlayerReady(event) {
+function onPlayerReady() {
   player.loadPlaylist(videoIds, currentVideoId, currentTime);
 }
 
@@ -60,10 +59,4 @@ function onPlayerStateChange(event) {
     document.getElementById("curSongTitle").innerText = songTitle;
     document.getElementById("curAddedBy").innerText = songAddedBy;
   }
-  if (event.data == YT.PlayerState.ENDED) {
-    console.log("IN IF CLAUSE ENDED");
-  }
-}
-function stopVideo() {
-  player.stopVideo();
 }

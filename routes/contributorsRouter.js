@@ -15,6 +15,7 @@ contributorsRouter.post(
   catchError(async (req, res) => {
     let { pageCb, pagePl, contributorId, playlistId, page, playlistType } =
       req.params;
+    const persistence = req.app.locals.persistence;
     const yourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -41,12 +42,7 @@ contributorsRouter.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistId, playlistType, page, pagePl } = req.params;
-    console.log("IN GET ADD CONT ROUTE", {
-      playlistId,
-      playlistType,
-      page,
-      pagePl,
-    });
+    const persistence = req.app.locals.persistence;
     const isYourPlaylist = await persistence.isYourPlaylist(
       +playlistId,
       req.session.user.id,
@@ -70,6 +66,7 @@ contributorsRouter.get(
   requireAuth,
   catchError(async (req, res) => {
     const { playlistType, playlistId, page, pagePl, pageCb } = req.params;
+    const persistence = req.app.locals.persistence;
     const auth = await persistence.isReadPlaylistAuthorized(
       +playlistId,
       req.session.user.id,
@@ -77,7 +74,7 @@ contributorsRouter.get(
     if (!auth) throw new ForbiddenError();
     const offset = (+pageCb - 1) * ITEMS_PER_PAGE;
     const contributor = await persistence.getContributorTotal(+playlistId);
-    if (!contributor) throw new NotFound();
+    if (!contributor) throw new NotFoundError();
     const totalPages = Math.ceil(+contributor.count / ITEMS_PER_PAGE);
     if ((+pageCb > totalPages && +pageCb !== 1) || +pageCb < 1)
       throw new NotFoundError();
@@ -120,6 +117,7 @@ contributorsRouter.post(
       .withMessage(MSG.creatorContributor),
   ],
   catchError(async (req, res) => {
+    const persistence = req.app.locals.persistence;
     const errors = validationResult(req);
     const { playlistId, playlistType, page, pagePl } = req.params;
     const rerender = async () => {
