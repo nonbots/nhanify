@@ -26,5 +26,13 @@ export default [
       ...pluginJest.configs.recommended.rules,
     },
   },
+  {
+    files: ["**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
   pluginJs.configs.recommended,
 ];
