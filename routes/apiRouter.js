@@ -16,13 +16,14 @@ apiRouter.get("/playlists/public", async (req, res) => {
   res.json({ playlists: formattedData });
 });
 
+/*
 apiRouter.get("/playlists/:id", (req, res) => {
-  /*
     check if the playlist id is a public playlist 
         {playlist: {},
         songs: [{}]}
     else 
         return 403 as a response 
-   */
 });
+*/
+
 module.exports = { apiRouter };
