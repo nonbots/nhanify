@@ -1,6 +1,5 @@
 const { Router } = require("express");
 const playlistsRouter = Router();
-
 const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");

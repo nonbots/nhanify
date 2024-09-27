@@ -14,6 +14,7 @@ const { playlistsRouter } = require("./routes/playlistsRouter.js");
 const { songsRouter } = require("./routes/songsRouter.js");
 const { contributorsRouter } = require("./routes/contributorsRouter.js");
 const { authRouter } = require("./routes/authRouter.js");
+const { apiRouter } = require("./routes/apiRouter.js");
 app.set("views", "./views");
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
   delete req.session.flash;
   next();
 });
+app.use("/api", apiRouter);
 app.use(authRouter);
 app.use(playlistsRouter);
 app.use(songsRouter);
