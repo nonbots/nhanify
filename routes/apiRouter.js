@@ -16,14 +16,33 @@ apiRouter.get("/playlists/public", async (req, res) => {
   res.json({ playlists: formattedData });
 });
 
-/*
-apiRouter.get("/playlists/:id", (req, res) => {
-    check if the playlist id is a public playlist 
-        {playlist: {},
-        songs: [{}]}
-    else 
-        return 403 as a response 
+apiRouter.get("/playlists/:id", async (req, res) => {
+  const persistence = req.app.locals.persistence;
+  const playlist = await persistence.getPublicPlaylist(req.params.id);
+  if (!playlist) {
+    res.status(404).json({ error: "404" });
+    return;
+  }
+  const result = await persistence.getPlaylistInfoSongs(req.params.id, 0, 100);
+  const info = result.info;
+  const songs = result.songs.map((song) => {
+    return {
+      id: song.id,
+      title: song.title,
+      videoId: song.video_id,
+      addedBy: song.username,
+      durationSec: song.duration_sec,
+    };
+  });
+
+  res.json({
+    id: +req.params.id,
+    title: info.title,
+    creatorId: info.creator_id,
+    isPrivate: info.private,
+    songCount: result.songTotal,
+    songs,
+  });
 });
-*/
 
 module.exports = { apiRouter };
