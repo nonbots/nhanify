@@ -1,3 +1,4 @@
+.vscode/
 session-store.db
 *.swp
 .psql_history

@@ -53,8 +53,8 @@ app.use(contributorsRouter);
 app.use("*", (req, res, next) => {
   next(new NotFoundError());
 });
-
-app.use((err, req, res) => {
+app.use((err, req, res, _next) => {
+  // do not remove next parameter
   console.log(err);
   if (err instanceof ForbiddenError) {
     res.status(403);

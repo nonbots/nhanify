@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const apiRouter = Router();
+const { NotFoundError } = require("../lib/errors.js");
 
 apiRouter.get("/playlists/public", async (req, res) => {
   const persistence = req.app.locals.persistence;
@@ -45,4 +46,26 @@ apiRouter.get("/playlists/:id", async (req, res) => {
   });
 });
 
+/*async function addSongtoStreamPlaylist(API_KEY, addedBy) {
+
+}
+*/
+// error handlers
+apiRouter.use("*", (req, res, next) => {
+  console.log("IN * ROUTE");
+  //  req.NotFoundError = new NotFoundError();
+  // next();
+  next(new NotFoundError());
+});
+apiRouter.use((err, req, res, _next) => {
+  // do not remove next parameter
+  console.log({ err });
+  if (req.err instanceof NotFoundError) {
+    res.status(404).json({ error: "404" });
+  } else if (err instanceof NotFoundError) {
+    res.status(404).json({ error: "404" });
+  } else {
+    res.status(500).json({ error: "500" });
+  }
+});
 module.exports = { apiRouter };

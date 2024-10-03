@@ -13,6 +13,16 @@ export default [
     },
   },
   {
+    rules: {
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.{test,spec}.js"],
     plugins: {
       jest: pluginJest,
