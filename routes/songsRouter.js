@@ -6,7 +6,8 @@ const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
 const { isValidURL, getVidInfo } = require("../lib/playlist.js");
-const { YT_API_KEY, ITEMS_PER_PAGE } = process.env;
+const { YT_API_KEY} = process.env;
+const SONGS_PER_PAGE = 100;
 const MSG = require("../lib/msg.json");
 const PAGE_OFFSET = 4;
 
@@ -25,7 +26,7 @@ songsRouter.get(
     if (!isReadAuth) throw new ForbiddenError();
     const data = await getPlaylist(
       req.app.locals.persistence,
-      ITEMS_PER_PAGE,
+      SONGS_PER_PAGE,
       PAGE_OFFSET,
       playlistType,
       playlistId,
@@ -145,14 +146,14 @@ songsRouter.post(
     );
     if (!writePlaylist) throw new ForbiddenError();
     const rerender = async () => {
-      const offset = (+pagePl - 1) * ITEMS_PER_PAGE;
+      const offset = (+pagePl - 1) * SONGS_PER_PAGE;
       const playlist = await persistence.getPlaylistInfoSongs(
         +playlistId,
         offset,
-        ITEMS_PER_PAGE,
+        SONGS_PER_PAGE,
       );
       const videoIds = playlist.songs.map((song) => song.video_id);
-      const totalPages = Math.ceil(+playlist.songTotal / ITEMS_PER_PAGE);
+      const totalPages = Math.ceil(+playlist.songTotal / SONGS_PER_PAGE);
       if ((+pagePl > totalPages && +pagePl !== 1) || +pagePl < 1)
         throw new NotFoundError();
       const startPage = Math.max(+pagePl - PAGE_OFFSET, 1);
@@ -239,7 +240,7 @@ songsRouter.post(
     if (!deleted) throw new NotFoundError();
     const song = await persistence.getSongTotal(playlistId);
     if (!song) throw new NotFoundError();
-    const totalPages = Math.ceil(+song.count / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(+song.count / SONGS_PER_PAGE);
     req.flash("successes", MSG.deleteSong);
     if (+pagePl > totalPages && +pagePl !== 1) pagePl = +pagePl - 1;
     return res.redirect(

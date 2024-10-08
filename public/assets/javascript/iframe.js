@@ -42,11 +42,11 @@ function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING) {
     console.log("IN IS PLAYING");
     const curSongIdx = player.getPlaylistIndex() + 1;
-    console.log({curSongIdx});
+    console.log({ curSongIdx });
     const songCard = document.querySelector(
       `.songCard:nth-child(${curSongIdx})`,
     );
-    console.log({songCard});
+    console.log({ songCard });
     const songIdx = songCard.querySelector("div.valNo > p").innerText;
     const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
     const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;

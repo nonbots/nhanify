@@ -5,7 +5,7 @@ const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { getPlaylists, getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
-const { ITEMS_PER_PAGE } = process.env;
+const PLAYLISTS_PER_PAGE = 10;
 const MSG = require("../lib/msg.json");
 const PAGE_OFFSET = 4;
 // Get a playlist's edit form.
@@ -98,7 +98,7 @@ playlistsRouter.get(
     const { page, playlistId, pagePl } = req.params;
     const data = await getPlaylist(
       req.app.locals.persistence,
-      ITEMS_PER_PAGE,
+      PLAYLISTS_PER_PAGE,
       PAGE_OFFSET,
       "anonPublic",
       +playlistId,
@@ -124,7 +124,7 @@ playlistsRouter.post(
     if (!contributionPlaylist) throw new NotFoundError();
     const playlist = await persistence.getContributionPlaylistTotal(userId);
     if (!playlist) throw new NotFoundError();
-    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(+playlist.count / PLAYLISTS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
     if (+page > totalPages && +page !== 1) page = +page - 1;
     return res.redirect(`/contribution/playlists/${page}`);
@@ -148,7 +148,7 @@ playlistsRouter.post(
     if (!deleted) throw new NotFoundError();
     const playlist = await persistence.getYourPlaylistTotal(userId);
     if (!playlist) throw new NotFoundError();
-    const totalPages = Math.ceil(+playlist.count / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(+playlist.count / PLAYLISTS_PER_PAGE);
     req.flash("successes", MSG.deletePlaylist);
     if (+page > totalPages && +page !== 1) page = +page - 1;
     return res.redirect(`/your/playlists/${page}`);
@@ -243,7 +243,7 @@ playlistsRouter.get(
     const data = await getPlaylists(
       playlistType,
       page,
-      ITEMS_PER_PAGE,
+      PLAYLISTS_PER_PAGE,
       req.app.locals.persistence,
       PAGE_OFFSET,
       userId,
@@ -262,7 +262,7 @@ playlistsRouter.get(
     const data = await getPlaylists(
       "anonPublic",
       page,
-      ITEMS_PER_PAGE,
+      PLAYLISTS_PER_PAGE,
       req.app.locals.persistence,
       PAGE_OFFSET,
     );
