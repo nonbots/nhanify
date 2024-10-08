@@ -6,10 +6,10 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
-const currentVideoId = 0; 
-const currentTime = 0; 
+const currentVideoId = 0;
+const currentTime = 0;
 const songCards = document.querySelectorAll(".songCard");
-videoIds = populatePlaylist(songCards); //also adds click songcard listener
+let videoIds = populatePlaylist(songCards); //also adds click songcard listener
 
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
@@ -55,14 +55,14 @@ function onPlayerStateChange(event) {
 }
 
 const shuffleBtn = document.getElementById("shuffle");
-shuffleBtn.addEventListener("click", function() {
+shuffleBtn.addEventListener("click", function () {
   const songs = Array.from(songCards);
   for (let i = songs.length - 1; i > 0; i--) {
     const randomIndex = Math.floor(Math.random() * (i + 1));
     [songs[i], songs[randomIndex]] = [songs[randomIndex], songs[i]];
   }
   const playlist = document.getElementsByClassName("playListWrap")[0];
-  songs.forEach((song,index) => {
+  songs.forEach((song, index) => {
     song.children[0].children[0].textContent = index + 1;
     playlist.appendChild(song);
   });
@@ -78,4 +78,4 @@ function populatePlaylist(songCards) {
     });
   });
   return videoIds;
-};
+}
