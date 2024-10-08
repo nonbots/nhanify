@@ -37,15 +37,18 @@ function onPlayerReady() {
 
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
-//    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
+  console.log("IN ON PLAYERSTATECHANGE");
   if (event.data == YT.PlayerState.PLAYING) {
+    console.log("IN IS PLAYING");
     const curSongIdx = player.getPlaylistIndex() + 1;
+    console.log({curSongIdx});
     const songCard = document.querySelector(
       `.songCard:nth-child(${curSongIdx})`,
     );
+    console.log({songCard});
     const songIdx = songCard.querySelector("div.valNo > p").innerText;
-    const songTitle = songCard.querySelector("div.valTitle > p").innerText;
+    const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
     const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;
 
     document.getElementById("curSongNo").innerText = songIdx;
@@ -63,12 +66,13 @@ shuffleBtn.addEventListener("click", function () {
   }
   const playlist = document.getElementsByClassName("playListWrap")[0];
   songs.forEach((song, index) => {
-    song.children[0].children[0].textContent = index + 1;
+    song.children[0].children[0].children[0].textContent = index + 1;
     playlist.appendChild(song);
   });
   videoIds = populatePlaylist(songs);
   player.loadPlaylist(videoIds, currentVideoId, currentTime);
 });
+
 function populatePlaylist(songCards) {
   const videoIds = [];
   songCards.forEach((songCard, index) => {
