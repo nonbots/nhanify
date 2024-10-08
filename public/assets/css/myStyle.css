@@ -168,10 +168,11 @@ main {
   display: flex;
   column-gap: 1rem;
 }
+.playerDiv {
+  width: 100%;
+}
 .iframeDiv {
   aspect-ratio: 16 / 9;
-  width: 100%;
-  height: auto;
   background-color: var(--color-bg-dark);
   display: flex;
   border-radius: 1rem;
@@ -249,6 +250,18 @@ main {
   border: 0px;
 }
 
+#shuffle {
+  background: transparent url("../icons/shuffle.png") 50% 50% no-repeat;
+  background-size: 20px 20px;
+  border: 0px;
+  width: 20px;
+  height: 10px;
+}
+.control {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+}
 .jam {
   height: 200px;
   background: transparent url("../icons/wiggle_outine.gif") 50% 50% no-repeat;

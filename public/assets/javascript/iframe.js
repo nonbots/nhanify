@@ -5,21 +5,14 @@ var tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-const videoIds = [];
-const currentVideoId = 0; //get the current video from server/db
-const currentTime = 0; // get from server
+var player;
+const currentVideoId = 0; 
+const currentTime = 0; 
 const songCards = document.querySelectorAll(".songCard");
+videoIds = populatePlaylist(songCards); //also adds click songcard listener
 
-songCards.forEach((songCard, index) => {
-  videoIds.push(songCard.dataset.videoId);
-  songCard.addEventListener("click", function () {
-    player.playVideoAt(index);
-  });
-});
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
-var player;
 // eslint-disable-next-line no-unused-vars
 function onYouTubeIframeAPIReady() {
   player = new YT.Player("player", {
@@ -60,3 +53,29 @@ function onPlayerStateChange(event) {
     document.getElementById("curAddedBy").innerText = songAddedBy;
   }
 }
+
+const shuffleBtn = document.getElementById("shuffle");
+shuffleBtn.addEventListener("click", function() {
+  const songs = Array.from(songCards);
+  for (let i = songs.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    [songs[i], songs[randomIndex]] = [songs[randomIndex], songs[i]];
+  }
+  const playlist = document.getElementsByClassName("playListWrap")[0];
+  songs.forEach((song,index) => {
+    song.children[0].children[0].textContent = index + 1;
+    playlist.appendChild(song);
+  });
+  videoIds = populatePlaylist(songs);
+  player.loadPlaylist(videoIds, currentVideoId, currentTime);
+});
+function populatePlaylist(songCards) {
+  const videoIds = [];
+  songCards.forEach((songCard, index) => {
+    videoIds.push(songCard.dataset.videoId);
+    songCard.addEventListener("click", function () {
+      player.playVideoAt(index);
+    });
+  });
+  return videoIds;
+};

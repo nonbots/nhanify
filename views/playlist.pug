@@ -50,25 +50,20 @@ block main
             a(href=`/${playlistType}/playlists/${page}`) Back
           else
             a(href=`/anon/public/playlists/${page}`) Back
-          .iframeDiv
-            #player
-          .currentSongcols
-            .labelPlayIcon
-            .labelNo
-              p(class="username") No.
-            .labelTitle
-              p(class="username") Title
-            .labelAddedBy
-              p(class="username") Added By
-          .currentSong
-            .playIcon
-              p ♫
-            .valNo
-              p(id="curSongNo") ...
-            .valTitle
-              p(id="curSongTitle") ...
-            .valAddedBy
-              p(id="curAddedBy") ...
+          .playerDiv
+            .iframeDiv
+              #player
+            .currentSong
+              .playIcon
+                p ♫
+              .valNo
+                p(id="curSongNo") ...
+              .valTitle
+                p(id="curSongTitle") ...
+              .valAddedBy
+                p(id="curAddedBy") ...
+          .control
+            button(id="shuffle")
           if (playlistType !== "public" && playlistType !== "anonPublic")
             .addDiv
               form(class="addForm" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/add` method="post")

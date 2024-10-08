@@ -6,9 +6,8 @@ const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
 const { isValidURL, getVidInfo } = require("../lib/playlist.js");
-const { YT_API_KEY } = process.env;
+const { YT_API_KEY, ITEMS_PER_PAGE } = process.env;
 const MSG = require("../lib/msg.json");
-const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
 
 // Get a playlist.

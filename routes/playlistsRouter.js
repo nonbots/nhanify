@@ -5,8 +5,8 @@ const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { getPlaylists, getPlaylist } = require("./middleware.js");
 const { body, validationResult } = require("express-validator");
+const { ITEMS_PER_PAGE } = process.env;
 const MSG = require("../lib/msg.json");
-const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
 // Get a playlist's edit form.
 playlistsRouter.get(

@@ -4,8 +4,8 @@ const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { body, validationResult } = require("express-validator");
+const { ITEMS_PER_PAGE } = process.env;
 const MSG = require("../lib/msg.json");
-const ITEMS_PER_PAGE = 5;
 const PAGE_OFFSET = 4;
 
 // Delete contributor from a playlist.
