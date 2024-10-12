@@ -6,10 +6,86 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
+const eventSource = new EventSource("/api/event");
 const currentVideoId = 0;
 const currentTime = 0;
+const parent = document.getElementsByClassName("playListWrap")[0];
 const songCards = document.querySelectorAll(".songCard");
 let videoIds = populatePlaylist(songCards); //also adds click songcard listener
+eventSource.onmessage = (event) => {
+  const card = document.createElement("div");
+  card.classList.add("songCard");
+  card.setAttribute("data-video-id", data.videoId);
+  const descriptionDiv = document.createElement("div");
+  card.appendChild(descriptionDiv);
+  descriptionDiv.classList.add("descriptionDiv");
+  const valNo = document.createElement("div");
+  valNo.classList.add("valNo");
+  descriptionDiv.appendChild(valNo);
+  const valTitle = document.createElement("div");
+  valTitle.classList.add("valTitle");
+  descriptionDiv.appendChild(valTitle);
+  const valDuration = document.createElement("div");
+  valDuration.classList.add("valDuration");
+  descriptionDiv.appendChild(valDuration);
+  const valAddedBy = document.createElement("div");
+  valAddedBy.classList.add("valAddedBy");
+  descriptionDiv.appendChild(valAddedBy);
+  const modDiv = document.createElement("div");
+  modDiv.classList.add("modDiv");
+  card.appendChild(modDiv);
+  const valEdit = document.createElement("div");
+  valEdit.classList.add("valEdit");
+  modDiv.appendChild(valEdit);
+  const editForm = document.createElement("form");
+  valEdit.append(editForm);
+  editForm.classList.add("delete");
+  editForm.setAttribute(
+    "action",
+    `/contribution/playlists/1/playlist/1/6/49/edit`,
+  );
+  editForm.setAttribute("method", "get");
+  const valDelete = document.createElement("div");
+  valDelete.classList.add("valDelete");
+  modDiv.appendChild(valDelete);
+  const valNoText = document.createElement("p");
+  valNo.appendChild(valNoText);
+  valNoText.textContent = "*";
+  const valTitleText = document.createElement("p");
+  valTitle.appendChild(valTitleText);
+  valTitleText.textContent = data.title;
+  const valDurationText = document.createElement("p");
+  valDuration.appendChild(valDurationText);
+  valDurationText.textContent = data.duration;
+  const valAddedByText = document.createElement("p");
+  valAddedBy.appendChild(valAddedByText);
+  valAddedByText.textContent = "placeholder";
+  const deleteForm = document.createElement("form");
+  deleteForm.classList.add("delete");
+  const deleteInput = document.createElement("input");
+  deleteInput.classList.add("deleteBtn");
+  valDelete.appendChild(deleteForm);
+  deleteForm.appendChild(deleteInput);
+  deleteForm.setAttribute(
+    "action",
+    `/contribution/playlists/1/playlist/1/6/49/delete`,
+  );
+  deleteForm.setAttribute("method", "post");
+  const editInput = document.createElement("input");
+  editInput.classList.add("editBtn");
+  editForm.appendChild(editInput);
+  editInput.setAttribute("value", "");
+  editInput.setAttribute("type", "submit");
+  deleteInput.setAttribute("value", "");
+  deleteInput.setAttribute("type", "submit");
+  deleteInput.setAttribute(
+    "onclick",
+    "confirmSubmit(event,'Do you want to delete the song from the playlist?')",
+  );
+  parent.insertBefore(card, parent.firstChild);
+  videoIds.unshift(data.videoId);
+  player.loadPlaylist(videoIds, currentVideoId, currentTime);
+};
 
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
@@ -38,15 +114,11 @@ function onPlayerReady() {
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
 function onPlayerStateChange(event) {
-  console.log("IN ON PLAYERSTATECHANGE");
   if (event.data == YT.PlayerState.PLAYING) {
-    console.log("IN IS PLAYING");
     const curSongIdx = player.getPlaylistIndex() + 1;
-    console.log({ curSongIdx });
     const songCard = document.querySelector(
       `.songCard:nth-child(${curSongIdx})`,
     );
-    console.log({ songCard });
     const songIdx = songCard.querySelector("div.valNo > p").innerText;
     const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
     const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;

@@ -2,8 +2,15 @@ const { Router, json } = require("express");
 const apiRouter = Router();
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { YT_API_KEY, NHANIFY_API_KEY } = process.env;
-const { getVidInfo, isValidURL } = require("../lib/playlist.js");
+const {
+  getVidInfo,
+  isValidURL,
+  durationSecsToHHMMSS,
+} = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
+const { keepalives } = require("pg/lib/defaults.js");
+let clients = [];
+
 apiRouter.use(json());
 
 apiRouter.get(
@@ -71,7 +78,6 @@ apiRouter.post(
     //parse for videoId from Yotube URL
     //call to the database to add the song
     const persistence = req.app.locals.persistence;
-    console.log("ISVALID URL", req.body.url, isValidURL(req.body.url));
     if (!isValidURL(req.body.url)) {
       res.status(404).json({ msg: "invalid_url" });
       return;
@@ -88,7 +94,6 @@ apiRouter.post(
     if (!writePlaylist) {
       await persistence.addContributor(user.id, req.body.playlistId);
     }
-    console.log("THE BODY", req.body);
     const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
     if (!vidInfo) {
       res.status(404).json({ msg: "invalid_video_id" });
@@ -123,12 +128,44 @@ apiRouter.post(
     } else {
       // a message to the bot
       // song title, url[video]
+      sendEvent({
+        title: addedSong.title,
+        videoId: addedSong.video_id,
+        playlistId: addedSong.playlist_id,
+        songId: addedSong.song_id,
+        duration: durationSecsToHHMMSS(addedSong.duration_sec),
+      });
       res.json({ msg: "success", song: addedSong });
       // song title has been added to plsylist title
       // url
     }
   }),
 );
+apiRouter.get("/event", (req, res) => {
+  console.log("IN EVENT");
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Status", "200");
+  clients.push(res);
+  req.on("close", () => {
+    clients = [];
+  });
+});
+
+function sendEvent(data) {
+  console.log("IN SENTEVENT");
+  console.log({ clients });
+  clients.forEach((client) => {
+    console.log({ data });
+    try {
+      client.write(`data: ${JSON.stringify(data)}\n\n`);
+    } catch (err) {
+      console.error();
+    }
+  });
+}
+
 // error handlers
 apiRouter.use("*", (req, res, next) => {
   next(new NotFoundError());
