@@ -28,6 +28,10 @@ body {
   min-height: 100dvh;
 }
 
+.btn {
+  cursor: pointer;
+}
+
 .bWrap {
   display: flex;
   width: 100%;
@@ -181,7 +185,7 @@ main {
 .modDiv {
   display: flex;
   width: 100%;
-  column-gap: 1rem;
+  column-gap: 0rem;
   justify-content: end;
 }
 
@@ -248,6 +252,8 @@ main {
   background: transparent url("../icons/edit.png") 50% 50% no-repeat;
   background-size: 20px 20px;
   border: 0px;
+  width: 20px;
+  height: 20px;
 }
 
 #shuffle {
@@ -291,7 +297,7 @@ main {
 .cols {
   display: flex;
   width: 100%;
-  column-gap: 1rem;
+  column-gap: 0rem;
 }
 .playIcon {
   display: flex;
@@ -387,11 +393,15 @@ main {
 .valDelete {
   display: flex;
   width: 5%;
+  align-items: center;
+  justify-content: center;
 }
 
 .valEdit {
   display: flex;
   width: 5%;
+  align-items: center;
+  justify-content: center;
 }
 
 p {
@@ -406,8 +416,6 @@ p {
 
 .delete {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
 }
 
 /* input forms */
