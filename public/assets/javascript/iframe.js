@@ -10,79 +10,77 @@ const eventSource = new EventSource("/api/event");
 const currentVideoId = 0;
 const currentTime = 0;
 const parent = document.getElementsByClassName("playListWrap")[0];
+
+function e(tag, attributes = {}, ...children) {
+  const element = document.createElement(tag);
+
+  Object.keys(attributes).forEach((key) => {
+    element.setAttribute(key, attributes[key]);
+  });
+
+  children.forEach((child) => {
+    if (typeof child === "string") {
+      element.appendChild(document.createTextNode(child));
+    } else {
+      element.appendChild(child);
+    }
+  });
+
+  return element;
+}
 const songCards = document.querySelectorAll(".songCard");
 let videoIds = populatePlaylist(songCards); //also adds click songcard listener
 eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  const card = document.createElement("div");
-  card.classList.add("songCard");
-  card.setAttribute("data-video-id", data.videoId);
-  const descriptionDiv = document.createElement("div");
-  card.appendChild(descriptionDiv);
-  descriptionDiv.classList.add("descriptionDiv");
-  const valNo = document.createElement("div");
-  valNo.classList.add("valNo");
-  descriptionDiv.appendChild(valNo);
-  const valTitle = document.createElement("div");
-  valTitle.classList.add("valTitle");
-  descriptionDiv.appendChild(valTitle);
-  const valDuration = document.createElement("div");
-  valDuration.classList.add("valDuration");
-  descriptionDiv.appendChild(valDuration);
-  const valAddedBy = document.createElement("div");
-  valAddedBy.classList.add("valAddedBy");
-  descriptionDiv.appendChild(valAddedBy);
-  const modDiv = document.createElement("div");
-  modDiv.classList.add("modDiv");
-  card.appendChild(modDiv);
-  const valEdit = document.createElement("div");
-  valEdit.classList.add("valEdit");
-  modDiv.appendChild(valEdit);
-  const editForm = document.createElement("form");
-  valEdit.append(editForm);
-  editForm.classList.add("delete");
-  editForm.setAttribute(
-    "action",
-    `/contribution/playlists/1/playlist/1/6/49/edit`,
+  const card = e(
+    "div",
+    { class: "songCard", "data-video-id": data.videoId },
+    e(
+      "div",
+      { class: "descriptionDiv" },
+      e("div", { class: "valNo" }, e("p", {}, "*")),
+      e("div", { class: "valTitle" }, e("p", {}, data.title)),
+      e("div", { class: "valDuration" }, e("p", {}, data.duration)),
+      e("div", { class: "valAddedBy" }, e("p", {}, "placeholder")),
+    ),
+    e(
+      "div",
+      { class: "modDiv" },
+      e(
+        "div",
+        { class: "valEdit" },
+        e(
+          "form",
+          {
+            class: "delete",
+            action: `/contribution/playlists/1/playlist/1/${data.playlistId}/${data.songId}/edit`,
+            method: "get",
+          },
+          e("input", { class: "editBtn", type: "submit", value: "" }),
+        ),
+      ),
+      e(
+        "div",
+        { class: "valDelete" },
+        e(
+          "form",
+          {
+            class: "delete",
+            action: `/contribution/playlists/1/playlist/1/${data.playlistId}/${data.songId}/delete`,
+            method: "post",
+          },
+          e("input", {
+            class: "deleteBtn",
+            onclick:
+              "confirmSubmit(event,'Do you want to delete the song from the playlist?')",
+            type: "submit",
+            value: "",
+          }),
+        ),
+      ),
+    ),
   );
-  editForm.setAttribute("method", "get");
-  const valDelete = document.createElement("div");
-  valDelete.classList.add("valDelete");
-  modDiv.appendChild(valDelete);
-  const valNoText = document.createElement("p");
-  valNo.appendChild(valNoText);
-  valNoText.textContent = "*";
-  const valTitleText = document.createElement("p");
-  valTitle.appendChild(valTitleText);
-  valTitleText.textContent = data.title;
-  const valDurationText = document.createElement("p");
-  valDuration.appendChild(valDurationText);
-  valDurationText.textContent = data.duration;
-  const valAddedByText = document.createElement("p");
-  valAddedBy.appendChild(valAddedByText);
-  valAddedByText.textContent = "placeholder";
-  const deleteForm = document.createElement("form");
-  deleteForm.classList.add("delete");
-  const deleteInput = document.createElement("input");
-  deleteInput.classList.add("deleteBtn");
-  valDelete.appendChild(deleteForm);
-  deleteForm.appendChild(deleteInput);
-  deleteForm.setAttribute(
-    "action",
-    `/contribution/playlists/1/playlist/1/6/49/delete`,
-  );
-  deleteForm.setAttribute("method", "post");
-  const editInput = document.createElement("input");
-  editInput.classList.add("editBtn");
-  editForm.appendChild(editInput);
-  editInput.setAttribute("value", "");
-  editInput.setAttribute("type", "submit");
-  deleteInput.setAttribute("value", "");
-  deleteInput.setAttribute("type", "submit");
-  deleteInput.setAttribute(
-    "onclick",
-    "confirmSubmit(event,'Do you want to delete the song from the playlist?')",
-  );
+
   parent.insertBefore(card, parent.firstChild);
   videoIds.unshift(data.videoId);
   player.loadPlaylist(videoIds, currentVideoId, currentTime);
