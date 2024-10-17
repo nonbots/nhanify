@@ -8,7 +8,6 @@ const {
   durationSecsToHHMMSS,
 } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
-const { keepalives } = require("pg/lib/defaults.js");
 let clients = [];
 
 apiRouter.use(json());
@@ -161,7 +160,7 @@ function sendEvent(data) {
     try {
       client.write(`data: ${JSON.stringify(data)}\n\n`);
     } catch (err) {
-      console.error();
+      console.error(err);
     }
   });
 }

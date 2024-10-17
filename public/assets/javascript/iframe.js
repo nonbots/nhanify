@@ -13,6 +13,7 @@ const parent = document.getElementsByClassName("playListWrap")[0];
 const songCards = document.querySelectorAll(".songCard");
 let videoIds = populatePlaylist(songCards); //also adds click songcard listener
 eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
   const card = document.createElement("div");
   card.classList.add("songCard");
   card.setAttribute("data-video-id", data.videoId);
