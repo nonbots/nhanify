@@ -25,7 +25,7 @@ block main
             .verticalDiv
               .songInputDiv
                 input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL" value=url) 
-            input(class="addBtn" type="submit" value="Add")
+            input(class="btn addBtn" type="submit" value="Add")
   else 
     .playlistsDiv
       h1(class="pageTitle") #{pageTitle}
@@ -63,14 +63,14 @@ block main
               .valAddedBy
                 p(id="curAddedBy") ...
           .control
-            button(id="shuffle")
+            button(class="btn" id="shuffle")
           if (playlistType !== "public" && playlistType !== "anonPublic")
             .addDiv
               form(class="addForm" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/add` method="post")
                 .verticalDiv
                   .songInputDiv
                     input(class="inputURL" id="url" type="text" name="url" placeholder="Youtube URL" value=url) 
-                input(class="addBtn" type="submit" value="Add")
+                input(class="btn addBtn" type="submit" value="Add")
           .pageNav 
             if (pagePl > 1) 
               if (playlistType !== "anonPublic")
@@ -106,11 +106,11 @@ block main
           .content
             .playListWrap
               each song in playlist.songs
-                div(class="songCard" data-video-id=`${song.video_id}`)
+                div(class="btn songCard" data-video-id=`${song.video_id}`)
                   .descriptionDiv
                     .valNo
                       p= playlist.songs.indexOf(song) + 1
-                    .valTitle
+                    div(class="valTitle")
                       p= song.title   
                     .valDuration
                       p= song.duration_sec
@@ -119,9 +119,8 @@ block main
                   .modDiv
                     if (user !== undefined && playlistType !== "public")
                       .valEdit
-                        form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/edit` method="get")
-                          input(class="editBtn" type="submit" value="")
+                        a(class="btn editBtn" href=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/edit`)
                       .valDelete
                         if (user !== undefined)
                           form(class="delete" action=`/${playlistType}/playlists/${page}/playlist/${pagePl}/${playlistId}/${song.id}/delete` method="post")
-                            input(onclick = "confirmSubmit(event,'Do you want to delete the song from the playlist?')" class="deleteBtn" type="submit" value="")
+                            input(onclick = "confirmSubmit(event,'Do you want to delete the song from the playlist?')" class="btn deleteBtn" type="submit" value="")

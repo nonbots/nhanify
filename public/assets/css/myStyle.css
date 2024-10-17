@@ -28,6 +28,10 @@ body {
   min-height: 100dvh;
 }
 
+.btn {
+  cursor: pointer;
+}
+
 .bWrap {
   display: flex;
   width: 100%;
@@ -248,14 +252,16 @@ main {
   background: transparent url("../icons/edit.png") 50% 50% no-repeat;
   background-size: 20px 20px;
   border: 0px;
+  width: 24px;
+  height: 24px;
 }
 
 #shuffle {
   background: transparent url("../icons/shuffle.png") 50% 50% no-repeat;
   background-size: 20px 20px;
   border: 0px;
-  width: 20px;
-  height: 10px;
+  width: 24px;
+  height: 24px;
 }
 .control {
   display: flex;
@@ -271,6 +277,8 @@ main {
 .deleteBtn {
   background: transparent url("../icons/delete.png") 50% 50% no-repeat;
   border: 0px;
+  width: 24px;
+  height: 24px;
 }
 .addBtn {
   margin: 0rem;
@@ -387,11 +395,15 @@ main {
 .valDelete {
   display: flex;
   width: 5%;
+  align-items: center;
+  justify-content: center;
 }
 
 .valEdit {
   display: flex;
   width: 5%;
+  align-items: center;
+  justify-content: center;
 }
 
 p {
@@ -406,8 +418,6 @@ p {
 
 .delete {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
 }
 
 /* input forms */
