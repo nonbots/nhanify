@@ -125,13 +125,14 @@ apiRouter.post(
     if (!addedSong) {
       throw new NotFoundError();
     } else {
+      console.log({ addedSong });
       // a message to the bot
       // song title, url[video]
       sendEvent({
         title: addedSong.title,
         videoId: addedSong.video_id,
         playlistId: addedSong.playlist_id,
-        songId: addedSong.song_id,
+        songId: addedSong.id,
         duration: durationSecsToHHMMSS(addedSong.duration_sec),
       });
       res.json({ msg: "success", song: addedSong });
