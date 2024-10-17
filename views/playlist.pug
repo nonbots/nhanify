@@ -106,7 +106,7 @@ block main
           .content
             .playListWrap
               each song in playlist.songs
-                div(class="songCard" data-video-id=`${song.video_id}`)
+                div(class="btn songCard" data-video-id=`${song.video_id}`)
                   .descriptionDiv
                     .valNo
                       p= playlist.songs.indexOf(song) + 1

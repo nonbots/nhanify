@@ -149,7 +149,7 @@ function populatePlaylist(songCards) {
   const videoIds = [];
   songCards.forEach((songCard, index) => {
     videoIds.push(songCard.dataset.videoId);
-    songCard.querySelector('.valTitle').addEventListener("click", function () {
+    songCard.addEventListener("click", function () {
       player.playVideoAt(index);
     });
   });

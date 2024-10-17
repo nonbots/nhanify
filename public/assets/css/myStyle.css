@@ -185,7 +185,7 @@ main {
 .modDiv {
   display: flex;
   width: 100%;
-  column-gap: 0rem;
+  column-gap: 1rem;
   justify-content: end;
 }
 
@@ -252,16 +252,16 @@ main {
   background: transparent url("../icons/edit.png") 50% 50% no-repeat;
   background-size: 20px 20px;
   border: 0px;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 #shuffle {
   background: transparent url("../icons/shuffle.png") 50% 50% no-repeat;
   background-size: 20px 20px;
   border: 0px;
-  width: 20px;
-  height: 10px;
+  width: 24px;
+  height: 24px;
 }
 .control {
   display: flex;
@@ -277,6 +277,8 @@ main {
 .deleteBtn {
   background: transparent url("../icons/delete.png") 50% 50% no-repeat;
   border: 0px;
+  width: 24px;
+  height: 24px;
 }
 .addBtn {
   margin: 0rem;
@@ -297,7 +299,7 @@ main {
 .cols {
   display: flex;
   width: 100%;
-  column-gap: 0rem;
+  column-gap: 1rem;
 }
 .playIcon {
   display: flex;
