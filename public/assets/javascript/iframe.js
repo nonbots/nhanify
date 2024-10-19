@@ -7,10 +7,10 @@ var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 const eventSource = new EventSource("/api/event");
-const currentVideoId = 0;
+let prevExistingIdx = 0;
 const currentTime = 0;
 const parent = document.getElementsByClassName("playListWrap")[0];
-
+const chatVideoIds = [];
 function e(tag, attributes = {}, ...children) {
   const element = document.createElement(tag);
 
@@ -29,9 +29,14 @@ function e(tag, attributes = {}, ...children) {
   return element;
 }
 const songCards = document.querySelectorAll(".songCard");
-let videoIds = populatePlaylist(songCards); //also adds click songcard listener
+let existingVideoIds = populatePlaylist(songCards); //also adds click songcard listener
 eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
+  chatVideoIds.push(data);
+  console.log({ chatVideoIds });
+};
+
+function updateDOM(data) {
   const card = e(
     "div",
     { class: "songCard", "data-video-id": data.videoId },
@@ -82,10 +87,8 @@ eventSource.onmessage = (event) => {
   );
 
   parent.insertBefore(card, parent.firstChild);
-  videoIds.unshift(data.videoId);
-  player.loadPlaylist(videoIds, currentVideoId, currentTime);
-};
-
+  //prevExistingIdx += 1;
+}
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
 // eslint-disable-next-line no-unused-vars
@@ -107,17 +110,26 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
-  player.loadPlaylist(videoIds, currentVideoId, currentTime);
+  console.log("IN ON PLAYER READY");
+  if (chatVideoIds.length !== 0) {
+    const song = chatVideoIds.shift();
+    updateDOM(song);
+    player.loadVideoById(song.videoId);
+  } else {
+    console.log("IN ELSE");
+    player.loadVideoById(existingVideoIds[prevExistingIdx]);
+  }
 }
 
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
 function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.PLAYING) {
-    const curSongIdx = player.getPlaylistIndex() + 1;
-    const songCard = document.querySelector(
-      `.songCard:nth-child(${curSongIdx})`,
-    );
+  if (event.data == YT.PlayerState.ENDED) {
+    console.log("THE SONG IS ENDED");
+    if (chatVideoIds.length === 0) prevExistingIdx += 1;
+    const songCard = document.querySelector(`.songCard:nth-child(${1})`);
+    console.log({ songCard });
+    /*
     const songIdx = songCard.querySelector("div.valNo > p").innerText;
     const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
     const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;
@@ -125,6 +137,16 @@ function onPlayerStateChange(event) {
     document.getElementById("curSongNo").innerText = songIdx;
     document.getElementById("curSongTitle").innerText = songTitle;
     document.getElementById("curAddedBy").innerText = songAddedBy;
+    */
+    console.log("IN ENDED", { prevExistingIdx, chatVideoIds });
+    if (chatVideoIds.length !== 0) {
+      const song = chatVideoIds.shift();
+      //updateDOM(song);
+      console.log({ song });
+      player.loadVideoById(song.videoId);
+    } else {
+      player.loadVideoById(existingVideoIds[prevExistingIdx]);
+    }
   }
 }
 
@@ -140,8 +162,8 @@ shuffleBtn.addEventListener("click", function () {
     song.children[0].children[0].children[0].textContent = index + 1;
     playlist.appendChild(song);
   });
-  videoIds = populatePlaylist(songs);
-  player.loadPlaylist(videoIds, currentVideoId, currentTime);
+  existingVideoIds = populatePlaylist(songs);
+  player.loadPlaylist(existingVideoIds, prevExistingIdx, currentTime);
 });
 
 function populatePlaylist(songCards) {
@@ -149,7 +171,9 @@ function populatePlaylist(songCards) {
   songCards.forEach((songCard, index) => {
     videoIds.push(songCard.dataset.videoId);
     songCard.addEventListener("click", function () {
-      player.playVideoAt(index);
+      player.loadVideoById(songCard.dataset.videoId);
+      prevExistingIdx = index;
+      console.log({ prevExistingIdx });
     });
   });
   return videoIds;
