@@ -8,8 +8,8 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 const eventSource = new EventSource("/api/event");
 let prevExistingIdx = 0;
-const currentTime = 0;
-const parent = document.getElementsByClassName("playListWrap")[0];
+//const currentTime = 0;
+//const parent = document.getElementsByClassName("playListWrap")[0];
 const chatVideoIds = [];
 function e(tag, attributes = {}, ...children) {
   const element = document.createElement(tag);
@@ -33,10 +33,9 @@ let existingVideoIds = populatePlaylist(songCards); //also adds click songcard l
 eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
   chatVideoIds.push(data);
-  console.log({ chatVideoIds });
 };
 
-function updateDOM(data) {
+/*function updateDOM(data) {
   const card = e(
     "div",
     { class: "songCard", "data-video-id": data.videoId },
@@ -89,6 +88,7 @@ function updateDOM(data) {
   parent.insertBefore(card, parent.firstChild);
   //prevExistingIdx += 1;
 }
+*/
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
 // eslint-disable-next-line no-unused-vars
@@ -110,39 +110,19 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
-  console.log("IN ON PLAYER READY");
-  if (chatVideoIds.length !== 0) {
-    const song = chatVideoIds.shift();
-    updateDOM(song);
-    player.loadVideoById(song.videoId);
-  } else {
-    console.log("IN ELSE");
-    player.loadVideoById(existingVideoIds[prevExistingIdx]);
-  }
+  renderCurSong();
+  player.loadVideoById(existingVideoIds[prevExistingIdx]);
 }
 
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
 function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
-    console.log("THE SONG IS ENDED");
     if (chatVideoIds.length === 0) prevExistingIdx += 1;
-    const songCard = document.querySelector(`.songCard:nth-child(${1})`);
-    console.log({ songCard });
-    /*
-    const songIdx = songCard.querySelector("div.valNo > p").innerText;
-    const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
-    const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;
-
-    document.getElementById("curSongNo").innerText = songIdx;
-    document.getElementById("curSongTitle").innerText = songTitle;
-    document.getElementById("curAddedBy").innerText = songAddedBy;
-    */
-    console.log("IN ENDED", { prevExistingIdx, chatVideoIds });
+    renderCurSong();
     if (chatVideoIds.length !== 0) {
       const song = chatVideoIds.shift();
       //updateDOM(song);
-      console.log({ song });
       player.loadVideoById(song.videoId);
     } else {
       player.loadVideoById(existingVideoIds[prevExistingIdx]);
@@ -150,6 +130,17 @@ function onPlayerStateChange(event) {
   }
 }
 
+function renderCurSong() {
+  const songCard = document.querySelector(
+    `.songCard:nth-child(${prevExistingIdx + 1})`,
+  );
+  const songIdx = songCard.querySelector("div.valNo > p").innerText;
+  const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
+  const songAddedBy = songCard.querySelector("div.valAddedBy > p").innerText;
+  document.getElementById("curSongNo").innerText = songIdx;
+  document.getElementById("curSongTitle").innerText = songTitle;
+  document.getElementById("curAddedBy").innerText = songAddedBy;
+}
 const shuffleBtn = document.getElementById("shuffle");
 shuffleBtn.addEventListener("click", function () {
   const songs = Array.from(songCards);
@@ -163,7 +154,9 @@ shuffleBtn.addEventListener("click", function () {
     playlist.appendChild(song);
   });
   existingVideoIds = populatePlaylist(songs);
-  player.loadPlaylist(existingVideoIds, prevExistingIdx, currentTime);
+  prevExistingIdx = 0;
+  renderCurSong();
+  player.loadVideoById(existingVideoIds[0]);
 });
 
 function populatePlaylist(songCards) {
@@ -173,7 +166,7 @@ function populatePlaylist(songCards) {
     songCard.addEventListener("click", function () {
       player.loadVideoById(songCard.dataset.videoId);
       prevExistingIdx = index;
-      console.log({ prevExistingIdx });
+      renderCurSong();
     });
   });
   return videoIds;
