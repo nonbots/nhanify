@@ -1,7 +1,7 @@
 /* global YT */
 // 2. This code loads the IFrame Player API code asynchronously.
+const socket = new WebSocket("ws://localhost:8080");
 var tag = document.createElement("script");
-
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -11,6 +11,19 @@ let prevExistingIdx = 0;
 //const currentTime = 0;
 //const parent = document.getElementsByClassName("playListWrap")[0];
 const chatVideoIds = [];
+socket.onopen = function (event) {
+  console.log("WebSocket connection opened.");
+};
+socket.onclose = function (event) {
+  console.log("WebSocket connection closed:", event);
+};
+socket.onerror = function (error) {
+  console.error("WebSocket error:", error);
+};
+socket.onmessage = function (event) {
+  console.log("Message received from Application B:", event.data);
+};
+
 function e(tag, attributes = {}, ...children) {
   const element = document.createElement(tag);
 
@@ -45,7 +58,7 @@ eventSource.onmessage = (event) => {
       e("div", { class: "valNo" }, e("p", {}, "*")),
       e("div", { class: "valTitle" }, e("p", {}, data.title)),
       e("div", { class: "valDuration" }, e("p", {}, data.duration)),
-      e("div", { class: "valAddedBy" }, e("p", {}, "placeholder")),
+      e("div", { class: "valAddedBy" }, e("p", {}, data.addedBy)),
     ),
     e(
       "div",
@@ -124,6 +137,7 @@ function onPlayerStateChange(event) {
       const song = chatVideoIds.shift();
       //updateDOM(song);
       player.loadVideoById(song.videoId);
+      socket.send(JSON.stringify(song));
     } else {
       player.loadVideoById(existingVideoIds[prevExistingIdx]);
     }

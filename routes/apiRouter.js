@@ -8,6 +8,7 @@ const {
   durationSecsToHHMMSS,
 } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
+const { body } = require("express-validator");
 let clients = [];
 
 apiRouter.use(json());
@@ -133,6 +134,7 @@ apiRouter.post(
         videoId: addedSong.video_id,
         playlistId: addedSong.playlist_id,
         songId: addedSong.id,
+        addedBy: req.body.addedBy,
         duration: durationSecsToHHMMSS(addedSong.duration_sec),
       });
       res.json({ msg: "success", song: addedSong });
