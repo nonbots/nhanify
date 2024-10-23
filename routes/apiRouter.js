@@ -77,11 +77,10 @@ apiRouter.post(
     //parse for videoId from Yotube URL
     //call to the database to add the song
     const persistence = req.app.locals.persistence;
-    /* if (!isValidURL(req.body.url)) {
+    if (!isValidURL(req.body.url)) {
       res.status(404).json({ msg: "invalid_url" });
       return;
     }
-    */
     const user = await persistence.getUserIdByUsername(req.body.addedBy);
     if (!user) {
       res.status(403).json({ msg: "no_user_account" });
@@ -94,12 +93,11 @@ apiRouter.post(
     if (!writePlaylist) {
       await persistence.addContributor(user.id, req.body.playlistId);
     }
-    /*  const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
+    const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
     if (!vidInfo) {
       res.status(404).json({ msg: "invalid_video_id" });
       return;
     }
-    */
     try {
       const song = await persistence.addSong(
         vidInfo.title,
