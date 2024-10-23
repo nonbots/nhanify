@@ -8,10 +8,11 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 const eventSource = new EventSource("/api/event");
 let prevExistingIdx = 0;
+console.log({ prevExistingIdx });
 //const currentTime = 0;
 //const parent = document.getElementsByClassName("playListWrap")[0];
 const chatVideoIds = [];
-socket.onopen = function (event) {
+socket.onopen = function (_event) {
   console.log("WebSocket connection opened.");
 };
 socket.onclose = function (event) {
@@ -20,10 +21,27 @@ socket.onclose = function (event) {
 socket.onerror = function (error) {
   console.error("WebSocket error:", error);
 };
+let chatSong;
+//let first;
+console.log({ chatSong });
 socket.onmessage = function (event) {
-  console.log("Message received from Application B:", event.data);
+  /*
+  if (!first) {
+    first = true;
+    return;
+  }
+  */
+  console.log("song from queue from nhanbot", event.data);
+  try {
+    chatSong = JSON.parse(event.data);
+    console.log("INIT:", chatSong);
+    playSong();
+  } catch (error) {
+    console.error(error);
+  }
 };
 
+/*
 function e(tag, attributes = {}, ...children) {
   const element = document.createElement(tag);
 
@@ -41,6 +59,7 @@ function e(tag, attributes = {}, ...children) {
 
   return element;
 }
+*/
 const songCards = document.querySelectorAll(".songCard");
 let existingVideoIds = populatePlaylist(songCards); //also adds click songcard listener
 eventSource.onmessage = (event) => {
@@ -123,30 +142,44 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
+  console.log("IN ON PLAYER READY");
   renderCurSong();
   player.loadVideoById(existingVideoIds[prevExistingIdx]);
+  //prevExistingIdx += 1;
+  socket.send(JSON.stringify({ type: "playerStateStarted" }));
 }
 
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
-function onPlayerStateChange(event) {
+async function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
-    if (chatVideoIds.length === 0) prevExistingIdx += 1;
-    renderCurSong();
-    if (chatVideoIds.length !== 0) {
-      const song = chatVideoIds.shift();
-      //updateDOM(song);
-      player.loadVideoById(song.videoId);
-      socket.send(JSON.stringify(song));
-    } else {
-      player.loadVideoById(existingVideoIds[prevExistingIdx]);
+    socket.send(JSON.stringify({ type: "playerStateEnded" }));
+    //playSong();
+  }
+}
+
+function playSong() {
+  console.log("SONG ENDED", { chatSong });
+  if (chatSong) {
+    player.loadVideoById(chatSong.videoId);
+    chatSong = undefined;
+    //socket.send(JSON.stringify(song));
+  } else {
+    player.loadVideoById(existingVideoIds[prevExistingIdx]);
+    console.log("IN ELSE PLAY EXISTING");
+    prevExistingIdx += 1; // 1
+    console.log(`${prevExistingIdx} === ${existingVideoIds.length}`);
+    if (prevExistingIdx === existingVideoIds.length) {
+      //0 === 1
+      prevExistingIdx = 0;
     }
+    renderCurSong();
   }
 }
 
 function renderCurSong() {
   const songCard = document.querySelector(
-    `.songCard:nth-child(${prevExistingIdx + 1})`,
+    `.songCard:nth-child(${prevExistingIdx + 1})`, //1+1 = 2
   );
   const songIdx = songCard.querySelector("div.valNo > p").innerText;
   const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
