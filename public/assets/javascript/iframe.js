@@ -8,7 +8,6 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 const eventSource = new EventSource("/api/event");
 let prevExistingIdx = 0;
-console.log({ prevExistingIdx });
 //const currentTime = 0;
 //const parent = document.getElementsByClassName("playListWrap")[0];
 const chatVideoIds = [];
@@ -22,19 +21,9 @@ socket.onerror = function (error) {
   console.error("WebSocket error:", error);
 };
 let chatSong;
-//let first;
-console.log({ chatSong });
 socket.onmessage = function (event) {
-  /*
-  if (!first) {
-    first = true;
-    return;
-  }
-  */
-  console.log("song from queue from nhanbot", event.data);
   try {
     chatSong = JSON.parse(event.data);
-    console.log("INIT:", chatSong);
     playSong();
   } catch (error) {
     console.error(error);
@@ -142,10 +131,8 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
-  console.log("IN ON PLAYER READY");
   renderCurSong();
   player.loadVideoById(existingVideoIds[prevExistingIdx]);
-  //prevExistingIdx += 1;
   socket.send(JSON.stringify({ type: "playerStateStarted" }));
 }
 
@@ -154,21 +141,17 @@ function onPlayerReady() {
 async function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
     socket.send(JSON.stringify({ type: "playerStateEnded" }));
-    //playSong();
   }
 }
 
 function playSong() {
-  console.log("SONG ENDED", { chatSong });
   if (chatSong) {
     player.loadVideoById(chatSong.videoId);
     chatSong = undefined;
     //socket.send(JSON.stringify(song));
   } else {
     player.loadVideoById(existingVideoIds[prevExistingIdx]);
-    console.log("IN ELSE PLAY EXISTING");
     prevExistingIdx += 1; // 1
-    console.log(`${prevExistingIdx} === ${existingVideoIds.length}`);
     if (prevExistingIdx === existingVideoIds.length) {
       //0 === 1
       prevExistingIdx = 0;
