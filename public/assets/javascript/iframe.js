@@ -11,6 +11,12 @@ let prevExistingIdx = 0;
 //const currentTime = 0;
 //const parent = document.getElementsByClassName("playListWrap")[0];
 const chatVideoIds = [];
+const songCards = document.querySelectorAll(".songCard");
+let existingVideoIds = populatePlaylist(songCards); //also adds click songcard listener
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  chatVideoIds.push(data);
+};
 socket.onopen = function (_event) {
   console.log("WebSocket connection opened.");
 };
@@ -23,6 +29,7 @@ socket.onerror = function (error) {
 let chatSong;
 socket.onmessage = function (event) {
   try {
+    if (!player) return;
     chatSong = JSON.parse(event.data);
     playSong();
   } catch (error) {
@@ -49,12 +56,6 @@ function e(tag, attributes = {}, ...children) {
   return element;
 }
 */
-const songCards = document.querySelectorAll(".songCard");
-let existingVideoIds = populatePlaylist(songCards); //also adds click songcard listener
-eventSource.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  chatVideoIds.push(data);
-};
 
 /*function updateDOM(data) {
   const card = e(
@@ -131,8 +132,7 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
-  renderCurSong();
-  player.loadVideoById(existingVideoIds[prevExistingIdx]);
+  prevExistingIdx -= 1;
   socket.send(JSON.stringify({ type: "playerStateStarted" }));
 }
 
@@ -148,21 +148,19 @@ function playSong() {
   if (chatSong) {
     player.loadVideoById(chatSong.videoId);
     chatSong = undefined;
-    //socket.send(JSON.stringify(song));
   } else {
-    player.loadVideoById(existingVideoIds[prevExistingIdx]);
-    prevExistingIdx += 1; // 1
-    if (prevExistingIdx === existingVideoIds.length) {
-      //0 === 1
-      prevExistingIdx = 0;
-    }
+    prevExistingIdx += 1;
     renderCurSong();
+    player.loadVideoById(existingVideoIds[prevExistingIdx]);
+    if (prevExistingIdx + 1 === existingVideoIds.length) {
+      prevExistingIdx = -1;
+    }
   }
 }
 
 function renderCurSong() {
   const songCard = document.querySelector(
-    `.songCard:nth-child(${prevExistingIdx + 1})`, //1+1 = 2
+    `.songCard:nth-child(${prevExistingIdx + 1})`,
   );
   const songIdx = songCard.querySelector("div.valNo > p").innerText;
   const songTitle = songCard.querySelector("div.valTitle > p ").innerText;
@@ -197,6 +195,9 @@ function populatePlaylist(songCards) {
       player.loadVideoById(songCard.dataset.videoId);
       prevExistingIdx = index;
       renderCurSong();
+      if (prevExistingIdx + 1 === existingVideoIds.length) {
+        prevExistingIdx = -1;
+      }
     });
   });
   return videoIds;
