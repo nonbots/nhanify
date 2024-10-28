@@ -1,6 +1,5 @@
 /* global YT */
 // 2. This code loads the IFrame Player API code asynchronously.
-const socket = new WebSocket("ws://localhost:8080");
 var tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
@@ -17,25 +16,29 @@ eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
   chatVideoIds.push(data);
 };
-socket.onopen = function (_event) {
-  console.log("WebSocket connection opened.");
-};
-socket.onclose = function (event) {
-  console.log("WebSocket connection closed:", event);
-};
-socket.onerror = function (error) {
-  console.error("WebSocket error:", error);
-};
+let socket;
 let chatSong;
-socket.onmessage = function (event) {
-  try {
-    if (!player) return;
-    chatSong = JSON.parse(event.data);
-    playSong();
-  } catch (error) {
-    console.error(error);
-  }
-};
+if (window.location.hostname === "localhost") {
+  socket = new WebSocket("ws://localhost:8080");
+  socket.onopen = function (_event) {
+    console.log("WebSocket connection opened.");
+  };
+  socket.onclose = function (event) {
+    console.log("WebSocket connection closed:", event);
+  };
+  socket.onerror = function (error) {
+    console.error("WebSocket error:", error);
+  };
+  socket.onmessage = function (event) {
+    try {
+      if (!player) return;
+      chatSong = JSON.parse(event.data);
+      playSong();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+}
 
 /*
 function e(tag, attributes = {}, ...children) {
@@ -122,6 +125,7 @@ function onYouTubeIframeAPIReady() {
       playsinline: 1,
       enablejsapi: 1,
       loop: 1,
+      autoplay: 1,
     },
     events: {
       onReady: onPlayerReady,
@@ -132,15 +136,27 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
-  prevExistingIdx -= 1;
-  socket.send(JSON.stringify({ type: "playerStateStarted" }));
+  console.log("IN ON PLAYER READY");
+  if (socket) {
+    prevExistingIdx -= 1;
+    socket.send(JSON.stringify({ type: "playerStateStarted" }));
+  } else {
+    console.log("IN ELSE BRANCH OF ON PLAYER READY");
+    renderCurSong();
+    player.loadVideoById(existingVideoIds[prevExistingIdx]);
+    //setTimeout(() => player.playVideo(), 2000);
+  }
 }
 
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
 async function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
-    socket.send(JSON.stringify({ type: "playerStateEnded" }));
+    if (socket) {
+      socket.send(JSON.stringify({ type: "playerStateEnded" }));
+    } else {
+      playSong();
+    }
   }
 }
 
