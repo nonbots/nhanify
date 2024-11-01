@@ -66,6 +66,20 @@ apiRouter.get(
   }),
 );
 
+apiRouter.get(
+  "/users/:id",
+  catchError(async (req, res) => {
+    const persistence = req.app.locals.persistence;
+    const user = await persistence.getUserById(+req.params.id);
+    console.log({ user });
+    if (!user) {
+      res.status(404).json({ error: "404" });
+      return;
+    }
+    res.json({ username: user.username });
+  }),
+);
+
 apiRouter.post(
   "/playlist/addSong",
   catchError(async (req, res) => {
