@@ -2,11 +2,7 @@ const { Router, json } = require("express");
 const apiRouter = Router();
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { YT_API_KEY, NHANIFY_API_KEY } = process.env;
-const {
-  getVidInfo,
-  isValidURL,
-  durationSecsToHHMMSS,
-} = require("../lib/playlist.js");
+const { getVidInfo, durationSecsToHHMMSS } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
 let clients = [];
 
@@ -90,33 +86,43 @@ apiRouter.post(
     // make call to Youtube data api to get video
     //parse for videoId from Yotube URL
     //call to the database to add the song
-    const persistence = req.app.locals.persistence;
+    /*const persistence = req.app.locals.persistence;
     if (!isValidURL(req.body.url)) {
       res.status(404).json({ msg: "invalid_url" });
       return;
-    }
-    const user = await persistence.getUserIdByUsername(req.body.addedBy);
+    }*/
+    const persistence = req.app.locals.persistence;
+    const playlistTitle = "Saved Songs";
+    let createdPlaylist;
+    let user = await persistence.getUserIdByUsername(req.body.addedBy);
     if (!user) {
       res.status(403).json({ msg: "no_user_account" });
       return;
     }
-    const writePlaylist = await persistence.isWriteSongAuthorized(
-      req.body.playlistId,
-      user.id,
+    const playlist = await persistence.getPlaylistByUserPlaylistName(
+      req.body.addedBy,
+      playlistTitle,
     );
-    if (!writePlaylist) {
-      await persistence.addContributor(user.id, req.body.playlistId);
+    if (!playlist) {
+      //create the playlist for the user called nhancodes Stream
+      createdPlaylist = await persistence.createPlaylist(
+        playlistTitle,
+        true,
+        user.id,
+      );
+      console.log({ createdPlaylist });
     }
     const vidInfo = await getVidInfo(req.body.url, YT_API_KEY);
     if (!vidInfo) {
       res.status(404).json({ msg: "invalid_video_id" });
       return;
     }
+    const playlistId = !createdPlaylist ? playlist.id : createdPlaylist.id;
     try {
       const song = await persistence.addSong(
         vidInfo.title,
         vidInfo.videoId,
-        req.body.playlistId,
+        playlistId,
         user.id,
         vidInfo.durationSecs,
       );
@@ -132,10 +138,7 @@ apiRouter.post(
       throw error;
     }
     //make a query for the added song in the playlist
-    const addedSong = await persistence.getSong(
-      vidInfo.videoId,
-      req.body.playlistId,
-    );
+    const addedSong = await persistence.getSong(vidInfo.videoId, playlistId);
     if (!addedSong) {
       throw new NotFoundError();
     } else {
