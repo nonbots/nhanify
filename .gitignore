@@ -4,3 +4,4 @@ session-store.db
 .psql_history
 .env
 node_modules/
+backup.sql

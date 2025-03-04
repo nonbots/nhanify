@@ -50,8 +50,8 @@ authRouter.get("/twitchAuthResponse", async (req, res) => {
     return res.render("signin");
   //data[0].id
   const username = responseAuthUser.data[0].display_name;
-  // modify findUser to user the twitch id instead to find the user 
-  const user = await persistence.findUser(username);// pass in id
+  // modify findUser to user the twitch id instead to find the user
+  const user = await persistence.findUser(username); // pass in id
   if (!user) {
     req.flash("errors", "No account associated with the username. ");
     req.session.twitchUsername = username;

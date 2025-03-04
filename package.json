@@ -8,7 +8,7 @@
   },
   "scripts": {
     "prettier": "npx prettier . --write",
-    "lint": "npx eslint --fix .",
+    "lint": "npx eslint . --ignore-pattern 'backup.sql' --fix .",
     "test": "jest --verbose --detectOpenHandles",
     "start": "nodemon --env-file=.env app.js",
     "make-db": "psql -d nhanify < lib/schema.sql && psql -d nhanify < migrations/sqls/20240918190940-add-duration-up.sql && psql -d nhanify < lib/seed.sql",
