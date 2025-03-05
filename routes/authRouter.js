@@ -48,13 +48,12 @@ authRouter.get("/twitchAuthResponse", async (req, res) => {
   const persistence = req.app.locals.persistence;
   if (responseAuthUser.message === "Invalid OAuth token")
     return res.render("signin");
-  //data[0].id
-  const username = responseAuthUser.data[0].display_name;
-  // modify findUser to user the twitch id instead to find the user
-  const user = await persistence.findUser(username); // pass in id
+  const { id, display_name } = responseAuthUser.data[0];
+  const user = await persistence.updateUser(display_name, id);
   if (!user) {
     req.flash("errors", "No account associated with the username. ");
-    req.session.twitchUsername = username;
+    req.session.twitchUsername = display_name;
+    req.session.twitchId = id;
     return res.redirect("/twitchSignup");
   }
   req.flash("successes", "You are logged in");
@@ -69,7 +68,10 @@ authRouter.get("/twitchSignup", (req, res) => {
 });
 authRouter.post("/twitchSignup/create", async (req, res) => {
   const persistence = req.app.locals.persistence;
-  const user = await persistence.createUserTwitch(req.session.twitchUsername);
+  const user = await persistence.createUserTwitch(
+    req.session.twitchUsername,
+    req.session.twitchId,
+  );
   req.session.user = user;
   req.flash("successes", MSG.createUser);
   return res.redirect("/your/playlists/1");

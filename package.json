@@ -18,7 +18,9 @@
     "stop-ec2": "ssh nhanify 'sudo systemctl stop myserver.service'",
     "status-ec2": "ssh nhanify 'sudo systemctl status myserver.service'",
     "deploy-ec2": "ssh -t nhanify 'bash -i -c \"cd nhanify && git pull && npm install && npx db-migrate up --env pg && sudo systemctl restart myserver.service\"'",
-    "prepare": "husky"
+    "prepare": "husky",
+    "migrate-up": "npx db-migrate up -e pg",
+    "migrate-down": "npx db-migrate down -e pg"
   },
   "author": "",
   "license": "ISC",
