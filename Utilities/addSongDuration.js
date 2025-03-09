@@ -2,6 +2,7 @@ const { YT_API_KEY } = process.env;
 
 // import in the db client and connect to the database
 const { setTimeout } = require("timers/promises");
+console.log({ setTimeout });
 const client = require("../lib/pg-connect.js");
 const { getVidInfoByVidId } = require("../lib/playlist.js");
 
