@@ -2,6 +2,7 @@ html {
   font-size: 100%;
   text-overflow: ellipsis;
 }
+
 :root {
   --color-bg-dark: #0b2447;
   --color-bg-light: white;
@@ -12,6 +13,15 @@ html {
   --font-size-large: 3rem;
   --font-size-medium: 2rem;
   --font-size-small: 1rem;
+}
+
+.key {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  margin-right: 3rem;
+  flex-direction: column;
+  row-gap: 1rem;
 }
 
 /* layout */
@@ -62,6 +72,7 @@ body {
   width: fit-content;
   padding: 1rem;
 }
+
 .stack1 {
   display: flex;
   flex-direction: row;
@@ -139,6 +150,10 @@ footer {
   row-gap: 1rem;
 }
 
+.left {
+  align-self: inherit;
+}
+
 /* table for lists */
 main {
   display: flex;
@@ -147,6 +162,8 @@ main {
   height: 100%;
   background-color: var(--color-tertiary);
   align-items: center;
+  row-gap: 1rem;
+  padding: 1rem 0;
 }
 
 .playlistsDiv {
@@ -163,18 +180,22 @@ main {
 #player {
   background-color: grey;
 }
+
 .emptyMessage {
   display: flex;
   margin-top: 1rem;
   flex-direction: column;
 }
+
 .listHeader {
   display: flex;
   column-gap: 1rem;
 }
+
 .playerDiv {
   width: 100%;
 }
+
 .iframeDiv {
   aspect-ratio: 16 / 9;
   background-color: var(--color-bg-dark);
@@ -214,6 +235,7 @@ main {
   border-radius: 0rem;
   border-bottom: thin solid var(--color-secondary);
 }
+
 .addDiv {
   display: flex;
   width: 100%;
@@ -221,20 +243,24 @@ main {
   column-gap: 1rem;
   justify-content: space-between;
 }
+
 .pages {
   display: flex;
   column-gap: 1.5rem;
 }
+
 .pageNav {
   display: flex;
   column-gap: 1.5rem;
   justify-content: right;
   width: 100%;
 }
+
 .curPage {
   font-size: 1.1rem;
   color: var(--color-primary);
 }
+
 .labelSong {
   font-weight: 300;
   width: 40%;
@@ -243,6 +269,7 @@ main {
   align-content: center;
   text-align: left;
 }
+
 .stopContributionBtn {
   background: none;
   border: thin solid var(--color-secondary);
@@ -263,23 +290,27 @@ main {
   width: 24px;
   height: 24px;
 }
+
 .control {
   display: flex;
   justify-content: end;
   width: 100%;
 }
+
 .jam {
   height: 200px;
   background: transparent url("../icons/wiggle_outine.gif") 50% 50% no-repeat;
   background-size: 200px 200px;
   border: 0px;
 }
+
 .deleteBtn {
   background: transparent url("../icons/delete.png") 50% 50% no-repeat;
   border: 0px;
   width: 24px;
   height: 24px;
 }
+
 .addBtn {
   margin: 0rem;
   background-color: var(--color-secondary);
@@ -290,6 +321,7 @@ main {
   height: 1.5rem;
   width: 15%;
 }
+
 .addForm {
   display: flex;
   align-items: center;
@@ -301,6 +333,7 @@ main {
   width: 100%;
   column-gap: 1rem;
 }
+
 .playIcon {
   display: flex;
   width: 4%;
@@ -317,17 +350,21 @@ main {
   width: 100%;
   column-gap: 1rem;
 }
+
 .labelNo {
   width: 8%;
   display: flex;
 }
+
 .labelSongTotal {
   display: flex;
 }
+
 .labelTitle {
   width: 52%;
   display: flex;
 }
+
 .labelAddedBy {
   width: 25%;
   display: flex;
@@ -428,6 +465,7 @@ p {
   justify-content: center;
   height: 100%;
 }
+
 .mainWrap {
   display: flex;
   flex-direction: column;
@@ -485,24 +523,29 @@ input {
 pre {
   text-wrap: wrap;
 }
+
 .errorMessages {
   display: flex;
   flex-direction: column;
   row-gap: 0.5rem;
   margin-top: 1rem;
 }
+
 .errorWrap {
   margin-bottom: 1rem;
 }
+
 .flash {
   height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .errorTxt {
   overflow: unset;
 }
+
 .errors {
   background-color: #ff000038;
   border: 1px dashed red;
@@ -511,6 +554,7 @@ pre {
   color: #ffdede;
   text-align: left;
 }
+
 .successes {
   background-color: #4c8a5c;
   border: 1px dashed green;
@@ -519,6 +563,7 @@ pre {
   color: #c7fcd6;
   text-align: left;
 }
+
 .info {
   background-color: #b9b73e;
   border: 1px dashed yellow;
@@ -527,6 +572,7 @@ pre {
   color: #f9f9e9;
   text-align: left;
 }
+
 .rotate180 {
   transform: rotate(180deg);
 }

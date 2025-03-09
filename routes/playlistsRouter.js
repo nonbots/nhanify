@@ -1,4 +1,6 @@
 const { Router } = require("express");
+const { v7: uuidv7 } = require("uuid");
+const { KEY } = process.env;
 const playlistsRouter = Router();
 const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
@@ -249,8 +251,21 @@ playlistsRouter.get(
       userId,
     );
 
-    return res.render("playlists", data);
+    res.render("playlists", { apiKey: req.session.apiKey, ...data });
+    req.session.apiKey = "";
+    return;
     //return res.render("playlists", {flash: req.flash(), ...data});
+  }),
+);
+
+playlistsRouter.post(
+  "/your/playlists/:page/createApiKey",
+  catchError(async (req, res) => {
+    const apiKey = uuidv7();
+    const persistence = req.app.locals.persistence;
+    await persistence.createApiKey(apiKey, KEY);
+    req.session.apiKey = apiKey;
+    return res.redirect(`/your/playlists/${req.params.page}`);
   }),
 );
 
