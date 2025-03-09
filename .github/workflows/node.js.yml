@@ -49,6 +49,11 @@ jobs:
       PGDATABASE: nhanify
       PGPASSWORD: postgres
 
+      BOT_REFRESH_TOKEN: 7hlugpzhw70xb47od111mi0bvwqs0bx9wsgqcnbmmhf1ff4s6n
+      CLIENT_ID: xlqjxv2ze8utinnuifd5silonb17xh
+      CLIET_SECRET: s1u8ynl9ewzhq23mh4xjn1pwbypciy
+      YT_API_KEY: iAIzaSyBGUijO2z4G5BbFGqEtF8Vn8_2z9Pv1LlQ
+
     steps:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
@@ -74,8 +79,8 @@ jobs:
         # a new PostgreSQL table.
       - run: npm run build --if-present
       - run: npx db-migrate up --env pg
-      - run: node --env-file=.env Utilities/addSongDuration.js
-      - run: node --env-file=.env Utilities/addTwitchId.js
+      - run: node Utilities/addSongDuration.js
+      - run: node Utilities/addTwitchId.js
       - run: npm test
       - run: npx prettier . --check
       - run: npx eslint .
