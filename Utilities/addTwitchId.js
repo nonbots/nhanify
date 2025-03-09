@@ -80,6 +80,7 @@ async function refreshAuthToken(entity, BOT_REFRESH_TOKEN) {
 }
 (async () => {
   const data = await refreshAuthToken("bot", BOT_REFRESH_TOKEN);
+  console.log("NEW TOKEN", data.body.access_token);
   const usersNameData = await usersName();
   const params = usersNameData.map((user) => `login=${user.username}`); //Orshy
   await run(data.body.access_token, CLIENT_ID, params);
