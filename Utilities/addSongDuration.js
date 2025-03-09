@@ -1,7 +1,7 @@
 const { YT_API_KEY } = process.env;
 
 // import in the db client and connect to the database
-const setTimeout = require("timers/promises");
+const { setTimeout } = require("timers/promises");
 const client = require("../lib/pg-connect.js");
 const { getVidInfoByVidId } = require("../lib/playlist.js");
 
@@ -9,6 +9,7 @@ const { getVidInfoByVidId } = require("../lib/playlist.js");
 async function getNullDurSong() {
   const result = await client.query(
     "SELECT DISTINCT video_id FROM songs WHERE duration_sec IS NULL",
+    //"SELECT DISTINCT video_id FROM songs",
   );
   return result.rows;
 }
