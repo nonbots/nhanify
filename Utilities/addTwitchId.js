@@ -58,7 +58,6 @@ async function refreshAuthToken(entity, BOT_REFRESH_TOKEN) {
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
   };
-  console.log({ BOT_REFRESH_TOKEN, CLIENT_ID, CLIENT_SECRET });
   try {
     const response = await fetch("https://id.twitch.tv/oauth2/token", {
       method: "POST",
@@ -81,7 +80,6 @@ async function refreshAuthToken(entity, BOT_REFRESH_TOKEN) {
 }
 (async () => {
   const data = await refreshAuthToken("bot", BOT_REFRESH_TOKEN);
-  console.log("NEW TOKEN", data.body.access_token);
   const usersNameData = await usersName();
   const params = usersNameData.map((user) => `login=${user.username}`); //Orshy
   await run(data.body.access_token, CLIENT_ID, params);

@@ -51,7 +51,7 @@ jobs:
 
       BOT_REFRESH_TOKEN: 7hlugpzhw70xb47od111mi0bvwqs0bx9wsgqcnbmmhf1ff4s6n
       CLIENT_ID: xlqjxv2ze8utinnuifd5silonb17xh
-      CLIET_SECRET: s1u8ynl9ewzhq23mh4xjn1pwbypciy
+      CLIENT_SECRET: s1u8ynl9ewzhq23mh4xjn1pwbypciy
       YT_API_KEY: AIzaSyBGUijO2z4G5BbFGqEtF8Vn8_2z9Pv1LlQ
 
     steps:
