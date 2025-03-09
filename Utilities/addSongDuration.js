@@ -23,7 +23,10 @@ async function getNullDurSong() {
     console.log(`Title: ${vidInfo.title}`);
     await updateSongDuration(song.video_id, vidInfo.durationSecs);
   }
+  console.log("FINISHED");
+  await client.end();
 })();
+
 // insert the duration into the specific record associated with the video id.
 async function updateSongDuration(videoId, duration) {
   try {

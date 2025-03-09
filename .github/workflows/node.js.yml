@@ -74,6 +74,8 @@ jobs:
         # a new PostgreSQL table.
       - run: npm run build --if-present
       - run: npx db-migrate up --env pg
+      - run: node --env-file=.env Utilities/addSongDuration.js
+      - run: node --env-file=.env Utilities/addTwitchId.js
       - run: npm test
       - run: npx prettier . --check
       - run: npx eslint .
