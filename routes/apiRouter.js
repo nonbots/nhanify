@@ -4,12 +4,14 @@ const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
 const { YT_API_KEY, NHANIFY_API_KEY } = process.env;
 const { getVidInfo, durationSecsToHHMMSS } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
+const { apiAuth } = require("./middleware.js");
 let clients = [];
 
 apiRouter.use(json());
 
 apiRouter.get(
   "/playlists/public",
+  apiAuth,
   catchError(async (req, res) => {
     const persistence = req.app.locals.persistence;
     const playlists = await persistence.getPublicPlaylistsPage(0, 1000);

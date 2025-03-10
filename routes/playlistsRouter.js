@@ -263,7 +263,7 @@ playlistsRouter.post(
   catchError(async (req, res) => {
     const apiKey = uuidv7();
     const persistence = req.app.locals.persistence;
-    await persistence.createApiKey(apiKey, KEY);
+    await persistence.createApiKey(apiKey, KEY, req.session.user.id);
     req.session.apiKey = apiKey;
     return res.redirect(`/your/playlists/${req.params.page}`);
   }),

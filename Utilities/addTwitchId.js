@@ -58,6 +58,7 @@ async function refreshAuthToken(entity, BOT_REFRESH_TOKEN) {
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
   };
+  console.log({ CLIENT_ID, CLIENT_SECRET, BOT_REFRESH_TOKEN });
   try {
     const response = await fetch("https://id.twitch.tv/oauth2/token", {
       method: "POST",

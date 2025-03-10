@@ -2,7 +2,19 @@ const { DOMAIN } = process.env;
 const { NotFoundError } = require("../lib/errors.js");
 const MSG = require("../lib/msg.json");
 const { durationSecsToHHMMSS } = require("../lib/playlist.js");
+const { ForbiddenError } = require("../lib/errors.js");
 
+async function apiAuth(req, res, next) {
+  //const { authorization, user_id } = req.headers;
+  //get decrypted authorization on db by id
+  const persistence = req.locals.persistence;
+  const decryptedApiKey = await persistence.decryptedApiKey;
+  //compare to authorization
+  if (`Bearer ${decryptedApiKey}` !== req.headers.authorization) {
+    throw new ForbiddenError();
+  }
+  next();
+}
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     const requestURL = encodeURIComponent(req.originalUrl);
@@ -120,4 +132,4 @@ async function getPlaylist(
   };
 }
 
-module.exports = { getPlaylists, getPlaylist, requireAuth };
+module.exports = { getPlaylists, getPlaylist, requireAuth, apiAuth };
