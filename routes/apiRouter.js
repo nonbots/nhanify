@@ -1,17 +1,17 @@
 const { Router, json } = require("express");
 const apiRouter = Router();
 const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
-const { YT_API_KEY, NHANIFY_API_KEY } = process.env;
+const { YT_API_KEY } = process.env;
 const { getVidInfo, durationSecsToHHMMSS } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
-const { apiAuth } = require("./middleware.js");
+const { apiAuth, apiAuthStream } = require("./middleware.js");
 let clients = [];
 
 apiRouter.use(json());
 
 apiRouter.get(
   "/playlists/public",
-  apiAuth,
+  catchError(apiAuth),
   catchError(async (req, res) => {
     const persistence = req.app.locals.persistence;
     const playlists = await persistence.getPublicPlaylistsPage(0, 1000);
@@ -30,6 +30,7 @@ apiRouter.get(
 
 apiRouter.get(
   "/playlists/:id",
+  catchError(apiAuth),
   catchError(async (req, res) => {
     const persistence = req.app.locals.persistence;
     const playlist = await persistence.getPublicPlaylist(req.params.id);
@@ -66,6 +67,7 @@ apiRouter.get(
 
 apiRouter.get(
   "/users/:id",
+  catchError(apiAuth),
   catchError(async (req, res) => {
     const persistence = req.app.locals.persistence;
     const user = await persistence.getUserById(+req.params.id);
@@ -80,11 +82,9 @@ apiRouter.get(
 
 apiRouter.post(
   "/playlist/addSong",
+  catchError(apiAuthStream),
   catchError(async (req, res) => {
     //check the API_KEY in nhanify and the passed in API_KEY
-    if (`Bearer ${NHANIFY_API_KEY}` !== req.headers.authorization) {
-      throw new ForbiddenError();
-    }
     // make call to Youtube data api to get video
     //parse for videoId from Yotube URL
     //call to the database to add the song
@@ -192,8 +192,7 @@ apiRouter.use("*", (req, res, next) => {
 });
 apiRouter.use((err, req, res, _next) => {
   // do not remove next parameter
-  console.log({ err });
-  if (req.err instanceof ForbiddenError) {
+  if (err instanceof ForbiddenError) {
     res.status(403).json({ error: "403" });
   } else if (err instanceof NotFoundError) {
     res.status(404).json({ error: "404" });

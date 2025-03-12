@@ -1,6 +1,5 @@
 const { Router } = require("express");
 const { v7: uuidv7 } = require("uuid");
-const { KEY } = process.env;
 const playlistsRouter = Router();
 const { requireAuth } = require("./middleware.js");
 const catchError = require("./catch-error.js");
@@ -263,7 +262,7 @@ playlistsRouter.post(
   catchError(async (req, res) => {
     const apiKey = uuidv7();
     const persistence = req.app.locals.persistence;
-    await persistence.createApiKey(apiKey, KEY, req.session.user.id);
+    await persistence.createApiKey(apiKey, req.session.user.id);
     req.session.apiKey = apiKey;
     return res.redirect(`/your/playlists/${req.params.page}`);
   }),

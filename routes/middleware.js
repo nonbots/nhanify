@@ -5,12 +5,30 @@ const { durationSecsToHHMMSS } = require("../lib/playlist.js");
 const { ForbiddenError } = require("../lib/errors.js");
 
 async function apiAuth(req, res, next) {
-  //const { authorization, user_id } = req.headers;
-  //get decrypted authorization on db by id
-  const persistence = req.locals.persistence;
-  const decryptedApiKey = await persistence.decryptedApiKey;
-  //compare to authorization
-  if (`Bearer ${decryptedApiKey}` !== req.headers.authorization) {
+  const { authorization, "user-id": userId } = req.headers;
+  const persistence = req.app.locals.persistence;
+  const response = await persistence.decryptedApiKey(+userId);
+  if (!response) throw new ForbiddenError();
+  const { decrypted_api_key: decryptedApiKey } = response;
+  console.log({ decryptedApiKey, authorization });
+  if (`Bearer ${decryptedApiKey}` !== authorization) {
+    throw new ForbiddenError();
+  }
+  //if user and day is the same as current day in json return too many request
+  //check the total number of request on user for the day, if greater than 2 return true too many request
+  // check if user id exist, if not add the userid and the day else update the value to the new day
+  await persistence.addRequest(+userId);
+
+  next();
+}
+async function apiAuthStream(req, res, next) {
+  const { authorization } = req.headers;
+  const persistence = req.app.locals.persistence;
+  const response = await persistence.decryptedApiKey(7);
+  if (!response) throw new ForbiddenError();
+  const { decrypted_api_key: decryptedApiKey } = response;
+  console.log({ decryptedApiKey, authorization });
+  if (`Bearer ${decryptedApiKey}` !== authorization) {
     throw new ForbiddenError();
   }
   next();
@@ -132,4 +150,10 @@ async function getPlaylist(
   };
 }
 
-module.exports = { getPlaylists, getPlaylist, requireAuth, apiAuth };
+module.exports = {
+  getPlaylists,
+  getPlaylist,
+  requireAuth,
+  apiAuth,
+  apiAuthStream,
+};
