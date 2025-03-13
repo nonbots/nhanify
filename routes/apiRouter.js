@@ -1,6 +1,10 @@
 const { Router, json } = require("express");
 const apiRouter = Router();
-const { NotFoundError, ForbiddenError } = require("../lib/errors.js");
+const {
+  TooManyError,
+  NotFoundError,
+  ForbiddenError,
+} = require("../lib/errors.js");
 const { YT_API_KEY } = process.env;
 const { getVidInfo, durationSecsToHHMMSS } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
@@ -196,6 +200,8 @@ apiRouter.use((err, req, res, _next) => {
     res.status(403).json({ error: "403" });
   } else if (err instanceof NotFoundError) {
     res.status(404).json({ error: "404" });
+  } else if (err instanceof TooManyError) {
+    res.status(429).json({ error: "429" });
   } else {
     res.status(500).json({ error: "500" });
   }

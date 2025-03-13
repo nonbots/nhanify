@@ -1,9 +1,9 @@
-const { DOMAIN } = process.env;
-const { NotFoundError } = require("../lib/errors.js");
+const { DOMAIN, NHANCODES_ID } = process.env;
+const { NotFoundError, TooManyError } = require("../lib/errors.js");
 const MSG = require("../lib/msg.json");
 const { durationSecsToHHMMSS } = require("../lib/playlist.js");
 const { ForbiddenError } = require("../lib/errors.js");
-
+const MAX_API_REQUEST = 100;
 async function apiAuth(req, res, next) {
   const { authorization, "user-id": userId } = req.headers;
   const persistence = req.app.locals.persistence;
@@ -11,20 +11,16 @@ async function apiAuth(req, res, next) {
   if (!response) throw new ForbiddenError();
   const { decrypted_api_key: decryptedApiKey } = response;
   console.log({ decryptedApiKey, authorization });
-  if (`Bearer ${decryptedApiKey}` !== authorization) {
-    throw new ForbiddenError();
-  }
-  //if user and day is the same as current day in json return too many request
-  //check the total number of request on user for the day, if greater than 2 return true too many request
-  // check if user id exist, if not add the userid and the day else update the value to the new day
-  await persistence.addRequest(+userId);
-
+  if (`Bearer ${decryptedApiKey}` !== authorization) throw new ForbiddenError();
+  // record the api request for user and current time/day
+  const request = await persistence.addRequest(+userId, MAX_API_REQUEST);
+  if (!request) throw new TooManyError();
   next();
 }
 async function apiAuthStream(req, res, next) {
   const { authorization } = req.headers;
   const persistence = req.app.locals.persistence;
-  const response = await persistence.decryptedApiKey(7);
+  const response = await persistence.decryptedApiKey(NHANCODES_ID);
   if (!response) throw new ForbiddenError();
   const { decrypted_api_key: decryptedApiKey } = response;
   console.log({ decryptedApiKey, authorization });
