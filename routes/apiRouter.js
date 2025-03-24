@@ -8,7 +8,7 @@ const {
 const { YT_API_KEY } = process.env;
 const { getVidInfo, durationSecsToHHMMSS } = require("../lib/playlist.js");
 const catchError = require("./catch-error.js");
-const { apiAuth, apiAuthStream } = require("./middleware.js");
+const { apiAuth } = require("./middleware.js");
 let clients = [];
 
 apiRouter.use(json());
@@ -86,7 +86,7 @@ apiRouter.get(
 
 apiRouter.post(
   "/playlist/addSong",
-  catchError(apiAuthStream),
+  catchError(apiAuth),
   catchError(async (req, res) => {
     //check the API_KEY in nhanify and the passed in API_KEY
     // make call to Youtube data api to get video
