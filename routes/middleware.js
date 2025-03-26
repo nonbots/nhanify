@@ -10,7 +10,6 @@ async function apiAuth(req, res, next) {
   const response = await persistence.decryptedApiKey(+userId);
   if (!response) throw new ForbiddenError();
   const { decrypted_api_key: decryptedApiKey } = response;
-  console.log({ decryptedApiKey, authorization });
   if (`Bearer ${decryptedApiKey}` !== authorization) throw new ForbiddenError();
   // record the api request for user and current time/day
   const request = await persistence.addRequest(+userId, MAX_API_REQUEST);
@@ -23,7 +22,6 @@ async function apiAuthStream(req, res, next) {
   const response = await persistence.decryptedApiKey(NHANCODES_ID);
   if (!response) throw new ForbiddenError();
   const { decrypted_api_key: decryptedApiKey } = response;
-  console.log({ decryptedApiKey, authorization });
   if (`Bearer ${decryptedApiKey}` !== authorization) {
     throw new ForbiddenError();
   }
