@@ -3,7 +3,7 @@ const { NotFoundError, TooManyError } = require("../lib/errors.js");
 const MSG = require("../lib/msg.json");
 const { durationSecsToHHMMSS } = require("../lib/playlist.js");
 const { ForbiddenError } = require("../lib/errors.js");
-const MAX_API_REQUEST = 100;
+const MAX_API_REQUEST = 900;
 async function apiAuth(req, res, next) {
   const { authorization, "user-id": userId } = req.headers;
   const persistence = req.app.locals.persistence;

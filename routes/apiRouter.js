@@ -33,6 +33,33 @@ apiRouter.get(
 );
 
 apiRouter.get(
+  "/playlists",
+  catchError(apiAuth),
+  catchError(async (req, res) => {
+    const persistence = req.app.locals.persistence;
+    const ids =
+      typeof req.query.id === "string" ? [req.query.id] : req.query.id;
+    const queryParams = ids.reduce((accum, id) => {
+      if (!Number.isNaN(Number(id)) && +id >= 1) accum.push(+id);
+      return accum;
+    }, []);
+    console.log(queryParams);
+    const playlists = await persistence.getPlaylistsByIdPage(queryParams);
+    console.log({ playlists });
+    const formattedData = playlists.map((playlist) => {
+      return {
+        id: playlist.id,
+        title: playlist.title,
+        creator: { id: playlist.creator_id, username: playlist.username },
+        isPrivate: playlist.private,
+        songCount: +playlist.count,
+      };
+    });
+    res.json({ playlists: formattedData });
+  }),
+);
+
+apiRouter.get(
   "/playlists/:id",
   catchError(apiAuth),
   catchError(async (req, res) => {
