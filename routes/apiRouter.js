@@ -64,7 +64,7 @@ apiRouter.get(
   catchError(apiAuth),
   catchError(async (req, res) => {
     const persistence = req.app.locals.persistence;
-    const playlist = await persistence.getPublicPlaylist(req.params.id);
+    const playlist = await persistence.getPlaylist(req.params.id);
     if (!playlist) {
       res.status(404).json({ error: "404" });
       return;
