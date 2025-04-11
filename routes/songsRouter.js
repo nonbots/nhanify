@@ -18,6 +18,8 @@ songsRouter.get(
   catchError(async (req, res) => {
     const { page, pagePl, playlistType, playlistId } = req.params;
 
+    if (Number.isNaN(+playlistId) || !Number.isInteger(+playlistId))
+      throw new NotFoundError();
     const persistence = req.app.locals.persistence;
     const isReadAuth = await persistence.isReadPlaylistAuthorized(
       +playlistId,

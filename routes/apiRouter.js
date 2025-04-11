@@ -132,12 +132,13 @@ apiRouter.post(
       res.status(403).json({ msg: "no_user_account" });
       return;
     }
+    console.log(req.body.addedBy); //lowercase
     const playlist = await persistence.getPlaylistByUserPlaylistName(
       req.body.addedBy,
       playlistTitle,
     );
     if (!playlist) {
-      //create the playlist for the user called nhancodes Stream
+      //create the playlist for the user called Saved Songs
       createdPlaylist = await persistence.createPlaylist(
         playlistTitle,
         true,
