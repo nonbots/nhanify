@@ -3,10 +3,12 @@ extends layout
 block main
   .key
     if (playlistType === "your")
-      form(action=`/your/playlists/${page}/createApiKey` method="post")
-        input(type="submit" value="Generate API Key")
-      if (apiKey) 
-        p.left #{apiKey}
+      .userInfo
+        p.left User Id: #{user.id}
+        form(action=`/your/playlists/${page}/createApiKey` method="post")
+          input(type="submit" value="Generate API Key")
+        if (apiKey) 
+          p.left #{apiKey}
   if (playlistTotal === 0) 
     .errorMessages
       - let msgTypes = Object.keys(flash || {})

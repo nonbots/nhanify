@@ -253,7 +253,6 @@ playlistsRouter.get(
     res.render("playlists", { apiKey: req.session.apiKey, ...data });
     req.session.apiKey = "";
     return;
-    //return res.render("playlists", {flash: req.flash(), ...data});
   }),
 );
 
