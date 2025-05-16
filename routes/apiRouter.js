@@ -1,3 +1,7 @@
+const { NODE_ENV } = process.env;
+const isProduction = NODE_ENV === "production";
+let Sentry;
+if (isProduction) Sentry = require("@sentry/node");
 const { Router, json } = require("express");
 const apiRouter = Router();
 const {
@@ -12,6 +16,10 @@ const { apiAuth } = require("./middleware.js");
 let clients = [];
 
 apiRouter.use(json());
+
+apiRouter.get("/debug-sentry", function mainHandler(_req, _res) {
+  throw new Error("My first Sentry error!");
+});
 
 apiRouter.get(
   "/playlists/public",
@@ -231,6 +239,7 @@ apiRouter.use((err, req, res, _next) => {
   } else if (err instanceof TooManyError) {
     res.status(429).json({ error: "429" });
   } else {
+    if (isProduction) Sentry.captureException(err);
     res.status(500).json({ error: "500" });
   }
 });

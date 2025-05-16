@@ -1,4 +1,15 @@
-const { HOST, PORT, SESSION_SECRET } = process.env;
+const { HOST, PORT, SESSION_SECRET, NODE_ENV } = process.env;
+// IMPORTANT: Make sure to import `instrument.js` at the top of your file.
+// If you're using ECMAScript Modules (ESM) syntax, use `import "./instrument.js";`
+const isProduction = NODE_ENV === "production";
+let Sentry;
+if (isProduction) {
+  require("./lib/instrument.js");
+  // All other imports below
+  // Import with `import * as Sentry from "@sentry/node"` if you are using ESM
+  Sentry = require("@sentry/node");
+}
+
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -49,6 +60,9 @@ app.use(playlistsRouter);
 app.use(songsRouter);
 app.use(contributorsRouter);
 
+// The error handler must be registered before any other error middleware and after all controllers
+if (isProduction) Sentry.setupExpressErrorHandler(app);
+
 // error handlers
 app.use("*", (req, res, next) => {
   next(new NotFoundError());
@@ -71,6 +85,7 @@ app.use((err, req, res, _next) => {
       msg2: MSG.errorNav,
     });
   } else {
+    if (isProduction) Sentry.captureException(err);
     res.status(500);
     res.render("error", { statusCode: 500, msg: MSG.error500 });
   }

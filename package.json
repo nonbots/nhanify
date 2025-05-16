@@ -25,6 +25,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/cli": "^2.45.0",
+    "@sentry/node": "^9.19.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "connect-loki": "^1.2.0",
